@@ -57,6 +57,36 @@
 </section>
 
 <section class="panel">
+  <div class="flex items-center justify-between gap-3">
+    <h2 class="text-base font-bold">Actualisation automatique</h2>
+    <select class="field" name="autoRefresh" aria-label="Intervalle d'actualisation automatique"
+      [ngModel]="store.autoRefresh()" (ngModelChange)="store.setAutoRefresh(+$event)">
+      <option [ngValue]="0">Désactivée</option>
+      @for (m of autoRefreshOptions; track m) { <option [ngValue]="m">Toutes les {{ m }} min</option> }
+    </select>
+  </div>
+  <p class="mt-2 text-[13px] text-muted">Les flux sont actualisés à cet intervalle lorsque l'application est ouverte et en ligne.</p>
+</section>
+
+<section class="panel">
+  <div class="mb-2.5 flex items-center justify-between gap-3">
+    <h2 class="text-base font-bold">Notifications</h2>
+    <button type="button" role="switch" aria-label="Activer les notifications" [attr.aria-checked]="push.enabled()"
+      class="relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:opacity-50" [class]="push.enabled() ? 'bg-accent' : 'bg-line'"
+      [disabled]="!push.supported || push.busy()" (click)="push.enabled() ? push.disable() : push.enable()">
+      <span class="absolute left-0.5 top-0.5 size-5 rounded-full bg-white transition-transform" [class.translate-x-5]="push.enabled()"></span>
+    </button>
+  </div>
+  @if (push.supported) {
+    <p class="mb-2 text-[13px] text-muted">Reçoit une notification pour les nouveaux articles, application fermée. Nécessite le worker rss-reader-push (dossier push-worker) ; sur iPhone, l'application doit être installée sur l'écran d'accueil.</p>
+    <input class="field w-full" name="pushUrl" placeholder="https://rss-reader-push.compte.workers.dev" [ngModel]="push.url()" (ngModelChange)="push.setUrl($event)">
+    @if (push.error()) { <p class="mt-2 text-sm text-red-400">{{ push.error() }}</p> }
+  } @else {
+    <p class="text-[13px] text-muted">Notifications push non disponibles sur cet appareil ou dans ce mode (application installée requise).</p>
+  }
+</section>
+
+<section class="panel">
   <div class="mb-2.5 flex items-center justify-between gap-3">
     <h2 class="text-base font-bold">Proxy CORS</h2>
     <button type="button" role="switch" aria-label="Activer le proxy CORS" [attr.aria-checked]="store.proxyEnabled()"

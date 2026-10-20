@@ -4,6 +4,7 @@ import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
 
 import { AppPromptComponent } from './pwa/app-prompt.component';
+import { PushService } from './pwa/push.service';
 import { RssStore } from './rss/rss.store';
 import { DrawerContentComponent } from './ui/drawer-content.component';
 import { DrawerService } from './ui/drawer.service';
@@ -32,6 +33,7 @@ export class RootComponent {
   protected readonly drawer = inject(DrawerService);
   protected readonly layout = inject(LayoutService);
   private readonly router = inject(Router);
+  private readonly pushSync = inject(PushService);
   protected readonly onArticles = signal(this.isArticles());
   protected readonly articleId = signal(this.currentArticleId());
   protected readonly ui = UI_ICONS;

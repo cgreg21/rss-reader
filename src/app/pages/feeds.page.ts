@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 import { RssStore } from '../rss/rss.store';
+import { PushService } from '../pwa/push.service';
 import { UI_ICONS } from '../ui/icons';
 
 @Component({
@@ -14,6 +15,8 @@ import { UI_ICONS } from '../ui/icons';
 })
 export class FeedsPage {
   protected readonly store = inject(RssStore);
+  protected readonly push = inject(PushService);
+  protected readonly autoRefreshOptions = [5, 15, 30, 60];
   protected readonly ui = UI_ICONS;
   protected url = '';
   protected categoryId: string | null = null;

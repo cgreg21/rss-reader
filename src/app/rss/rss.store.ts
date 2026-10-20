@@ -14,6 +14,7 @@ export type Scope =
 
 const PROXY_KEY = 'rssreader:caldav-proxy';
 const PROXY_ENABLED_KEY = 'rssreader:proxy-enabled';
+const AUTO_REFRESH_KEY = 'rssreader:auto-refresh';
 const DEFAULT_PROXY = '';
 
 /** The proxy relays the path as is, so only its origin matters; an invalid value means no proxy. */
@@ -49,6 +50,8 @@ export class RssStore {
   readonly proxy = signal(localStorage.getItem(PROXY_KEY) ?? DEFAULT_PROXY);
   readonly proxyEnabled = signal(localStorage.getItem(PROXY_ENABLED_KEY) !== '0');
   readonly layout = signal<ArticleLayout>(readLayout());
+  /** Minutes between automatic refreshes while online; 0 disables it. */
+  readonly autoRefresh = signal(Number(localStorage.getItem(AUTO_REFRESH_KEY) ?? 15) || 0);
 
   setLayout(value: ArticleLayout): void {
     this.layout.set(value);
@@ -110,6 +113,8 @@ export class RssStore {
   });
 
   private loaded: Promise<void> | null = null;
+  private lastRefresh = 0;
+  private autoTimer: ReturnType<typeof setInterval> | null = null;
 
   constructor() {
     window.addEventListener('online', () => {
@@ -117,6 +122,25 @@ export class RssStore {
       void this.refreshAll();
     });
     window.addEventListener('offline', () => this.online.set(false));
+    document.addEventListener('visibilitychange', () => this.autoRefreshIfDue());
+    this.scheduleAutoRefresh();
+  }
+
+  setAutoRefresh(minutes: number): void {
+    this.autoRefresh.set(minutes);
+    localStorage.setItem(AUTO_REFRESH_KEY, String(minutes));
+    this.scheduleAutoRefresh();
+  }
+
+  private scheduleAutoRefresh(): void {
+    if (this.autoTimer) clearInterval(this.autoTimer);
+    this.autoTimer = this.autoRefresh() > 0 ? setInterval(() => this.autoRefreshIfDue(), 30_000) : null;
+  }
+
+  private autoRefreshIfDue(): void {
+    const minutes = this.autoRefresh();
+    if (minutes <= 0 || document.hidden || !navigator.onLine || !this.loaded) return;
+    if (Date.now() - this.lastRefresh >= minutes * 60_000) void this.refreshAll();
   }
 
   load(): Promise<void> {
@@ -232,6 +256,7 @@ export class RssStore {
     try {
       await Promise.all(this.feeds().map((f) => this.refreshFeed(f)));
     } finally {
+      this.lastRefresh = Date.now();
       this.syncing.set(false);
     }
   }
