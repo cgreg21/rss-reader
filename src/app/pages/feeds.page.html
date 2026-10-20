@@ -1,0 +1,70 @@
+<div class="mb-5 flex items-center gap-3"><h1 class="flex-1 text-xl font-bold sm:text-[22px]">Abonnements</h1><a class="icon-btn" routerLink="/" aria-label="Retour">←</a></div>
+
+<section class="panel">
+  <h2 class="mb-2.5 text-base font-bold">Ajouter un flux</h2>
+  <form class="flex flex-wrap gap-2" (ngSubmit)="add()">
+    <input class="field min-w-60 flex-1" name="url" type="url" required placeholder="https://exemple.fr/rss.xml" [(ngModel)]="url">
+    <select class="field" name="cat" [(ngModel)]="categoryId">
+      <option [ngValue]="null">Sans catégorie</option>
+      @for (c of store.categories(); track c.id) { <option [ngValue]="c.id">{{ c.name }}</option> }
+    </select>
+    <button class="btn" type="submit" [disabled]="busy()">{{ busy() ? '…' : "S'abonner" }}</button>
+  </form>
+  @if (error()) { <p class="mt-2 text-red-400">{{ error() }}</p> }
+</section>
+
+<section class="panel">
+  <h2 class="mb-2.5 text-base font-bold">Catégories</h2>
+  <form class="flex flex-wrap gap-2" (ngSubmit)="addCategory()">
+    <input class="field min-w-60 flex-1" name="name" placeholder="Nouvelle catégorie" [(ngModel)]="newCategory">
+    <button class="btn" type="submit">Créer</button>
+  </form>
+  <ul class="mt-2.5">
+    @for (c of store.categories(); track c.id) {
+      <li class="flex flex-wrap items-center gap-2.5 border-t border-line py-2">
+        <span class="min-w-0 flex-1">{{ c.name }}</span><button class="btn-ghost" type="button" (click)="store.removeCategory(c.id)">Supprimer</button>
+      </li>
+    }
+  </ul>
+</section>
+
+<section class="panel">
+  <h2 class="mb-2.5 text-base font-bold">Flux suivis</h2>
+  <ul>
+    @for (f of store.feeds(); track f.id) {
+      <li class="flex flex-wrap items-center gap-2.5 border-t border-line py-2">
+        <div class="min-w-0 flex-1"><strong>{{ f.title }}</strong>
+          @if (f.error) { <small class="block text-red-400">{{ f.error }}</small> }</div>
+        <select class="field" [ngModel]="f.categoryId" (ngModelChange)="store.setFeedCategory(f.id, $event)">
+          <option [ngValue]="null">Sans catégorie</option>
+          @for (c of store.categories(); track c.id) { <option [ngValue]="c.id">{{ c.name }}</option> }
+        </select>
+        <button class="btn-ghost" type="button" (click)="store.removeFeed(f.id)">Se désabonner</button>
+      </li>
+    } @empty { <li>Aucun abonnement.</li> }
+  </ul>
+</section>
+
+<section class="panel">
+  <h2 class="mb-2.5 text-base font-bold">Import / export OPML</h2>
+  <div class="flex flex-wrap gap-2">
+    <label class="btn cursor-pointer">Importer
+      <input class="hidden" type="file" accept=".opml,.xml,text/xml,application/xml" (change)="importFile($event)">
+    </label>
+    <button class="btn-ghost" type="button" [disabled]="!store.feeds().length" (click)="exportFile()">Exporter</button>
+  </div>
+  @if (opmlMessage()) { <p class="mt-2 text-sm text-muted">{{ opmlMessage() }}</p> }
+</section>
+
+<section class="panel">
+  <div class="mb-2.5 flex items-center justify-between gap-3">
+    <h2 class="text-base font-bold">Proxy CORS</h2>
+    <button type="button" role="switch" aria-label="Activer le proxy CORS" [attr.aria-checked]="store.proxyEnabled()"
+      class="relative h-6 w-11 shrink-0 rounded-full transition-colors" [class]="store.proxyEnabled() ? 'bg-accent' : 'bg-line'"
+      (click)="store.setProxyEnabled(!store.proxyEnabled())">
+      <span class="absolute left-0.5 top-0.5 size-5 rounded-full bg-white transition-transform" [class.translate-x-5]="store.proxyEnabled()"></span>
+    </button>
+  </div>
+  <p class="mb-2 text-[13px] text-muted">La plupart des flux n'autorisent pas la lecture directe depuis un navigateur. L'URL du flux (encodée) est ajoutée à la fin de cette adresse ; désactivé ou vide, l'accès est direct.</p>
+  <input class="field w-full disabled:opacity-50" name="proxy" [disabled]="!store.proxyEnabled()" [ngModel]="store.proxy()" (ngModelChange)="store.setProxy($event)">
+</section>

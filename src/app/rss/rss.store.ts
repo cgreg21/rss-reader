@@ -3,6 +3,7 @@ import { Injectable, computed, signal } from '@angular/core';
 import { db } from './db';
 import { parseFeed } from './feed-parser';
 import { Article, Category, Feed } from './models';
+import { buildOpml, parseOpml } from './opml';
 
 export type Scope =
   | { type: 'all' }
@@ -12,6 +13,7 @@ export type Scope =
   | { type: 'category'; id: string };
 
 const PROXY_KEY = 'rssreader:proxy';
+const PROXY_ENABLED_KEY = 'rssreader:proxy-enabled';
 const DEFAULT_PROXY = 'https://corsproxy.io/?url=';
 const MAX_ARTICLES_PER_FEED = 100;
 
@@ -28,6 +30,7 @@ export class RssStore {
   readonly syncing = signal(false);
   readonly online = signal(navigator.onLine);
   readonly proxy = signal(localStorage.getItem(PROXY_KEY) ?? DEFAULT_PROXY);
+  readonly proxyEnabled = signal(localStorage.getItem(PROXY_ENABLED_KEY) !== '0');
 
   readonly scopeTitle = computed(() => {
     const s = this.scope();
@@ -111,6 +114,11 @@ export class RssStore {
     localStorage.setItem(PROXY_KEY, this.proxy());
   }
 
+  setProxyEnabled(value: boolean): void {
+    this.proxyEnabled.set(value);
+    localStorage.setItem(PROXY_ENABLED_KEY, value ? '1' : '0');
+  }
+
   async addFeed(rawUrl: string, categoryId: string | null): Promise<void> {
     const url = new URL(rawUrl.trim()).href;
     if (this.feeds().some((f) => f.url === url)) throw new Error('Flux déjà suivi');
@@ -120,6 +128,42 @@ export class RssStore {
     await db.put('feeds', feed);
     this.feeds.update((l) => [...l, feed]);
     await this.merge(feed.id, parsed.items);
+  }
+
+  async importOpml(xml: string): Promise<{ added: number; skipped: number }> {
+    const entries = parseOpml(xml);
+    let added = 0;
+    let skipped = 0;
+    const known = new Set(this.feeds().map((f) => f.url));
+    for (const entry of entries) {
+      let url: string;
+      try {
+        url = new URL(entry.url).href;
+      } catch {
+        skipped++;
+        continue;
+      }
+      if (known.has(url)) {
+        skipped++;
+        continue;
+      }
+      known.add(url);
+      let categoryId: string | null = null;
+      if (entry.category) {
+        await this.addCategory(entry.category);
+        categoryId = this.categories().find((c) => c.name.toLowerCase() === entry.category!.toLowerCase())?.id ?? null;
+      }
+      const feed: Feed = { id: `f${Date.now().toString(36)}${added}`, url, title: entry.title, categoryId };
+      await db.put('feeds', feed);
+      this.feeds.update((l) => [...l, feed]);
+      added++;
+    }
+    if (added) void this.refreshAll();
+    return { added, skipped };
+  }
+
+  exportOpml(): string {
+    return buildOpml(this.categories(), this.feeds());
   }
 
   async removeFeed(id: string): Promise<void> {
@@ -209,7 +253,7 @@ export class RssStore {
   }
 
   private async download(url: string): Promise<string> {
-    const proxy = this.proxy();
+    const proxy = this.proxyEnabled() ? this.proxy() : '';
     const response = await fetch(proxy ? proxy + encodeURIComponent(url) : url);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     return response.text();
