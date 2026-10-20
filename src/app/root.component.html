@@ -1,4 +1,4 @@
-<div #shell class="fixed inset-0 flex touch-pan-y flex-col overflow-hidden bg-bg pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] sidebar:flex-row"
+<div #shell class="fixed inset-0 flex h-screen touch-pan-y flex-col overflow-hidden bg-bg pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] sidebar:flex-row"
      (pointerdown)="onDown($event)" (pointermove)="onMove($event)" (pointerup)="onUp($event)" (pointercancel)="onUp($event)">
   <div class="flex min-h-0 min-w-0 flex-1 flex-col sidebar:order-last">
     <rss-top-bar />
