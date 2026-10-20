@@ -3,7 +3,7 @@ const MDI_CODE_POINTS = {
   menu: 0xF035C, refresh: 0xF0450, plus: 0xF0415, 'cog-outline': 0xF08BB, rss: 0xF046B,
   'calendar-today': 0xF00F6, 'star-outline': 0xF04D2, star: 0xF04CE, 'check-all': 0xF012D,
   magnify: 0xF0349, 'arrow-left': 0xF004D, 'open-in-new': 0xF03CC, 'email-outline': 0xF01F0,
-  'email-open-outline': 0xF05EF, 'trash-can-outline': 0xF0A7A, close: 0xF0156, download: 0xF01DA, upload: 0xF0552,
+  'email-open-outline': 0xF05EF, 'trash-can-outline': 0xF0A7A, close: 0xF0156, 'view-list': 0xF0572, 'view-agenda': 0xF056A, 'cards-outline': 0xF0639, download: 0xF01DA, upload: 0xF0552,
 } as const;
 
 export type IconName = keyof typeof MDI_CODE_POINTS;
@@ -29,6 +29,9 @@ export const UI_ICONS = {
   read: glyph('email-open-outline'),
   trash: glyph('trash-can-outline'),
   close: glyph('close'),
+  layoutList: glyph('view-list'),
+  layoutDetail: glyph('view-agenda'),
+  layoutCard: glyph('cards-outline'),
   download: glyph('download'),
   upload: glyph('upload'),
 };

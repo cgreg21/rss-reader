@@ -19,6 +19,13 @@ const MAX_ARTICLES_PER_FEED = 100;
 
 const startOfToday = (): number => new Date().setHours(0, 0, 0, 0);
 
+export type ArticleLayout = 'list' | 'detail' | 'card';
+const LAYOUT_KEY = 'rssreader:layout';
+const readLayout = (): ArticleLayout => {
+  const value = localStorage.getItem(LAYOUT_KEY);
+  return value === 'list' || value === 'card' ? value : 'detail';
+};
+
 @Injectable({ providedIn: 'root' })
 export class RssStore {
   readonly feeds = signal<Feed[]>([]);
@@ -31,6 +38,12 @@ export class RssStore {
   readonly online = signal(navigator.onLine);
   readonly proxy = signal(localStorage.getItem(PROXY_KEY) ?? DEFAULT_PROXY);
   readonly proxyEnabled = signal(localStorage.getItem(PROXY_ENABLED_KEY) !== '0');
+  readonly layout = signal<ArticleLayout>(readLayout());
+
+  setLayout(value: ArticleLayout): void {
+    this.layout.set(value);
+    localStorage.setItem(LAYOUT_KEY, value);
+  }
 
   readonly scopeTitle = computed(() => {
     const s = this.scope();
