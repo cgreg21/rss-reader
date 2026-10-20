@@ -1,5 +1,12 @@
 <header class="flex items-center justify-between gap-2 bg-side px-2.5 pb-1.5 pt-[calc(14px+env(safe-area-inset-top))] sidebar:hidden">
   <button class="icon-btn" type="button" aria-label="Menu" (click)="drawer.show()">{{ ui.menu }}</button>
-  <strong class="truncate">{{ store.scopeTitle() || 'RSS' }}</strong>
+  <strong class="min-w-0 flex-1 truncate text-center">{{ store.scopeTitle() || 'RSS' }}</strong>
+  <button class="icon-btn" type="button" aria-label="Rechercher" [attr.aria-expanded]="searching()" (click)="toggleSearch()">{{ ui.search }}</button>
   <button class="icon-btn" type="button" aria-label="Actualiser" (click)="store.refreshAll()">{{ ui.refresh }}</button>
 </header>
+@if (searching()) {
+  <div class="bg-side px-3 pb-2.5 sidebar:hidden">
+    <input #field class="field w-full" type="search" placeholder="Rechercher" aria-label="Rechercher"
+      [value]="store.search()" (input)="store.search.set($any($event.target).value)">
+  </div>
+}

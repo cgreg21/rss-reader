@@ -14,28 +14,25 @@ const FLY_MS = 200;
 
 type Direction = 'left' | 'right';
 
-/** One card at a time; swipe left toggles read/unread, swipe right toggles favorite (Tinder style). */
+/** Card with a Tinder-style swipe: left toggles read/unread, right toggles favorite. */
 @Component({
-  selector: 'rss-card-stack',
+  selector: 'rss-article-card',
   imports: [DatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './card-stack.component.html',
+  templateUrl: './article-card.component.html',
 })
-export class CardStackComponent {
-  readonly articles = input.required<Article[]>();
+export class ArticleCardComponent {
+  readonly article = input.required<Article>();
 
   protected readonly store = inject(RssStore);
   protected readonly ui = UI_ICONS;
   private readonly router = inject(Router);
   private readonly snackbar = inject(SnackbarService);
 
-  private readonly index = signal(0);
   protected readonly dragX = signal(0);
   protected readonly flying = signal<Direction | null>(null);
   protected readonly dragging = signal(false);
 
-  protected readonly position = computed(() => Math.min(this.index(), Math.max(0, this.articles().length - 1)));
-  protected readonly current = computed(() => this.articles()[this.position()] ?? null);
   protected readonly offset = computed(() => {
     const fly = this.flying();
     return fly === 'left' ? -window.innerWidth : fly === 'right' ? window.innerWidth : this.dragX();
@@ -82,8 +79,8 @@ export class CardStackComponent {
       this.dragging.set(false);
       if (Math.abs(dx) >= THRESHOLD) this.fling(dx < 0 ? 'left' : 'right');
       else this.dragX.set(0);
-    } else if (p.horizontal === null && Math.hypot(dx, dy) < TAP_SLOP && this.current()) {
-      void this.router.navigate(['/article', this.current()!.id]);
+    } else if (p.horizontal === null && Math.hypot(dx, dy) < TAP_SLOP) {
+      void this.router.navigate(['/article', this.article().id]);
     }
   }
 
@@ -94,31 +91,24 @@ export class CardStackComponent {
   }
 
   protected fling(direction: Direction): void {
-    if (this.flying() || !this.current()) return;
+    if (this.flying()) return;
     this.flying.set(direction);
     setTimeout(() => this.commit(direction), FLY_MS);
   }
 
   private commit(direction: Direction): void {
-    const article = this.current();
-    this.flying.set(null);
-    this.dragX.set(0);
-    if (!article) return;
+    const article = this.article();
     if (direction === 'left') {
       void this.store.patch(article.id, { read: !article.read });
       this.snackbar.show(article.read ? 'Marqué comme non lu' : 'Marqué comme lu');
-      // Read articles leave the unread list, so the next one slides into the same position.
-      const leaves = this.store.unreadOnly() && !article.read && this.store.scope().type !== 'favorites';
-      if (!leaves) this.advance();
     } else {
       void this.store.patch(article.id, { favorite: !article.favorite });
       this.snackbar.show(article.favorite ? 'Retiré des favoris' : 'Ajouté aux favoris');
-      this.advance();
     }
-  }
-
-  private advance(): void {
-    const length = this.articles().length;
-    this.index.set(length ? (this.position() + 1) % length : 0);
+    // The card stays in the list unless a filter removes it: put it back without a slide-in.
+    this.dragging.set(true);
+    this.flying.set(null);
+    this.dragX.set(0);
+    requestAnimationFrame(() => this.dragging.set(false));
   }
 }

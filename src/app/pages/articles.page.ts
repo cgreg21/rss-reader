@@ -4,11 +4,11 @@ import { RouterLink } from '@angular/router';
 
 import { ArticleLayout, RssStore } from '../rss/rss.store';
 import { UI_ICONS } from '../ui/icons';
-import { CardStackComponent } from './card-stack.component';
+import { CardListComponent } from './card-list.component';
 
 @Component({
   selector: 'rss-articles',
-  imports: [RouterLink, DatePipe, CardStackComponent],
+  imports: [RouterLink, DatePipe, CardListComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './articles.page.html',
 })

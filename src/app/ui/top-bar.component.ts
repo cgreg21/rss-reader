@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, effect, inject, signal, viewChild } from '@angular/core';
 
 import { RssStore } from '../rss/rss.store';
 import { DrawerService } from './drawer.service';
@@ -15,4 +15,15 @@ export class TopBarComponent {
   protected readonly store = inject(RssStore);
   protected readonly drawer = inject(DrawerService);
   protected readonly ui = UI_ICONS;
+  protected readonly searching = signal(this.store.search() !== '');
+  private readonly field = viewChild<ElementRef<HTMLInputElement>>('field');
+
+  constructor() {
+    effect(() => this.field()?.nativeElement.focus());
+  }
+
+  protected toggleSearch(): void {
+    if (this.searching()) this.store.search.set('');
+    this.searching.update((open) => !open);
+  }
 }

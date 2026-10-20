@@ -9,6 +9,7 @@ import { DrawerContentComponent } from './ui/drawer-content.component';
 import { DrawerService } from './ui/drawer.service';
 import { LayoutService } from './ui/layout.service';
 import { TopBarComponent } from './ui/top-bar.component';
+import { PullRefreshDirective } from './ui/pull-refresh.directive';
 import { SnackbarComponent } from './ui/snackbar.component';
 
 const DRAWER_WIDTH = 280;
@@ -18,7 +19,7 @@ const EDGE_WIDTH = 24;
 
 @Component({
   selector: 'rss-root',
-  imports: [RouterOutlet, TopBarComponent, DrawerContentComponent, AppPromptComponent, SnackbarComponent],
+  imports: [RouterOutlet, TopBarComponent, DrawerContentComponent, AppPromptComponent, SnackbarComponent, PullRefreshDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './root.component.html',
 })
@@ -27,6 +28,7 @@ export class RootComponent {
   protected readonly drawer = inject(DrawerService);
   protected readonly layout = inject(LayoutService);
   private readonly router = inject(Router);
+  protected readonly refresh = (): Promise<void> => this.store.refreshAll();
 
   private readonly shell = viewChild.required<ElementRef<HTMLElement>>('shell');
   private readonly edge = viewChild<ElementRef<HTMLElement>>('edge');

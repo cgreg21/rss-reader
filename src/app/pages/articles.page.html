@@ -1,5 +1,5 @@
-<div class="mb-5 flex flex-wrap items-center gap-3">
-  <h1 class="flex-1 text-xl font-bold sm:text-[22px]">{{ store.scopeTitle() }}
+<div class="mb-5 flex flex-wrap items-center justify-end gap-3 sidebar:justify-start">
+  <h1 class="hidden flex-1 text-xl font-bold sidebar:block sm:text-[22px]">{{ store.scopeTitle() }}
     <small class="text-[15px] font-normal text-muted">({{ store.unreadTotal() }} non lus)</small></h1>
   <button class="icon-btn" type="button" aria-label="Tout marquer comme lu" (click)="store.markAllRead()">{{ ui.markAllRead }}</button>
   <div class="flex rounded-full bg-side p-0.5" role="group" aria-label="Mise en page">
@@ -8,7 +8,7 @@
         [class]="store.layout() === l.id ? 'bg-accent !text-white' : ''" (click)="store.setLayout(l.id)">{{ l.icon }}</button>
     }
   </div>
-  <input class="field order-last w-full sm:order-none sm:w-72" type="search" placeholder="Rechercher" [value]="store.search()"
+  <input class="field hidden w-72 sidebar:block" type="search" placeholder="Rechercher" [value]="store.search()"
     (input)="store.search.set($any($event.target).value)">
 </div>
 
@@ -21,7 +21,7 @@
 
 @switch (store.layout()) {
   @case ('card') {
-    <rss-card-stack [articles]="store.visible()" />
+    <rss-card-list [articles]="store.visible()" />
   }
   @case ('list') {
     <div class="mx-auto flex max-w-3xl flex-col divide-y divide-line">
@@ -37,7 +37,7 @@
   @default {
     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-5 sidebar:grid-cols-3 sidebar:gap-6">
       @for (a of store.visible(); track a.id) {
-        <a class="flex min-w-0 flex-col gap-2.5" [routerLink]="['/article', a.id]" [class.opacity-60]="a.read">
+        <a class="flex min-w-0 flex-col gap-2.5 border-b border-line pb-6" [routerLink]="['/article', a.id]" [class.opacity-60]="a.read">
           <h2 class="text-lg leading-tight font-bold sidebar:text-xl">{{ a.title }}</h2>
           @if (a.image) { <img class="aspect-[16/10] w-full rounded-xl bg-side object-cover" [src]="a.image" alt="" loading="lazy" (error)="$any($event.target).remove()"> }
           <span class="text-xs text-accent">{{ a.read ? '' : '● ' }}{{ a.published | date: 'dd/MM/yyyy HH:mm' }} · {{ feedTitle(a.feedId) }}</span>

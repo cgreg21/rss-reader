@@ -1,9 +1,13 @@
-<div #shell class="fixed inset-0 flex h-screen touch-pan-y flex-col overflow-hidden bg-bg pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] sidebar:flex-row"
+<div #shell class="fixed inset-0 flex touch-pan-y flex-col overflow-hidden bg-bg pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] sidebar:flex-row"
      (pointerdown)="onDown($event)" (pointermove)="onMove($event)" (pointerup)="onUp($event)" (pointercancel)="onUp($event)">
   <div class="flex min-h-0 min-w-0 flex-1 flex-col sidebar:order-last">
     <rss-top-bar />
 
-    <main class="min-h-0 flex-1 overflow-y-auto overscroll-contain p-3.5 sm:p-5 sidebar:px-8 sidebar:py-6">
+    <main [rssPullRefresh]="refresh" #pull="pullRefresh" class="min-h-0 flex-1 overflow-y-auto overscroll-contain p-3.5 sm:p-5 sidebar:px-8 sidebar:py-6">
+      <div class="flex items-end justify-center overflow-hidden text-xs text-muted" [class.transition-[height]]="!pull.pulling()"
+           [style.height.px]="pull.distance()" aria-live="polite">
+        @if (pull.distance() > 0) { <span class="pb-2">{{ pull.label() }}</span> }
+      </div>
       @if (!store.online()) { <div class="banner">Hors ligne : les articles enregistrés restent lisibles.</div> }
       <router-outlet />
     </main>
