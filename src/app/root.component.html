@@ -22,7 +22,7 @@
        [style.opacity]="backdropOpacity()"
        (click)="onBackdropClick()"></div>
 
-  <aside class="absolute inset-y-0 left-0 z-30 flex w-[280px] shrink-0 touch-pan-y flex-col overflow-hidden bg-side p-3 pt-[max(12px,env(safe-area-inset-top))] shadow-2xl ease-out sidebar:static sidebar:order-first sidebar:pt-4 sidebar:shadow-none"
+  <aside class="absolute inset-y-0 left-0 z-30 flex w-[280px] shrink-0 touch-pan-y flex-col overflow-hidden bg-side p-3 pt-[calc(20px+env(safe-area-inset-top))] shadow-2xl ease-out sidebar:static sidebar:order-first sidebar:pt-4 sidebar:shadow-none"
          [class]="dragging() ? '' : 'transition-transform duration-200'"
          [style.transform]="layout.sidebar() ? null : 'translateX(' + drawerX() + 'px)'"
          [attr.inert]="drawerActive() ? null : ''">

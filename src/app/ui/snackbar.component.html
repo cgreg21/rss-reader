@@ -1,5 +1,5 @@
 @if (snackbar.current(); as message) {
-  <div class="pointer-events-none absolute inset-x-3 bottom-[calc(12px+env(safe-area-inset-bottom))] z-40 flex justify-center wide:left-auto wide:right-6 wide:justify-end">
+  <div class="pointer-events-none absolute inset-x-3 bottom-3 z-40 flex justify-center wide:left-auto wide:right-6 wide:justify-end">
     <div class="pointer-events-auto flex w-full max-w-[440px] items-center gap-3 rounded-xl border bg-side p-3 shadow-2xl"
          [class]="message.kind === 'error' ? 'border-red-400' : message.kind === 'success' ? 'border-accent' : 'border-line'"
          [attr.role]="message.kind === 'error' ? 'alert' : 'status'">

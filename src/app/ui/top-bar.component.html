@@ -1,4 +1,4 @@
-<header class="flex items-center justify-between gap-2 bg-side px-2.5 pb-1.5 pt-[max(6px,env(safe-area-inset-top))] sidebar:hidden">
+<header class="flex items-center justify-between gap-2 bg-side px-2.5 pb-1.5 pt-[calc(14px+env(safe-area-inset-top))] sidebar:hidden">
   <button class="icon-btn" type="button" aria-label="Menu" (click)="drawer.show()">{{ ui.menu }}</button>
   <strong class="truncate">{{ store.scopeTitle() || 'RSS' }}</strong>
   <button class="icon-btn" type="button" aria-label="Actualiser" (click)="store.refreshAll()">{{ ui.refresh }}</button>
