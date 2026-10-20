@@ -4,12 +4,19 @@
       <span class="absolute right-0.5 top-0.5 min-w-[18px] rounded-full bg-accent px-1 text-center font-sans text-[11px] font-bold leading-[18px] text-white">{{ store.unreadTotal() > 99 ? '99+' : store.unreadTotal() }}</span>
     }
   </button>
+  @if (articleId()) { <a class="icon-btn hidden sidebar:inline-grid" routerLink="/" aria-label="Précédent">{{ ui.back }}</a> }
   <strong class="min-w-0 flex-1 truncate text-center sidebar:text-left   sidebar:flex-none sidebar:text-xl">{{ store.scopeTitle() || 'RSS' }}
     <small class="hidden text-[15px] font-normal text-muted sidebar:inline">({{ store.unreadTotal() }} non lus)</small></strong>
+  @if (articleId(); as id) {
+    <span class="hidden flex-1 sidebar:block"></span>
+    <div class="hidden sidebar:block"><rss-article-detail-actions [id]="id" /></div>
+    <span class="size-11 sidebar:hidden"></span>
+  } @else {
     <input class="field hidden w-full max-w-md sidebar:ml-auto sidebar:block" type="search" placeholder="Rechercher" aria-label="Rechercher"
       [value]="store.search()" (input)="store.search.set($any($event.target).value)">
     @if (actions()) { <div class="hidden sidebar:block"><rss-article-actions /></div> }
     <button class="icon-btn sidebar:hidden" type="button" aria-label="Rechercher" [attr.aria-expanded]="searching()" (click)="toggleSearch()">{{ ui.search }}</button>
+  }
 </header>
 @if (searching()) {
   <div class="bg-side px-3 pb-2.5 sidebar:hidden">

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, signal, viewChild } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { RouterLink, RouterOutlet } from '@angular/router';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
 
@@ -13,6 +13,8 @@ import { PullRefreshDirective } from './ui/pull-refresh.directive';
 import { SnackbarComponent } from './ui/snackbar.component';
 import { DialogComponent } from './ui/dialog.component';
 import { ArticleActionsComponent } from './ui/article-actions.component';
+import { ArticleDetailActionsComponent } from './ui/article-detail-actions.component';
+import { UI_ICONS } from './ui/icons';
 
 const DRAWER_WIDTH = 280;
 const SWIPE_SLOP = 10;
@@ -21,7 +23,7 @@ const EDGE_WIDTH = 24;
 
 @Component({
   selector: 'rss-root',
-  imports: [RouterOutlet, TopBarComponent, DrawerContentComponent, AppPromptComponent, SnackbarComponent, DialogComponent, ArticleActionsComponent, PullRefreshDirective],
+  imports: [RouterOutlet, TopBarComponent, DrawerContentComponent, AppPromptComponent, SnackbarComponent, DialogComponent, ArticleActionsComponent, ArticleDetailActionsComponent, RouterLink, PullRefreshDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './root.component.html',
 })
@@ -31,6 +33,8 @@ export class RootComponent {
   protected readonly layout = inject(LayoutService);
   private readonly router = inject(Router);
   protected readonly onArticles = signal(this.isArticles());
+  protected readonly articleId = signal(this.currentArticleId());
+  protected readonly ui = UI_ICONS;
   protected readonly refresh = (): Promise<void> => this.store.refreshAll();
 
   private readonly shell = viewChild.required<ElementRef<HTMLElement>>('shell');
@@ -45,6 +49,11 @@ export class RootComponent {
   protected readonly backdropOpacity = computed(() => this.layout.sidebar() ? 0 : 1 + this.drawerX() / DRAWER_WIDTH);
   protected readonly drawerActive = computed(() => this.layout.sidebar() || this.drawer.opened());
 
+  private currentArticleId(): string | null {
+    const match = /^\/article\/([^/?#]+)/.exec(this.router.url);
+    return match ? decodeURIComponent(match[1]) : null;
+  }
+
   private isArticles(): boolean {
     return this.router.url.split(/[?#]/)[0] === '/';
   }
@@ -54,6 +63,7 @@ export class RootComponent {
     this.router.events.pipe(filter((e) => e instanceof NavigationEnd)).subscribe(() => {
       this.drawer.close();
       this.onArticles.set(this.isArticles());
+      this.articleId.set(this.currentArticleId());
     });
 
     // Non-passive so the browser's back/forward swipe is cancelled: while the drawer is dragged, and

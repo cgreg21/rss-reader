@@ -14,7 +14,7 @@
       <div class="absolute left-3 top-3 rounded-lg border-2 border-yellow-300 px-2 py-1 text-sm font-bold text-yellow-300" [style.opacity]="progress()">
         {{ article().favorite ? 'RETIRER' : 'FAVORI' }}</div>
     } @else if (offset() < 0) {
-      <div class="absolute right-3 top-3 rounded-lg border-2 border-accent px-2 py-1 text-sm font-bold text-accent" [style.opacity]="progress()">
+      <div class="absolute right-3 top-3 rounded-lg border-2 border-green-400 px-2 py-1 text-sm font-bold text-green-400" [style.opacity]="progress()">
         {{ article().read ? 'NON LU' : 'LU' }}</div>
     }
     @if (article().favorite) {
