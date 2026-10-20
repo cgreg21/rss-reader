@@ -1,14 +1,15 @@
 import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, signal, viewChild } from '@angular/core';
-import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
+import { RouterOutlet } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
 
-import { InstallService } from './pwa/install.service';
-import { UpdateService } from './pwa/update.service';
-import { RssStore, Scope } from './rss/rss.store';
+import { AppPromptComponent } from './pwa/app-prompt.component';
+import { RssStore } from './rss/rss.store';
+import { DrawerContentComponent } from './ui/drawer-content.component';
 import { DrawerService } from './ui/drawer.service';
 import { LayoutService } from './ui/layout.service';
-import { UI_ICONS } from './ui/icons';
-import { APP_VERSION } from './pwa/app-info';
+import { TopBarComponent } from './ui/top-bar.component';
+import { SnackbarComponent } from './ui/snackbar.component';
 
 const DRAWER_WIDTH = 280;
 const SWIPE_SLOP = 10;
@@ -17,18 +18,14 @@ const EDGE_WIDTH = 24;
 
 @Component({
   selector: 'rss-root',
-  imports: [RouterOutlet, RouterLink],
+  imports: [RouterOutlet, TopBarComponent, DrawerContentComponent, AppPromptComponent, SnackbarComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './root.component.html',
 })
 export class RootComponent {
   protected readonly store = inject(RssStore);
-  protected readonly install = inject(InstallService);
-  protected readonly updates = inject(UpdateService);
   protected readonly drawer = inject(DrawerService);
   protected readonly layout = inject(LayoutService);
-  protected readonly ui = UI_ICONS;
-  protected readonly version = APP_VERSION;
   private readonly router = inject(Router);
 
   private readonly shell = viewChild.required<ElementRef<HTMLElement>>('shell');
@@ -71,26 +68,6 @@ export class RootComponent {
         if (!(document.activeElement instanceof HTMLInputElement || document.activeElement instanceof HTMLTextAreaElement)) window.scrollTo(0, 0);
       }, 100);
     });
-  }
-
-  protected go(scope: Scope): void {
-    this.store.scope.set(scope);
-    this.drawer.close();
-    void this.router.navigateByUrl('/');
-  }
-
-  protected is(type: Scope['type']): boolean {
-    return this.store.scope().type === type;
-  }
-
-  protected isFeed(id: string): boolean {
-    const s = this.store.scope();
-    return s.type === 'feed' && s.id === id;
-  }
-
-  protected isCategory(id: string): boolean {
-    const s = this.store.scope();
-    return s.type === 'category' && s.id === id;
   }
 
   protected onBackdropClick(): void {

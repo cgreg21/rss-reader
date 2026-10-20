@@ -1,0 +1,24 @@
+@if (snackbar.current(); as message) {
+  <div class="pointer-events-none absolute inset-x-3 bottom-[calc(12px+env(safe-area-inset-bottom))] z-40 flex justify-center wide:left-auto wide:right-6 wide:justify-end">
+    <div class="pointer-events-auto flex w-full max-w-[440px] items-center gap-3 rounded-xl border bg-side p-3 shadow-2xl"
+         [class]="message.kind === 'error' ? 'border-red-400' : message.kind === 'success' ? 'border-accent' : 'border-line'"
+         [attr.role]="message.kind === 'error' ? 'alert' : 'status'">
+      @if (message.image) { <img [src]="message.image" alt="" class="size-11 shrink-0 rounded-lg"> }
+      <div class="min-w-0 flex-1">
+        @if (message.title) { <div class="text-sm font-bold">{{ message.title }}</div> }
+        <div class="text-sm" [class]="message.title ? 'text-xs text-muted' : message.kind === 'error' ? 'font-medium text-red-400' : 'font-medium'">{{ message.text }}</div>
+      </div>
+      @if (message.actions?.length) {
+        <div class="flex shrink-0 flex-col gap-1">
+          @for (action of message.actions; track action.label) {
+            <button type="button" class="rounded-md px-3 py-1.5 text-sm transition-transform active:scale-95"
+                    [class]="action.primary ? 'bg-accent font-bold text-bg' : 'font-medium text-muted'"
+                    (click)="snackbar.runAction(action)">{{ action.label }}</button>
+          }
+        </div>
+      } @else {
+        <button type="button" class="icon-btn" aria-label="Fermer" (click)="snackbar.dismiss()">{{ ui.close }}</button>
+      }
+    </div>
+  </div>
+}
