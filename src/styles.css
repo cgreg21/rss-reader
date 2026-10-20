@@ -1,5 +1,30 @@
 @import "tailwindcss";
 
+/* Relative URLs: the bundler copies the fonts next to the stylesheet, so the app works under any base href. */
+@font-face {
+  font-family: "DM Sans";
+  font-weight: 400;
+  src: url("./fonts/DMSans-Regular.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "DM Sans";
+  font-weight: 500;
+  src: url("./fonts/DMSans-Medium.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "DM Sans";
+  font-weight: 700;
+  src: url("./fonts/DMSans-Bold.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Material Design Icons";
+  src: url("./fonts/MaterialDesignIcons.ttf") format("truetype");
+  font-display: block;
+}
+
 /* Tablet / desktop layout; a phone in landscape is wide but short, so it keeps the mobile layout. */
 @custom-variant wide (@media (min-width: 768px) and (min-height: 500px));
 /* Permanent sidebar: only when wide and in landscape; a tablet in portrait keeps the drawer hidden. */
@@ -12,17 +37,23 @@
   --color-line: #2a3650;
   --color-muted: #8d9ab3;
   --color-accent: #1fb5b0;
+  --font-sans: "DM Sans", system-ui, sans-serif;
+  --font-mdi: "Material Design Icons";
 }
 
 @layer base {
   :root { color-scheme: dark; }
-  html, body { @apply h-full bg-bg text-[15px] text-slate-100 antialiased; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; }
+  html, body { @apply h-full bg-bg text-slate-100 antialiased; font-family: var(--font-sans); -webkit-tap-highlight-color: transparent; overscroll-behavior: none; }
+  button, input, select { font: inherit; color: inherit; }
+  /* Below 16px iOS zooms into a focused field and the page stays zoomed afterwards. */
+  input, select { font-size: max(16px, 1em); }
   button { @apply cursor-pointer; }
+  button:disabled { @apply cursor-default opacity-40; }
   input:focus, select:focus { @apply outline-2 outline-accent; }
 }
 
 @layer components {
-  .icon-btn { @apply inline-grid h-9 min-w-9 cursor-pointer place-items-center rounded-xl text-lg text-muted hover:bg-white/5 hover:text-slate-100; }
+  .icon-btn { @apply inline-grid size-11 min-w-11 cursor-pointer place-items-center rounded-full font-mdi text-[22px] text-muted transition-transform hover:bg-white/5 hover:text-slate-100 active:scale-90; }
   .btn { @apply rounded-xl bg-accent px-4 py-2 font-semibold text-[#04201f] disabled:opacity-60; }
   .btn-ghost { @apply rounded-xl border border-line px-4 py-2 text-muted hover:text-slate-100; }
   .field { @apply min-w-0 rounded-xl border border-transparent bg-side px-3.5 py-2; }

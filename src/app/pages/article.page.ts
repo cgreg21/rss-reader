@@ -3,6 +3,7 @@ import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
 import { RssStore } from '../rss/rss.store';
+import { UI_ICONS } from '../ui/icons';
 
 @Component({
   selector: 'rss-article',
@@ -13,6 +14,7 @@ import { RssStore } from '../rss/rss.store';
 export class ArticlePage {
   readonly id = input.required<string>();
   protected readonly store = inject(RssStore);
+  protected readonly ui = UI_ICONS;
   protected readonly article = computed(() => this.store.article(this.id()));
   protected readonly feedTitle = computed(() => this.store.feeds().find((f) => f.id === this.article()?.feedId)?.title ?? '');
 

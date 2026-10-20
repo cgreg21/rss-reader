@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 import { RssStore } from '../rss/rss.store';
+import { UI_ICONS } from '../ui/icons';
 
 @Component({
   selector: 'rss-feeds',
@@ -12,6 +13,7 @@ import { RssStore } from '../rss/rss.store';
 })
 export class FeedsPage {
   protected readonly store = inject(RssStore);
+  protected readonly ui = UI_ICONS;
   protected url = '';
   protected categoryId: string | null = null;
   protected newCategory = '';

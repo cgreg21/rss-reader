@@ -73,11 +73,15 @@ export class RssStore {
   readonly groups = computed(() => {
     const feeds = this.feeds();
     const counts = this.unreadByFeed();
+    const unreadOnly = this.unreadOnly();
     const group = (id: string | null, name: string) => {
-      const list = feeds.filter((f) => f.categoryId === id).sort((a, b) => a.title.localeCompare(b.title));
+      const list = feeds
+        .filter((f) => f.categoryId === id && (!unreadOnly || (counts.get(f.id) ?? 0) > 0))
+        .sort((a, b) => a.title.localeCompare(b.title));
       return { id, name, feeds: list, unread: list.reduce((n, f) => n + (counts.get(f.id) ?? 0), 0) };
     };
-    const known = this.categories().slice().sort((a, b) => a.name.localeCompare(b.name)).map((c) => group(c.id, c.name));
+    const known = this.categories().slice().sort((a, b) => a.name.localeCompare(b.name)).map((c) => group(c.id, c.name))
+      .filter((g) => !unreadOnly || g.feeds.length);
     const other = group(null, 'Autres');
     return other.feeds.length ? [...known, other] : known;
   });

@@ -1,7 +1,7 @@
 <div class="mb-5 flex flex-wrap items-center gap-3">
   <h1 class="flex-1 text-xl font-bold sm:text-[22px]">{{ store.scopeTitle() }}
     <small class="text-[15px] font-normal text-muted">({{ store.unreadTotal() }} non lus)</small></h1>
-  <button class="icon-btn" type="button" aria-label="Tout marquer comme lu" (click)="store.markAllRead()">✓</button>
+  <button class="icon-btn" type="button" aria-label="Tout marquer comme lu" (click)="store.markAllRead()">{{ ui.markAllRead }}</button>
   <input class="field order-last w-full sm:order-none sm:w-72" type="search" placeholder="Rechercher" [value]="store.search()"
     (input)="store.search.set($any($event.target).value)">
 </div>

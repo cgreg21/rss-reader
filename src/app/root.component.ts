@@ -7,6 +7,8 @@ import { UpdateService } from './pwa/update.service';
 import { RssStore, Scope } from './rss/rss.store';
 import { DrawerService } from './ui/drawer.service';
 import { LayoutService } from './ui/layout.service';
+import { UI_ICONS } from './ui/icons';
+import { APP_VERSION } from './pwa/app-info';
 
 const DRAWER_WIDTH = 280;
 const SWIPE_SLOP = 10;
@@ -25,6 +27,8 @@ export class RootComponent {
   protected readonly updates = inject(UpdateService);
   protected readonly drawer = inject(DrawerService);
   protected readonly layout = inject(LayoutService);
+  protected readonly ui = UI_ICONS;
+  protected readonly version = APP_VERSION;
   private readonly router = inject(Router);
 
   private readonly shell = viewChild.required<ElementRef<HTMLElement>>('shell');

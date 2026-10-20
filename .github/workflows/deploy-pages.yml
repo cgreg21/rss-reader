@@ -15,10 +15,41 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Bumps the patch version first so the deployed build already shows the new number.
+  bump:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      sha: ${{ steps.push.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Increment the patch version
+        run: npm version patch --no-git-tag-version
+
+      - name: Commit and push
+        id: push
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json
+          git commit -m "chore: bump version to ${VERSION} [skip ci]"
+          git pull --rebase
+          git push
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
   build:
+    needs: bump
+    # Also runs on manual dispatch, where the bump job is skipped.
+    if: ${{ !cancelled() && (needs.bump.result == 'success' || needs.bump.result == 'skipped') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.bump.outputs.sha || github.sha }}
 
       - uses: actions/setup-node@v5
         with:

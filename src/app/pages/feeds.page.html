@@ -1,4 +1,4 @@
-<div class="mb-5 flex items-center gap-3"><h1 class="flex-1 text-xl font-bold sm:text-[22px]">Abonnements</h1><a class="icon-btn" routerLink="/" aria-label="Retour">←</a></div>
+<div class="mb-5 flex items-center gap-3"><h1 class="flex-1 text-xl font-bold sm:text-[22px]">Abonnements</h1><a class="icon-btn" routerLink="/" aria-label="Retour">{{ ui.back }}</a></div>
 
 <section class="panel">
   <h2 class="mb-2.5 text-base font-bold">Ajouter un flux</h2>
@@ -22,7 +22,7 @@
   <ul class="mt-2.5">
     @for (c of store.categories(); track c.id) {
       <li class="flex flex-wrap items-center gap-2.5 border-t border-line py-2">
-        <span class="min-w-0 flex-1">{{ c.name }}</span><button class="btn-ghost" type="button" (click)="store.removeCategory(c.id)">Supprimer</button>
+        <span class="min-w-0 flex-1">{{ c.name }}</span><button class="icon-btn" type="button" aria-label="Supprimer" (click)="store.removeCategory(c.id)">{{ ui.trash }}</button>
       </li>
     }
   </ul>
@@ -39,7 +39,7 @@
           <option [ngValue]="null">Sans catégorie</option>
           @for (c of store.categories(); track c.id) { <option [ngValue]="c.id">{{ c.name }}</option> }
         </select>
-        <button class="btn-ghost" type="button" (click)="store.removeFeed(f.id)">Se désabonner</button>
+        <button class="icon-btn" type="button" aria-label="Se désabonner" (click)="store.removeFeed(f.id)">{{ ui.trash }}</button>
       </li>
     } @empty { <li>Aucun abonnement.</li> }
   </ul>
