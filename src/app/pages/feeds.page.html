@@ -14,6 +14,25 @@
 </section>
 
 <section class="panel">
+  <h2 class="mb-2.5 text-base font-bold">Rechercher des flux</h2>
+  <form class="flex flex-wrap gap-2" (ngSubmit)="search()">
+    <input class="field min-w-60 flex-1" name="query" type="search" placeholder="Sujet, site ou mot-clé" [(ngModel)]="query">
+    <button class="btn" type="submit" [disabled]="searching()">{{ searching() ? '…' : 'Rechercher' }}</button>
+  </form>
+  @if (searchError()) { <p class="mt-2 text-red-400">{{ searchError() }}</p> }
+  <ul class="mt-2.5">
+    @for (h of hits(); track h.url) {
+      <li class="flex flex-wrap items-center gap-2.5 border-t border-line py-2">
+        <div class="min-w-0 flex-1"><strong>{{ h.title }}</strong>
+          @if (h.description) { <small class="line-clamp-2 block text-muted">{{ h.description }}</small> }
+          <small class="block truncate text-muted">{{ h.url }}@if (h.subscribers) { · {{ h.subscribers }} abonnés }</small></div>
+        <button class="btn" type="button" [disabled]="followed(h.url)" (click)="follow(h)">{{ followed(h.url) ? 'Suivi' : "S'abonner" }}</button>
+      </li>
+    } @empty { @if (searched() && !searching()) { <li class="text-muted">Aucun résultat.</li> } }
+  </ul>
+</section>
+
+<section class="panel">
   <h2 class="mb-2.5 text-base font-bold">Catégories</h2>
   <form class="flex flex-wrap gap-2" (ngSubmit)="addCategory()">
     <input class="field min-w-60 flex-1" name="name" placeholder="Nouvelle catégorie" [(ngModel)]="newCategory">

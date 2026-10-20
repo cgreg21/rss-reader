@@ -37,6 +37,14 @@ const readLayout = (): ArticleLayout => {
   return value === 'list' || value === 'card' ? value : 'detail';
 };
 
+export interface FeedHit {
+  url: string;
+  title: string;
+  website?: string;
+  description?: string;
+  subscribers?: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class RssStore {
   readonly feeds = signal<Feed[]>([]);
@@ -302,6 +310,15 @@ export class RssStore {
     for (const a of stale) await db.remove('articles', a.id);
     const dropped = new Set(stale.map((a) => a.id));
     this.articles.set(all.filter((a) => !dropped.has(a.id)));
+  }
+
+  /** Searches feeds online (Feedly public directory); also accepts a site URL. */
+  async searchFeeds(query: string): Promise<FeedHit[]> {
+    const text = await this.download(`https://cloud.feedly.com/v3/search/feeds?count=20&query=${encodeURIComponent(query.trim())}`);
+    const data = JSON.parse(text) as { results?: { feedId: string; title?: string; website?: string; description?: string; subscribers?: number }[] };
+    return (data.results ?? [])
+      .filter((r) => r.feedId?.startsWith('feed/'))
+      .map((r) => ({ url: r.feedId.slice(5), title: r.title ?? r.feedId.slice(5), website: r.website, description: r.description, subscribers: r.subscribers }));
   }
 
   private async download(url: string): Promise<string> {
