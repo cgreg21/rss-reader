@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
@@ -62,6 +62,12 @@ export class RootComponent {
 
   constructor() {
     void this.store.load();
+    effect(() => {
+      const count = this.store.unreadTotal();
+      const nav = navigator as Navigator & { setAppBadge?: (n?: number) => Promise<void>; clearAppBadge?: () => Promise<void> };
+      if (count > 0) void nav.setAppBadge?.(count).catch(() => undefined);
+      else void nav.clearAppBadge?.().catch(() => undefined);
+    });
     this.router.events.pipe(filter((e) => e instanceof NavigationEnd)).subscribe(() => {
       this.drawer.close();
       this.onArticles.set(this.isArticles());
