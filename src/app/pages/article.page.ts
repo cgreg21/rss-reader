@@ -4,17 +4,15 @@ import { RouterLink, Router } from '@angular/router';
 
 import { RssStore } from '../rss/rss.store';
 import { UI_ICONS } from '../ui/icons';
+import { ArticlesPage } from './articles.page';
 
 @Component({
   selector: 'rss-article',
-  imports: [RouterLink, DatePipe],
+  imports: [RouterLink, DatePipe, ArticlesPage],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './article.page.html',
   host: {
-    class: 'block min-h-full anim-fade-in',
-    '[style.transform]': 'offset() ? "translateX(" + offset() + "px)" : null',
-    '[style.opacity]': 'offset() ? 1 - offset() / (width * 1.5) : null',
-    '[style.transition]': 'animating() ? "transform 200ms ease-out, opacity 200ms ease-out" : null',
+    class: 'relative block min-h-full anim-fade-in',
     '(pointerdown)': 'swipeStart($event)',
     '(pointermove)': 'swipeMove($event)',
     '(pointerup)': 'swipeEnd($event)',
@@ -34,9 +32,14 @@ export class ArticlePage {
   protected readonly width = window.innerWidth;
   protected readonly offset = signal(0);
   protected readonly animating = signal(false);
+  protected readonly underTop = signal(0);
+  protected readonly underHeight = signal(0);
 
   protected swipeStart(event: PointerEvent): void {
     if (event.pointerType === 'mouse' || this.animating()) return;
+    const main = this.host.nativeElement.closest('main');
+    this.underTop.set(main ? main.getBoundingClientRect().top - this.host.nativeElement.getBoundingClientRect().top : 0);
+    this.underHeight.set(main?.clientHeight ?? window.innerHeight);
     this.swipe = { x: event.clientX, y: event.clientY, id: event.pointerId, horizontal: null };
   }
 

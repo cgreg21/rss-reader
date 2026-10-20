@@ -1,9 +1,20 @@
 @if (article(); as a) {
-  <article class="mx-auto max-w-3xl">
-    <h1 class="text-2xl leading-tight font-bold sidebar:text-3xl">{{ a.title }}</h1>
-    <p class="text-muted">{{ feedTitle() }} · {{ a.published | date: 'dd/MM/yyyy HH:mm' }}</p>
-    @if (a.content) { <div class="body" [innerHTML]="a.content"></div> } @else { <p>{{ a.summary }}</p> }
-  </article>
+  @if (offset() > 0) {
+    <div class="pointer-events-none absolute inset-x-0 overflow-hidden" [style.top.px]="underTop()" [style.height.px]="underHeight()"
+         [style.transform]="'translateX(' + (-(1 - offset() / width) * 80) + 'px)'"
+         [class.transition-transform]="animating()" [style.opacity]="0.5 + 0.5 * offset() / width">
+      <rss-articles />
+    </div>
+  }
+  <div class="relative bg-bg" [style.transform]="offset() ? 'translateX(' + offset() + 'px)' : null"
+       [style.box-shadow]="offset() ? '-12px 0 24px rgba(0,0,0,.45)' : null"
+       [style.transition]="animating() ? 'transform 200ms ease-out' : null" [style.min-height.px]="offset() ? underHeight() : null">
+    <article class="mx-auto max-w-3xl">
+      <h1 class="text-2xl leading-tight font-bold sidebar:text-3xl">{{ a.title }}</h1>
+      <p class="text-muted">{{ feedTitle() }} · {{ a.published | date: 'dd/MM/yyyy HH:mm' }}</p>
+      @if (a.content) { <div class="body" [innerHTML]="a.content"></div> } @else { <p>{{ a.summary }}</p> }
+    </article>
+  </div>
 } @else {
   <p class="mt-16 text-center text-accent"><a routerLink="/">Article introuvable.</a></p>
 }
