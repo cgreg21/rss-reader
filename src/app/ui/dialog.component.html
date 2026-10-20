@@ -1,6 +1,7 @@
 @if (dialog.current(); as d) {
-  <div class="fixed inset-0 z-[60] grid place-items-center bg-black/60 p-4" (click)="dialog.dismiss()">
-    <div class="w-full max-w-sm rounded-2xl border border-line bg-side p-5 shadow-2xl" role="dialog" aria-modal="true"
+  <div class="fixed inset-0 z-[60] grid place-items-center bg-black/60 p-4" (click)="dialog.dismiss()"
+       animate.enter="anim-fade-in" animate.leave="anim-fade-out">
+    <div class="w-full max-w-sm rounded-2xl border border-line bg-side p-5 shadow-2xl" role="dialog" aria-modal="true" animate.enter="anim-pop-in"
       [attr.aria-label]="d.title || d.message" (click)="$event.stopPropagation()">
       @if (d.title) { <h2 class="mb-2 text-lg font-semibold">{{ d.title }}</h2> }
       @if (d.message) { <p class="whitespace-pre-line text-muted">{{ d.message }}</p> }

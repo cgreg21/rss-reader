@@ -12,10 +12,10 @@
       <router-outlet />
     </main>
     @if (onArticles()) {
-      <nav class="bg-side px-2.5 py-1 sidebar:hidden"><rss-article-actions /></nav>
+      <nav class="bg-side px-2.5 py-1 sidebar:hidden" animate.enter="anim-up-in" animate.leave="anim-up-out"><rss-article-actions /></nav>
     }
     @if (articleId(); as id) {
-      <nav class="flex items-center justify-between bg-side px-2.5 py-1 sidebar:hidden">
+      <nav class="flex items-center justify-between bg-side px-2.5 py-1 sidebar:hidden" animate.enter="anim-up-in" animate.leave="anim-up-out">
         <a class="icon-btn" routerLink="/" aria-label="Précédent">{{ ui.back }}</a>
         <rss-article-detail-actions [id]="id" />
       </nav>

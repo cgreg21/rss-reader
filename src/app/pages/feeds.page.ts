@@ -7,6 +7,7 @@ import { UI_ICONS } from '../ui/icons';
 
 @Component({
   selector: 'rss-feeds',
+  host: { class: 'block anim-fade-in' },
   imports: [FormsModule, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './feeds.page.html',

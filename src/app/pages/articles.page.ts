@@ -4,10 +4,12 @@ import { RouterLink } from '@angular/router';
 
 import { RssStore } from '../rss/rss.store';
 import { CardListComponent } from './card-list.component';
+import { RevealDirective } from '../ui/reveal.directive';
 
 @Component({
   selector: 'rss-articles',
-  imports: [RouterLink, DatePipe, CardListComponent],
+  host: { class: 'block anim-fade-in' },
+  imports: [RouterLink, DatePipe, CardListComponent, RevealDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './articles.page.html',
 })

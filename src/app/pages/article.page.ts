@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, computed, effect, inject, input, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
 
@@ -10,7 +10,16 @@ import { UI_ICONS } from '../ui/icons';
   imports: [RouterLink, DatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './article.page.html',
-  host: { class: 'block min-h-full', '(pointerdown)': 'swipeStart($event)', '(pointerup)': 'swipeEnd($event)', '(pointercancel)': 'swipeStart(null)' },
+  host: {
+    class: 'block min-h-full anim-fade-in',
+    '[style.transform]': 'offset() ? "translateX(" + offset() + "px)" : null',
+    '[style.opacity]': 'offset() ? 1 - offset() / (width * 1.5) : null',
+    '[style.transition]': 'animating() ? "transform 200ms ease-out, opacity 200ms ease-out" : null',
+    '(pointerdown)': 'swipeStart($event)',
+    '(pointermove)': 'swipeMove($event)',
+    '(pointerup)': 'swipeEnd($event)',
+    '(pointercancel)': 'swipeEnd($event)',
+  },
 })
 export class ArticlePage {
   readonly id = input.required<string>();
@@ -19,21 +28,45 @@ export class ArticlePage {
   protected readonly article = computed(() => this.store.article(this.id()));
   protected readonly feedTitle = computed(() => this.store.feeds().find((f) => f.id === this.article()?.feedId)?.title ?? '');
 
-  private swipe: { x: number; y: number } | null = null;
+  private swipe: { x: number; y: number; id: number; horizontal: boolean | null } | null = null;
   private readonly router = inject(Router);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  protected readonly width = window.innerWidth;
+  protected readonly offset = signal(0);
+  protected readonly animating = signal(false);
 
-  protected swipeStart(event: PointerEvent | null): void {
-    this.swipe = event && event.pointerType !== 'mouse' ? { x: event.clientX, y: event.clientY } : null;
+  protected swipeStart(event: PointerEvent): void {
+    if (event.pointerType === 'mouse' || this.animating()) return;
+    this.swipe = { x: event.clientX, y: event.clientY, id: event.pointerId, horizontal: null };
   }
 
-  /** A rightward swipe goes back to the list. */
+  protected swipeMove(event: PointerEvent): void {
+    const swipe = this.swipe;
+    if (!swipe || event.pointerId !== swipe.id) return;
+    const dx = event.clientX - swipe.x;
+    const dy = event.clientY - swipe.y;
+    if (swipe.horizontal === null && Math.max(Math.abs(dx), Math.abs(dy)) >= 10) {
+      swipe.horizontal = dx > 0 && Math.abs(dx) > Math.abs(dy);
+      if (swipe.horizontal) this.host.nativeElement.setPointerCapture(event.pointerId);
+      else this.swipe = null;
+    }
+    if (swipe.horizontal) this.offset.set(Math.max(0, dx));
+  }
+
+  /** A rightward swipe slides the article out and goes back to the list. */
   protected swipeEnd(event: PointerEvent): void {
-    const start = this.swipe;
+    const swipe = this.swipe;
     this.swipe = null;
-    if (!start) return;
-    const dx = event.clientX - start.x;
-    const dy = event.clientY - start.y;
-    if (dx > 80 && Math.abs(dy) < dx * 0.6) void this.router.navigateByUrl('/');
+    if (!swipe?.horizontal || event.pointerId !== swipe.id) return;
+    this.host.nativeElement.releasePointerCapture?.(event.pointerId);
+    this.animating.set(true);
+    if (event.type === 'pointerup' && this.offset() > 80) {
+      this.offset.set(this.width);
+      setTimeout(() => void this.router.navigateByUrl('/'), 200);
+    } else {
+      this.offset.set(0);
+      setTimeout(() => this.animating.set(false), 200);
+    }
   }
 
   constructor() {

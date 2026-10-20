@@ -72,3 +72,26 @@
 .body a { @apply text-accent underline; }
 .body pre { @apply overflow-x-auto rounded-lg bg-side p-3; }
 .body h1, .body h2, .body h3 { @apply mt-6 mb-2 font-bold; }
+
+@keyframes anim-fade-in { from { opacity: 0; } }
+@keyframes anim-fade-out { to { opacity: 0; } }
+@keyframes anim-pop-in { from { opacity: 0; transform: scale(0.92); } }
+@keyframes anim-pop-out { to { opacity: 0; transform: scale(0.92); } }
+@keyframes anim-up-in { from { opacity: 0; transform: translateY(16px); } }
+@keyframes anim-up-out { to { opacity: 0; transform: translateY(16px); } }
+@keyframes anim-down-in { from { opacity: 0; transform: translateY(-8px); } }
+@keyframes anim-down-out { to { opacity: 0; transform: translateY(-8px); } }
+.anim-fade-in { animation: anim-fade-in 180ms ease-out; }
+.anim-fade-out { animation: anim-fade-out 150ms ease-in forwards; }
+.anim-pop-in { animation: anim-pop-in 180ms ease-out; }
+.anim-pop-out { animation: anim-pop-out 150ms ease-in forwards; }
+.anim-up-in { animation: anim-up-in 220ms ease-out; }
+.anim-up-out { animation: anim-up-out 160ms ease-in forwards; }
+.anim-down-in { animation: anim-down-in 180ms ease-out; }
+.anim-down-out { animation: anim-down-out 140ms ease-in forwards; }
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+  [class*='anim-'] { animation-duration: 1ms !important; }
+}
+.reveal { opacity: 0; transform: translateY(var(--reveal-y, 24px)); transition: opacity 300ms ease-out, transform 300ms ease-out; }
+.reveal-in { opacity: 1; transform: none; }

@@ -1,7 +1,7 @@
 <header class="flex items-center justify-between gap-2 bg-side px-2.5 pb-1.5 pt-[calc(14px+env(safe-area-inset-top))] sidebar:px-8 sidebar:pt-3">
   <button class="icon-btn relative sidebar:hidden" type="button" aria-label="Menu" (click)="drawer.show()">{{ ui.menu }}
     @if (store.unreadTotal() > 0) {
-      <span class="absolute right-0.5 top-0.5 min-w-[18px] rounded-full bg-accent px-1 text-center font-sans text-[11px] font-bold leading-[18px] text-white">{{ store.unreadTotal() > 99 ? '99+' : store.unreadTotal() }}</span>
+      <span animate.enter="anim-pop-in" class="absolute right-0.5 top-0.5 min-w-[18px] rounded-full bg-accent px-1 text-center font-sans text-[11px] font-bold leading-[18px] text-white">{{ store.unreadTotal() > 99 ? '99+' : store.unreadTotal() }}</span>
     }
   </button>
   @if (articleId()) { <a class="icon-btn hidden sidebar:inline-grid" routerLink="/" aria-label="Précédent">{{ ui.back }}</a> }
@@ -19,7 +19,7 @@
   }
 </header>
 @if (searching()) {
-  <div class="bg-side px-3 pb-2.5 sidebar:hidden">
+  <div class="bg-side px-3 pb-2.5 sidebar:hidden" animate.enter="anim-down-in" animate.leave="anim-down-out">
     <input #field class="field w-full" type="search" placeholder="Rechercher" aria-label="Rechercher"
       [value]="store.search()" (input)="store.search.set($any($event.target).value)">
   </div>
