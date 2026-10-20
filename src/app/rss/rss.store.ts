@@ -12,9 +12,19 @@ export type Scope =
   | { type: 'feed'; id: string }
   | { type: 'category'; id: string };
 
-const PROXY_KEY = 'rssreader:proxy';
+const PROXY_KEY = 'rssreader:caldav-proxy';
 const PROXY_ENABLED_KEY = 'rssreader:proxy-enabled';
-const DEFAULT_PROXY = 'https://corsproxy.io/?url=';
+const DEFAULT_PROXY = '';
+
+/** The proxy relays the path as is, so only its origin matters; an invalid value means no proxy. */
+const proxyOrigin = (value: string): string => {
+  try {
+    const url = new URL(value.trim());
+    return url.protocol === 'https:' || url.protocol === 'http:' ? url.origin : '';
+  } catch {
+    return '';
+  }
+};
 const MAX_ARTICLES_PER_FEED = 100;
 
 const startOfToday = (): number => new Date().setHours(0, 0, 0, 0);
@@ -270,8 +280,15 @@ export class RssStore {
   }
 
   private async download(url: string): Promise<string> {
-    const proxy = this.proxyEnabled() ? this.proxy() : '';
-    const response = await fetch(proxy ? proxy + encodeURIComponent(url) : url);
+    const proxy = this.proxyEnabled() ? proxyOrigin(this.proxy()) : '';
+    let response: Response;
+    if (proxy) {
+      // budget-caldav-proxy contract: same path and query on the proxy, target origin in X-Upstream.
+      const target = new URL(url);
+      response = await fetch(proxy + target.pathname + target.search, { credentials: 'omit', headers: { 'X-Upstream': target.origin } });
+    } else {
+      response = await fetch(url);
+    }
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     return response.text();
   }
