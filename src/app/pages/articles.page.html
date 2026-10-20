@@ -1,17 +1,3 @@
-<div class="mb-5 flex flex-wrap items-center justify-end gap-3 sidebar:justify-start">
-  <h1 class="hidden flex-1 text-xl font-bold sidebar:block sm:text-[22px]">{{ store.scopeTitle() }}
-    <small class="text-[15px] font-normal text-muted">({{ store.unreadTotal() }} non lus)</small></h1>
-  <button class="icon-btn" type="button" aria-label="Tout marquer comme lu" (click)="store.markAllRead()">{{ ui.markAllRead }}</button>
-  <div class="flex rounded-full bg-side p-0.5" role="group" aria-label="Mise en page">
-    @for (l of layouts; track l.id) {
-      <button class="icon-btn !size-9 !min-w-9" type="button" [attr.aria-label]="l.label" [attr.aria-pressed]="store.layout() === l.id"
-        [class]="store.layout() === l.id ? 'bg-accent !text-white' : ''" (click)="store.setLayout(l.id)">{{ l.icon }}</button>
-    }
-  </div>
-  <input class="field hidden w-72 sidebar:block" type="search" placeholder="Rechercher" [value]="store.search()"
-    (input)="store.search.set($any($event.target).value)">
-</div>
-
 @if (!store.visible().length) {
   <p class="mt-16 text-center text-muted">
     @if (!store.feeds().length) { Aucun flux. <a class="text-accent" routerLink="/feeds">Ajoutez votre premier abonnement.</a> }

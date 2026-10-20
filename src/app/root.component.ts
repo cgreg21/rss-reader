@@ -11,6 +11,8 @@ import { LayoutService } from './ui/layout.service';
 import { TopBarComponent } from './ui/top-bar.component';
 import { PullRefreshDirective } from './ui/pull-refresh.directive';
 import { SnackbarComponent } from './ui/snackbar.component';
+import { DialogComponent } from './ui/dialog.component';
+import { ArticleActionsComponent } from './ui/article-actions.component';
 
 const DRAWER_WIDTH = 280;
 const SWIPE_SLOP = 10;
@@ -19,7 +21,7 @@ const EDGE_WIDTH = 24;
 
 @Component({
   selector: 'rss-root',
-  imports: [RouterOutlet, TopBarComponent, DrawerContentComponent, AppPromptComponent, SnackbarComponent, PullRefreshDirective],
+  imports: [RouterOutlet, TopBarComponent, DrawerContentComponent, AppPromptComponent, SnackbarComponent, DialogComponent, ArticleActionsComponent, PullRefreshDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './root.component.html',
 })
@@ -28,6 +30,7 @@ export class RootComponent {
   protected readonly drawer = inject(DrawerService);
   protected readonly layout = inject(LayoutService);
   private readonly router = inject(Router);
+  protected readonly onArticles = signal(this.isArticles());
   protected readonly refresh = (): Promise<void> => this.store.refreshAll();
 
   private readonly shell = viewChild.required<ElementRef<HTMLElement>>('shell');
@@ -42,9 +45,16 @@ export class RootComponent {
   protected readonly backdropOpacity = computed(() => this.layout.sidebar() ? 0 : 1 + this.drawerX() / DRAWER_WIDTH);
   protected readonly drawerActive = computed(() => this.layout.sidebar() || this.drawer.opened());
 
+  private isArticles(): boolean {
+    return this.router.url.split(/[?#]/)[0] === '/';
+  }
+
   constructor() {
     void this.store.load();
-    this.router.events.pipe(filter((e) => e instanceof NavigationEnd)).subscribe(() => this.drawer.close());
+    this.router.events.pipe(filter((e) => e instanceof NavigationEnd)).subscribe(() => {
+      this.drawer.close();
+      this.onArticles.set(this.isArticles());
+    });
 
     // Non-passive so the browser's back/forward swipe is cancelled: while the drawer is dragged, and
     // for horizontal moves of a touch that started on a screen edge (where that gesture begins).

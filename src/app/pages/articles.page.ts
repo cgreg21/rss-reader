@@ -2,8 +2,7 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
-import { ArticleLayout, RssStore } from '../rss/rss.store';
-import { UI_ICONS } from '../ui/icons';
+import { RssStore } from '../rss/rss.store';
 import { CardListComponent } from './card-list.component';
 
 @Component({
@@ -14,12 +13,6 @@ import { CardListComponent } from './card-list.component';
 })
 export class ArticlesPage {
   protected readonly store = inject(RssStore);
-  protected readonly ui = UI_ICONS;
-  protected readonly layouts: { id: ArticleLayout; label: string; icon: string }[] = [
-    { id: 'list', label: 'Liste', icon: UI_ICONS.layoutList },
-    { id: 'detail', label: 'Détail', icon: UI_ICONS.layoutDetail },
-    { id: 'card', label: 'Cartes', icon: UI_ICONS.layoutCard },
-  ];
 
   protected feedTitle(id: string): string {
     return this.store.feeds().find((f) => f.id === id)?.title ?? '';

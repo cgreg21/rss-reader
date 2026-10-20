@@ -1,7 +1,7 @@
 <div #shell class="fixed inset-0 flex h-screen touch-pan-y flex-col overflow-hidden bg-bg pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] sidebar:flex-row"
      (pointerdown)="onDown($event)" (pointermove)="onMove($event)" (pointerup)="onUp($event)" (pointercancel)="onUp($event)">
   <div class="flex min-h-0 min-w-0 flex-1 flex-col sidebar:order-last">
-    <rss-top-bar />
+    <rss-top-bar [actions]="onArticles()" />
 
     <main [rssPullRefresh]="refresh" #pull="pullRefresh" class="min-h-0 flex-1 overflow-y-auto overscroll-contain p-3.5 sm:p-5 sidebar:px-8 sidebar:py-6">
       <div class="flex items-end justify-center overflow-hidden text-xs text-muted" [class.transition-[height]]="!pull.pulling()"
@@ -11,11 +11,14 @@
       @if (!store.online()) { <div class="banner">Hors ligne : les articles enregistrés restent lisibles.</div> }
       <router-outlet />
     </main>
+    @if (onArticles()) {
+      <nav class="bg-side px-2.5 py-1 sidebar:hidden"><rss-article-actions /></nav>
+    }
   </div>
 
   <rss-app-prompt />
   <rss-snackbar />
-
+  <rss-dialog />
   @if (!drawerActive()) {
     <div #edge class="absolute inset-y-0 left-0 z-20 w-6 touch-none" aria-hidden="true"></div>
   }
