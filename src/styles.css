@@ -93,5 +93,5 @@
   .reveal { opacity: 1; transform: none; transition: none; }
   [class*='anim-'] { animation-duration: 1ms !important; }
 }
-.reveal { opacity: 0; transform: translateY(var(--reveal-y, 24px)); transition: opacity 300ms ease-out, transform 300ms ease-out; }
+.reveal { opacity: 0; transform: translateY(var(--reveal-y, 24px)) scale(0.92); transition: opacity 300ms ease-out, transform 300ms ease-out; }
 .reveal-in { opacity: 1; transform: none; }
