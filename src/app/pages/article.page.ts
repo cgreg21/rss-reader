@@ -12,7 +12,7 @@ import { ArticlesPage } from './articles.page';
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './article.page.html',
   host: {
-    class: 'relative block min-h-full anim-fade-in',
+    class: 'relative block min-h-full touch-none anim-fade-in',
     '(pointerdown)': 'swipeStart($event)',
     '(pointermove)': 'swipeMove($event)',
     '(pointerup)': 'swipeEnd($event)',
@@ -41,14 +41,29 @@ export class ArticlePage {
     return o > 0 ? this.neighbours().next : o < 0 ? this.neighbours().previous : undefined;
   });
 
-  private swipe: { x: number; y: number; id: number; horizontal: boolean | null } | null = null;
+  private swipe: { x: number; y: number; id: number; axis: 'x' | 'y' | null } | null = null;
   private readonly router = inject(Router);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   protected readonly width = window.innerWidth;
-  protected readonly abs = Math.abs;
+  protected readonly height = window.innerHeight;
+  protected readonly offsetY = signal(0);
   protected readonly animating = signal(false);
   protected readonly underTop = signal(0);
   protected readonly underHeight = signal(0);
+
+  protected readonly moving = computed(() => this.offset() !== 0 || this.offsetY() > 0);
+  protected readonly currentTransform = computed(() =>
+    this.offsetY() > 0 ? `translateY(${this.offsetY()}px)` : this.offset() ? `translateX(${this.offset()}px)` : null);
+  protected readonly currentShadow = computed(() =>
+    this.offsetY() > 0 ? '0 -12px 24px rgba(0,0,0,.45)' : this.offset() ? `${this.offset() > 0 ? '-12px' : '12px'} 0 24px rgba(0,0,0,.45)` : null);
+  protected readonly underTransform = computed(() => {
+    const y = this.offsetY();
+    const progress = y > 0 ? y / this.height : Math.abs(this.offset()) / this.width;
+    const shift = (1 - progress) * 80;
+    const move = y > 0 ? `translateY(${-shift}px)` : `translateX(${this.offset() > 0 ? -shift : shift}px)`;
+    return `${move} scale(${0.94 + 0.06 * progress})`;
+  });
+  protected readonly underOpacity = computed(() => 0.5 + 0.5 * (this.offsetY() > 0 ? this.offsetY() / this.height : Math.abs(this.offset()) / this.width));
 
   protected feedName(feedId: string): string {
     return this.store.feeds().find((f) => f.id === feedId)?.title ?? '';
@@ -59,7 +74,7 @@ export class ArticlePage {
     const main = this.host.nativeElement.closest('main');
     this.underTop.set(main ? main.getBoundingClientRect().top - this.host.nativeElement.getBoundingClientRect().top : 0);
     this.underHeight.set(main?.clientHeight ?? window.innerHeight);
-    this.swipe = { x: event.clientX, y: event.clientY, id: event.pointerId, horizontal: null };
+    this.swipe = { x: event.clientX, y: event.clientY, id: event.pointerId, axis: null };
   }
 
   protected swipeMove(event: PointerEvent): void {
@@ -67,30 +82,43 @@ export class ArticlePage {
     if (!swipe || event.pointerId !== swipe.id) return;
     const dx = event.clientX - swipe.x;
     const dy = event.clientY - swipe.y;
-    if (swipe.horizontal === null && Math.max(Math.abs(dx), Math.abs(dy)) >= 10) {
-      swipe.horizontal = Math.abs(dx) > Math.abs(dy);
-      if (swipe.horizontal) this.host.nativeElement.setPointerCapture(event.pointerId);
-      else this.swipe = null;
+    if (swipe.axis === null && Math.max(Math.abs(dx), Math.abs(dy)) >= 10) {
+      const horizontal = Math.abs(dx) > Math.abs(dy);
+      if (horizontal || dy > 0) {
+        swipe.axis = horizontal ? 'x' : 'y';
+        this.host.nativeElement.setPointerCapture(event.pointerId);
+      } else {
+        this.swipe = null;
+      }
     }
-    if (swipe.horizontal) this.offset.set(dx);
+    if (swipe.axis === 'x') this.offset.set(dx);
+    else if (swipe.axis === 'y') this.offsetY.set(Math.max(0, dy));
   }
 
-  /** Swiping right opens the next article, left the previous one; without one, back to the list. */
+  /** Right: next article, left: previous one, down: the list; without a neighbour, back to the list. */
   protected swipeEnd(event: PointerEvent): void {
     const swipe = this.swipe;
     this.swipe = null;
-    if (!swipe?.horizontal || event.pointerId !== swipe.id) return;
+    if (!swipe?.axis || event.pointerId !== swipe.id) return;
     this.host.nativeElement.releasePointerCapture?.(event.pointerId);
     this.animating.set(true);
-    const offset = this.offset();
-    if (event.type === 'pointerup' && Math.abs(offset) > 80) {
+    const committed = event.type === 'pointerup';
+    if (swipe.axis === 'y') {
+      if (committed && this.offsetY() > 80) {
+        this.offsetY.set(this.height);
+        setTimeout(() => void this.router.navigate(['/']), 200);
+        return;
+      }
+    } else if (committed && Math.abs(this.offset()) > 80) {
+      const offset = this.offset();
       const target = this.target();
       this.offset.set(offset > 0 ? this.width : -this.width);
       setTimeout(() => void this.router.navigate(target ? ['/article', target.id] : ['/']), 200);
-    } else {
-      this.offset.set(0);
-      setTimeout(() => this.animating.set(false), 200);
+      return;
     }
+    this.offset.set(0);
+    this.offsetY.set(0);
+    setTimeout(() => this.animating.set(false), 200);
   }
 
   constructor() {
@@ -102,6 +130,7 @@ export class ArticlePage {
           this.order.set(ids.includes(id) ? ids : [id]);
         }
         this.offset.set(0);
+        this.offsetY.set(0);
         this.animating.set(false);
       });
     });

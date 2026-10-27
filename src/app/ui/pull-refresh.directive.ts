@@ -12,6 +12,7 @@ const SLOP = 8;
 @Directive({ selector: '[rssPullRefresh]', exportAs: 'pullRefresh' })
 export class PullRefreshDirective {
   readonly refresh = input.required<() => Promise<void>>({ alias: 'rssPullRefresh' });
+  readonly enabled = input(true, { alias: 'rssPullRefreshEnabled' });
 
   /** Height of the indicator, in px. */
   readonly distance = signal(0);
@@ -25,7 +26,7 @@ export class PullRefreshDirective {
     const el = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
     el.addEventListener('touchstart', (e) => {
       const t = e.touches[0];
-      this.start = !this.refreshing() && el.scrollTop <= 0 && e.touches.length === 1 ? { x: t.clientX, y: t.clientY } : null;
+      this.start = this.enabled() && !this.refreshing() && el.scrollTop <= 0 && e.touches.length === 1 ? { x: t.clientX, y: t.clientY } : null;
       this.active = false;
     }, { passive: true });
     // Non-passive: once the pull has started the browser must not scroll or bounce the page.

@@ -7,10 +7,10 @@
 </ng-template>
 
 @if (article(); as a) {
-  @if (offset() !== 0) {
-    <div class="pointer-events-none absolute inset-x-0 overflow-hidden bg-bg" [style.top.px]="underTop()" [style.height.px]="underHeight()"
-         [style.transform]="'translateX(' + (offset() > 0 ? -1 : 1) * (1 - abs(offset()) / width) * 80 + 'px) scale(' + (0.94 + 0.06 * abs(offset()) / width) + ')'"
-         [style.transition]="animating() ? 'transform 200ms ease-out' : null" [style.opacity]="0.5 + 0.5 * abs(offset()) / width">
+  @if (moving()) {
+    <div class="pointer-events-none absolute -inset-x-3.5 overflow-hidden bg-bg px-3.5 sm:-inset-x-5 sm:px-5 sidebar:-inset-x-8 sidebar:px-8" [style.top.px]="underTop()" [style.height.px]="underHeight()"
+         [style.transform]="underTransform()"
+         [style.transition]="animating() ? 'transform 200ms ease-out' : null" [style.opacity]="underOpacity()">
       @if (target(); as t) {
         <ng-container [ngTemplateOutlet]="body" [ngTemplateOutletContext]="{ $implicit: t }" />
       } @else {
@@ -18,9 +18,9 @@
       }
     </div>
   }
-  <div class="relative bg-bg" [style.transform]="offset() ? 'translateX(' + offset() + 'px)' : null"
-       [style.box-shadow]="offset() ? (offset() > 0 ? '-12px' : '12px') + ' 0 24px rgba(0,0,0,.45)' : null"
-       [style.transition]="animating() ? 'transform 200ms ease-out' : null" [style.min-height.px]="offset() ? underHeight() : null">
+  <div class="relative -mx-3.5 bg-bg px-3.5 sm:-mx-5 sm:px-5 sidebar:-mx-8 sidebar:px-8" [style.transform]="currentTransform()"
+       [style.box-shadow]="currentShadow()"
+       [style.transition]="animating() ? 'transform 200ms ease-out' : null" [style.min-height.px]="moving() ? underHeight() : null">
     <ng-container [ngTemplateOutlet]="body" [ngTemplateOutletContext]="{ $implicit: a }" />
   </div>
 } @else {
