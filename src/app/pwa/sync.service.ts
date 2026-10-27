@@ -1,9 +1,13 @@
 import { Injectable, effect, inject, signal } from '@angular/core';
 
 import { RssStore, SyncDoc } from '../rss/rss.store';
+import { SnackbarService } from '../ui/snackbar.service';
 
 const CODE_KEY = 'rssreader:sync-code';
 const PIN_LENGTH = 4;
+const MAX_FAILURES = 5;
+/** Local changes are uploaded at most once an hour (or when the app is hidden). */
+const SYNC_INTERVAL_MS = 60 * 60_000;
 
 /** The worker wants a 16+ character secret: the PIN is stretched into one with SHA-256. */
 async function tokenFor(pin: string): Promise<string> {
@@ -15,6 +19,10 @@ async function tokenFor(pin: string): Promise<string> {
 @Injectable({ providedIn: 'root' })
 export class SyncService {
   private readonly store = inject(RssStore);
+  private readonly snackbar = inject(SnackbarService);
+  private failures = 0;
+  /** Set after repeated failures: automatic syncs stop until the user retries by hand. */
+  readonly stopped = signal(false);
 
   readonly code = signal(localStorage.getItem(CODE_KEY) ?? '');
   readonly busy = signal(false);
@@ -22,6 +30,7 @@ export class SyncService {
   readonly lastSync = signal<number | null>(null);
 
   private timer: ReturnType<typeof setTimeout> | undefined;
+  private dirty = false;
   private socket: WebSocket | undefined;
   private socketKey = '';
   private retry: ReturnType<typeof setTimeout> | undefined;
@@ -29,6 +38,7 @@ export class SyncService {
   constructor() {
     effect(() => {
       this.code();
+      this.stopped();
       this.store.proxy();
       void this.connect();
     });
@@ -37,21 +47,39 @@ export class SyncService {
       this.store.articles();
       this.store.removedFeeds();
       if (!this.enabled()) return;
-      clearTimeout(this.timer);
-      this.timer = setTimeout(() => void this.sync(), 4000);
+      this.dirty = true;
+      this.timer ??= setTimeout(() => void this.sync(), SYNC_INTERVAL_MS);
     });
     document.addEventListener('visibilitychange', () => {
-      if (!document.hidden && this.enabled()) void this.sync();
+      if (!this.enabled()) return;
+      if (document.hidden) {
+        if (this.dirty) void this.sync();
+      } else if (Date.now() - (this.lastSync() ?? 0) > SYNC_INTERVAL_MS) {
+        void this.sync();
+      }
     });
   }
 
   enabled(): boolean {
+    return !this.stopped() && this.configured();
+  }
+
+  private configured(): boolean {
     return new RegExp(`^\\d{${PIN_LENGTH}}$`).test(this.code()) && this.endpoint() !== '';
+  }
+
+  /** Manual retry: clears the failure stop, then syncs. */
+  resume(): void {
+    this.failures = 0;
+    this.stopped.set(false);
+    void this.sync();
   }
 
   setCode(value: string): void {
     this.code.set(value.replace(/\D/g, '').slice(0, PIN_LENGTH));
     localStorage.setItem(CODE_KEY, this.code());
+    this.failures = 0;
+    this.stopped.set(false);
     if (this.enabled()) void this.sync();
   }
 
@@ -63,6 +91,9 @@ export class SyncService {
 
   async sync(): Promise<void> {
     if (this.busy() || !this.enabled() || !navigator.onLine) return;
+    clearTimeout(this.timer);
+    this.timer = undefined;
+    this.dirty = false;
     this.busy.set(true);
     this.error.set('');
     try {
@@ -92,9 +123,15 @@ export class SyncService {
       }
       this.store.markSynced();
       this.lastSync.set(Date.now());
+      this.failures = 0;
       if (this.store.feeds().length !== feedsBefore) void this.store.refreshAll();
     } catch (e) {
       this.error.set(e instanceof Error ? e.message : 'Synchronisation impossible');
+      if (++this.failures >= MAX_FAILURES) {
+        this.stopped.set(true);
+        this.socket?.close();
+        this.snackbar.error('Synchronisation arrêtée après 5 échecs. Relancez-la depuis les options.');
+      }
     } finally {
       this.busy.set(false);
     }

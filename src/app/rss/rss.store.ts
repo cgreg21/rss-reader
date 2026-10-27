@@ -533,12 +533,31 @@ export class RssStore {
       .map((r) => ({ url: r.feedId.slice(5), title: r.title ?? r.feedId.slice(5), website: r.website, description: r.description, subscribers: r.subscribers }));
   }
 
+  private readonly directOk = new Set<string>(JSON.parse(localStorage.getItem('rssreader:direct-origins') ?? '[]') as string[]);
+  private readonly needsProxy = new Set<string>(JSON.parse(localStorage.getItem('rssreader:proxy-origins') ?? '[]') as string[]);
+
+  /** Direct fetch first (free); the worker proxy is only used for origins that block CORS, which are then remembered. */
   private async request(url: string): Promise<Response> {
     const proxy = this.proxyEnabled() ? proxyOrigin(this.proxy()) : '';
     if (!proxy) return fetch(url);
-    // budget-caldav-proxy contract: same path and query on the proxy, target origin in X-Upstream.
     const target = new URL(url);
-    return fetch(proxy + target.pathname + target.search, { credentials: 'omit', headers: { 'X-Upstream': target.origin } });
+    const viaProxy = () =>
+      // budget-caldav-proxy contract: same path and query on the proxy, target origin in X-Upstream.
+      fetch(proxy + target.pathname + target.search, { credentials: 'omit', headers: { 'X-Upstream': target.origin } });
+    if (this.needsProxy.has(target.origin)) return viaProxy();
+    try {
+      const response = await fetch(url, { credentials: 'omit' });
+      if (!this.directOk.has(target.origin)) {
+        this.directOk.add(target.origin);
+        localStorage.setItem('rssreader:direct-origins', JSON.stringify([...this.directOk]));
+      }
+      return response;
+    } catch (e) {
+      if (!navigator.onLine || this.directOk.has(target.origin)) throw e;
+      this.needsProxy.add(target.origin);
+      localStorage.setItem('rssreader:proxy-origins', JSON.stringify([...this.needsProxy]));
+      return viaProxy();
+    }
   }
 
   private async download(url: string): Promise<string> {
