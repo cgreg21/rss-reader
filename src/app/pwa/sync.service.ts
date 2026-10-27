@@ -1,6 +1,7 @@
 import { Injectable, effect, inject, signal } from '@angular/core';
 
-import { RssStore, SyncDoc } from '../rss/rss.store';
+import { RssStore, SyncDoc, canonicalSyncDoc } from '../rss/rss.store';
+import { PushService } from './push.service';
 
 const CODE_KEY = 'rssreader:sync-code';
 const PIN_LENGTH = 4;
@@ -15,6 +16,7 @@ async function tokenFor(pin: string): Promise<string> {
 @Injectable({ providedIn: 'root' })
 export class SyncService {
   private readonly store = inject(RssStore);
+  private readonly push = inject(PushService);
 
   readonly code = signal(localStorage.getItem(CODE_KEY) ?? '');
   readonly busy = signal(false);
@@ -22,6 +24,7 @@ export class SyncService {
   readonly lastSync = signal<number | null>(null);
 
   private timer: ReturnType<typeof setTimeout> | undefined;
+  private again = false;
 
   constructor() {
     effect(() => {
@@ -30,8 +33,18 @@ export class SyncService {
       this.store.removedFeeds();
       if (!this.enabled()) return;
       clearTimeout(this.timer);
-      this.timer = setTimeout(() => void this.sync(), 4000);
+      this.timer = setTimeout(() => void this.sync(), 2000);
     });
+    effect(() => {
+      const code = this.code();
+      if (!this.enabled()) {
+        this.push.syncToken.set('');
+        return;
+      }
+      void tokenFor(code).then((token) => this.push.syncToken.set(token));
+    });
+    // Another device changed the library: pull right away.
+    this.push.onSyncMessage(() => void this.sync());
     document.addEventListener('visibilitychange', () => {
       if (!document.hidden && this.enabled()) void this.sync();
     });
@@ -54,7 +67,11 @@ export class SyncService {
   }
 
   async sync(): Promise<void> {
-    if (this.busy() || !this.enabled() || !navigator.onLine) return;
+    if (!this.enabled() || !navigator.onLine) return;
+    if (this.busy()) {
+      this.again = true;
+      return;
+    }
     this.busy.set(true);
     this.error.set('');
     try {
@@ -66,20 +83,20 @@ export class SyncService {
       if (got.ok) {
         const doc = (await got.json()) as { rev: number; data: SyncDoc };
         rev = doc.rev;
-        remote = JSON.stringify(doc.data);
+        remote = canonicalSyncDoc(doc.data);
         await this.store.applySyncDoc(doc.data);
       } else if (got.status !== 404) {
         throw new Error(`Synchronisation : erreur ${got.status}`);
       }
       for (let attempt = 0; attempt < 2; attempt++) {
-        const local = JSON.stringify(this.store.buildSyncDoc());
-        if (rev !== undefined && local === remote) break;
-        const put = await this.call('PUT', { rev, data: JSON.parse(local) });
+        const doc = this.store.buildSyncDoc();
+        if (rev !== undefined && canonicalSyncDoc(doc) === remote) break;
+        const put = await this.call('PUT', { rev, data: doc, from: this.push.deviceEndpoint() });
         if (put.ok) break;
         if (put.status !== 409) throw new Error(`Synchronisation : erreur ${put.status}`);
         const current = (await put.json()) as { rev: number; data: SyncDoc };
         rev = current.rev;
-        remote = JSON.stringify(current.data);
+        remote = canonicalSyncDoc(current.data);
         await this.store.applySyncDoc(current.data);
       }
       this.store.markSynced();
@@ -89,6 +106,10 @@ export class SyncService {
       this.error.set(e instanceof Error ? e.message : 'Synchronisation impossible');
     } finally {
       this.busy.set(false);
+      if (this.again) {
+        this.again = false;
+        void this.sync();
+      }
     }
   }
 

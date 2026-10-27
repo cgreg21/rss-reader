@@ -18,6 +18,8 @@ export interface Feed {
   description?: string;
   format?: FeedFormat;
   categoryId: string | null;
+  /** When the category was last changed (last writer wins when syncing). */
+  categoryAt?: number;
   lastFetched?: number;
   error?: string;
   /** Consecutive failed refreshes. */
@@ -38,6 +40,8 @@ export interface Article {
   favorite: boolean;
   later?: boolean;
   fullText?: boolean;
+  /** When read / favorite / later last changed on any device (last writer wins when syncing). */
+  stateAt?: number;
 }
 
 export interface ParsedFeed {

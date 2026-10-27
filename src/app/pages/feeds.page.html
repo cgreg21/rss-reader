@@ -38,7 +38,7 @@
   <h2 class="mb-2.5 text-base font-bold">Catégories</h2>
   <form class="flex flex-wrap gap-2" (ngSubmit)="addCategory()">
     <input class="field min-w-60 flex-1" name="name" placeholder="Nouvelle catégorie" [(ngModel)]="newCategory">
-    <button class="btn" type="submit">Créer</button>
+    <button class="icon-btn" type="submit" aria-label="Créer la catégorie" title="Créer">{{ ui.add }}</button>
   </form>
   <ul class="mt-2.5">
     @for (c of store.categories(); track c.id) {
@@ -50,7 +50,16 @@
 </section>
 
 <section class="panel">
-  <h2 class="mb-2.5 text-base font-bold">Flux suivis</h2>
+  <div class="mb-2.5 flex items-center justify-between gap-3">
+    <h2 class="text-base font-bold">Flux suivis</h2>
+    <div class="flex gap-1">
+      <label class="icon-btn cursor-pointer" title="Importer un OPML" aria-label="Importer un OPML">{{ ui.upload }}
+        <input class="hidden" type="file" accept=".opml,.xml,text/xml,application/xml" (change)="importFile($event)">
+      </label>
+      <button class="icon-btn" type="button" title="Exporter en OPML" aria-label="Exporter en OPML" [disabled]="!store.feeds().length" (click)="exportFile()">{{ ui.download }}</button>
+    </div>
+  </div>
+  @if (opmlMessage()) { <p class="mb-2 text-sm text-muted">{{ opmlMessage() }}</p> }
   <ul>
     @for (f of store.feeds(); track f.id) {
       <li class="flex flex-wrap items-center gap-2.5 border-t border-line py-2">
@@ -68,16 +77,6 @@
   </ul>
 </section>
 
-<section class="panel">
-  <h2 class="mb-2.5 text-base font-bold">Import / export OPML</h2>
-  <div class="flex flex-wrap gap-2">
-    <label class="btn cursor-pointer">Importer
-      <input class="hidden" type="file" accept=".opml,.xml,text/xml,application/xml" (change)="importFile($event)">
-    </label>
-    <button class="btn-ghost" type="button" [disabled]="!store.feeds().length" (click)="exportFile()">Exporter</button>
-  </div>
-  @if (opmlMessage()) { <p class="mt-2 text-sm text-muted">{{ opmlMessage() }}</p> }
-</section>
 
 } @else if (tab() === 'sync') {
 <section class="panel">
