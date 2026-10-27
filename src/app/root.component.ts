@@ -5,6 +5,7 @@ import { filter } from 'rxjs';
 
 import { AppPromptComponent } from './pwa/app-prompt.component';
 import { PushService } from './pwa/push.service';
+import { SyncService } from './pwa/sync.service';
 import { RssStore } from './rss/rss.store';
 import { DrawerContentComponent } from './ui/drawer-content.component';
 import { DrawerService } from './ui/drawer.service';
@@ -34,6 +35,7 @@ export class RootComponent {
   protected readonly layout = inject(LayoutService);
   private readonly router = inject(Router);
   private readonly pushSync = inject(PushService);
+  private readonly librarySync = inject(SyncService);
   protected readonly onArticles = signal(this.isArticles());
   protected readonly articleId = signal(this.currentArticleId());
   protected readonly ui = UI_ICONS;

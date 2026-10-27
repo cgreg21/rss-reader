@@ -25,6 +25,17 @@ const THEME_KEY = 'rssreader:theme';
 const DEFAULT_PROXY = '';
 const MAX_CACHED_IMAGES = 300;
 const DEAD_FEED_FAILURES = 5;
+const REMOVED_KEY = 'rssreader:removed-feeds';
+
+/** Cross-device synchronised library: article states are keyed by the feed-independent part of the article id. */
+export interface SyncDoc {
+  feeds: { url: string; title: string; category: string | null }[];
+  removed: string[];
+  /** Bit flags per article: 1 read, 2 favorite, 4 later. */
+  states: Record<string, number>;
+}
+const stateKey = (articleId: string): string => articleId.slice(articleId.indexOf(':') + 1);
+const flags = (a: Article): number => (a.read ? 1 : 0) | (a.favorite ? 2 : 0) | (a.later ? 4 : 0);
 
 export type Theme = 'dark' | 'light';
 const applyAppearance = (theme: Theme, fontSize: number): void => {
@@ -243,6 +254,7 @@ export class RssStore {
       body = await this.download(url);
     }
     if (this.feeds().some((f) => f.url === url)) throw new Error('Flux déjà suivi');
+    this.noteFollowed(url);
     const id = `f${Date.now().toString(36)}`;
     const parsed = parseFeed(body, id);
     const feed: Feed = { id, url, title: parsed.title || new URL(url).hostname, siteUrl: parsed.siteUrl, description: parsed.description, format: parsed.format, categoryId, lastFetched: Date.now() };
@@ -269,6 +281,7 @@ export class RssStore {
         continue;
       }
       known.add(url);
+      this.noteFollowed(url);
       let categoryId: string | null = null;
       if (entry.category) {
         await this.addCategory(entry.category);
@@ -288,6 +301,32 @@ export class RssStore {
   }
 
   async removeFeed(id: string): Promise<void> {
+    const url = this.feeds().find((f) => f.id === id)?.url;
+    if (url) this.setRemovedFeeds([...new Set([...this.removedFeeds(), url])]);
+    await this.removeFeedLocal(id);
+  }
+
+  /** Urls of feeds unfollowed on some device, kept so synchronisation can propagate the removal. */
+  readonly removedFeeds = signal<string[]>(JSON.parse(localStorage.getItem(REMOVED_KEY) ?? '[]') as string[]);
+  /** Feeds re-followed here since the last sync, which must not be removed again by an older remote tombstone. */
+  private readonly readded = new Set<string>();
+
+  setRemovedFeeds(urls: string[]): void {
+    this.removedFeeds.set(urls);
+    localStorage.setItem(REMOVED_KEY, JSON.stringify(urls));
+  }
+
+  markSynced(): void {
+    this.readded.clear();
+  }
+
+  private noteFollowed(url: string): void {
+    if (!this.removedFeeds().includes(url)) return;
+    this.readded.add(url);
+    this.setRemovedFeeds(this.removedFeeds().filter((u) => u !== url));
+  }
+
+  private async removeFeedLocal(id: string): Promise<void> {
     await db.remove('feeds', id);
     for (const a of this.articles().filter((x) => x.feedId === id)) await db.remove('articles', a.id);
     this.feeds.update((l) => l.filter((f) => f.id !== id));
@@ -412,6 +451,52 @@ export class RssStore {
 
   private pendingStates = new Map<string, { read: boolean; favorite: boolean; later: boolean }>();
 
+  buildSyncDoc(): SyncDoc {
+    const categories = new Map(this.categories().map((c) => [c.id, c.name]));
+    const states: Record<string, number> = {};
+    for (const a of this.articles()) if (flags(a)) states[stateKey(a.id)] = flags(a);
+    return {
+      feeds: this.feeds().map((f) => ({ url: f.url, title: f.title, category: f.categoryId ? categories.get(f.categoryId) ?? null : null })),
+      removed: this.removedFeeds(),
+      states,
+    };
+  }
+
+  /** Merges a remote document into the local library: feeds and states are unions, removals win. */
+  async applySyncDoc(doc: SyncDoc): Promise<void> {
+    const removed = new Set([...this.removedFeeds(), ...(doc.removed ?? []).filter((u) => !this.readded.has(u))]);
+    for (const f of this.feeds().filter((x) => removed.has(x.url))) await this.removeFeedLocal(f.id);
+    this.setRemovedFeeds([...removed]);
+    for (const remote of doc.feeds ?? []) {
+      if (removed.has(remote.url) || this.feeds().some((f) => f.url === remote.url)) continue;
+      let categoryId: string | null = null;
+      if (remote.category) {
+        await this.addCategory(remote.category);
+        categoryId = this.categories().find((c) => c.name.toLowerCase() === remote.category!.toLowerCase())?.id ?? null;
+      }
+      const feed: Feed = { id: `f${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`, url: remote.url, title: remote.title, categoryId };
+      await db.put('feeds', feed);
+      this.feeds.update((l) => [...l, feed]);
+    }
+    const changed: Article[] = [];
+    const next = this.articles().map((a) => {
+      const remote = doc.states?.[stateKey(a.id)] ?? 0;
+      const merged = flags(a) | remote;
+      if (merged === flags(a)) return a;
+      const updated = { ...a, read: !!(merged & 1), favorite: !!(merged & 2), later: !!(merged & 4) };
+      changed.push(updated);
+      return updated;
+    });
+    if (changed.length) {
+      this.articles.set(next);
+      await db.putMany('articles', changed);
+    }
+    this.remoteStates = doc.states ?? {};
+  }
+
+  /** Remote states for articles not downloaded yet, applied once they arrive. */
+  private remoteStates: Record<string, number> = {};
+
   private async applyPendingStates(): Promise<void> {
     const changed = this.articles().filter((a) => this.pendingStates.has(a.id)).map((a) => ({ ...a, ...this.pendingStates.get(a.id)! }));
     this.pendingStates.clear();
@@ -423,7 +508,10 @@ export class RssStore {
 
   private async merge(feedId: string, items: ParsedFeed['items']): Promise<void> {
     const existing = new Set(this.articles().map((a) => a.id));
-    const fresh: Article[] = items.filter((i) => !existing.has(i.id)).map((i) => ({ ...i, feedId, read: false, favorite: false }));
+    const fresh: Article[] = items.filter((i) => !existing.has(i.id)).map((i) => {
+      const remote = this.remoteStates[stateKey(i.id)] ?? 0;
+      return { ...i, feedId, read: !!(remote & 1), favorite: !!(remote & 2), later: !!(remote & 4) };
+    });
     if (!fresh.length) return;
     await db.putMany('articles', fresh);
     const all = [...this.articles(), ...fresh];

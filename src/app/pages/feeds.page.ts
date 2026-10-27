@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -7,18 +8,20 @@ import { FeedHit, RssStore } from '../rss/rss.store';
 import { Feed } from '../rss/models';
 import { DialogService } from '../ui/dialog.service';
 import { PushService } from '../pwa/push.service';
+import { SyncService } from '../pwa/sync.service';
 import { UI_ICONS } from '../ui/icons';
 
 @Component({
   selector: 'rss-feeds',
   host: { class: 'block anim-fade-in' },
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, DatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './feeds.page.html',
 })
 export class FeedsPage {
   protected readonly store = inject(RssStore);
   protected readonly push = inject(PushService);
+  protected readonly sync = inject(SyncService);
   private readonly dialog = inject(DialogService);
   private readonly router = inject(Router);
   protected readonly autoRefreshOptions = [5, 15, 30, 60];
