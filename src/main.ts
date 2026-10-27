@@ -1,4 +1,4 @@
-import { isDevMode } from '@angular/core';
+import { isDevMode, provideZonelessChangeDetection } from '@angular/core';
 import { LocationStrategy } from '@angular/common';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
@@ -10,6 +10,7 @@ import { RootComponent } from './app/root.component';
 
 bootstrapApplication(RootComponent, {
   providers: [
+    provideZonelessChangeDetection(),
     provideRouter(routes, withComponentInputBinding()),
     { provide: LocationStrategy, useClass: ReplaceLocationStrategy },
     provideServiceWorker('ngsw-worker.js', {

@@ -15,7 +15,6 @@
             "outputPath": "dist/rssreader",
             "index": "src/index.html",
             "browser": "src/main.ts",
-            "polyfills": ["zone.js"],
             "tsConfig": "tsconfig.app.json",
             "assets": [{ "glob": "**/*", "input": "public" }, "src/manifest.webmanifest"],
             "styles": ["src/styles.css"],
