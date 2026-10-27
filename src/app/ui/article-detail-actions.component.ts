@@ -24,7 +24,10 @@ import { SnackbarService } from './snackbar.service';
         <button class="icon-btn" type="button" [attr.aria-label]="speaking() ? 'Arrêter la lecture' : 'Lire à voix haute'" [class.!text-accent]="speaking()"
           (click)="toggleSpeech(a.title, a.content || a.summary)">{{ speaking() ? ui.stop : ui.speak }}</button>
       }
-      @if (a.link) { <a class="icon-btn" [href]="a.link" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'original">{{ ui.external }}</a> }
+      @if (a.link) {
+        <a class="icon-btn" [href]="'https://wallhop.io/' + a.link" target="_blank" rel="noopener noreferrer" aria-label="Lire via wallhop.io">{{ ui.reader }}</a>
+        <a class="icon-btn" [href]="a.link" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'original">{{ ui.external }}</a>
+      }
     }
   `,
 })
