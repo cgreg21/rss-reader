@@ -43,7 +43,7 @@
 
 @layer base {
   :root { color-scheme: dark; }
-  html, body { @apply bg-bg text-slate-100 antialiased; height: 100vh; margin: 0; font-family: var(--font-sans); -webkit-tap-highlight-color: transparent; overscroll-behavior: none; }
+  html, body { @apply bg-bg text-slate-100 antialiased; height: 100vh; margin: 0; font-family: var(--font-sans); -webkit-tap-highlight-color: transparent; overscroll-behavior: none; touch-action: pan-x pan-y; }
   button, input, select { font: inherit; color: inherit; }
   /* Below 16px iOS zooms into a focused field and the page stays zoomed afterwards. */
   input, select { font-size: max(16px, 1em); }

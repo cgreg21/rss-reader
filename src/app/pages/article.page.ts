@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, ElementRef, computed, effect, inject, input, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, ElementRef, computed, effect, inject, input, signal, untracked } from '@angular/core';
+import { DatePipe, NgTemplateOutlet } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
 
 import { RssStore } from '../rss/rss.store';
@@ -8,7 +8,7 @@ import { ArticlesPage } from './articles.page';
 
 @Component({
   selector: 'rss-article',
-  imports: [RouterLink, DatePipe, ArticlesPage],
+  imports: [RouterLink, DatePipe, NgTemplateOutlet, ArticlesPage],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './article.page.html',
   host: {
@@ -24,16 +24,35 @@ export class ArticlePage {
   protected readonly store = inject(RssStore);
   protected readonly ui = UI_ICONS;
   protected readonly article = computed(() => this.store.article(this.id()));
-  protected readonly feedTitle = computed(() => this.store.feeds().find((f) => f.id === this.article()?.feedId)?.title ?? '');
+
+  /** Snapshot of the list order, so neighbours stay stable when reading an article hides it from the list. */
+  private readonly order = signal<string[]>([]);
+  private readonly neighbours = computed(() => {
+    const order = this.order();
+    const i = order.indexOf(this.id());
+    const find = (j: number) => (i >= 0 && order[j] ? this.store.article(order[j]) : undefined);
+    return { previous: find(i - 1), next: find(i + 1) };
+  });
+
+  protected readonly offset = signal(0);
+  /** Article revealed by the current swipe, or null when the swipe leads back to the list. */
+  protected readonly target = computed(() => {
+    const o = this.offset();
+    return o > 0 ? this.neighbours().next : o < 0 ? this.neighbours().previous : undefined;
+  });
 
   private swipe: { x: number; y: number; id: number; horizontal: boolean | null } | null = null;
   private readonly router = inject(Router);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   protected readonly width = window.innerWidth;
-  protected readonly offset = signal(0);
+  protected readonly abs = Math.abs;
   protected readonly animating = signal(false);
   protected readonly underTop = signal(0);
   protected readonly underHeight = signal(0);
+
+  protected feedName(feedId: string): string {
+    return this.store.feeds().find((f) => f.id === feedId)?.title ?? '';
+  }
 
   protected swipeStart(event: PointerEvent): void {
     if (event.pointerType === 'mouse' || this.animating()) return;
@@ -49,23 +68,25 @@ export class ArticlePage {
     const dx = event.clientX - swipe.x;
     const dy = event.clientY - swipe.y;
     if (swipe.horizontal === null && Math.max(Math.abs(dx), Math.abs(dy)) >= 10) {
-      swipe.horizontal = dx > 0 && Math.abs(dx) > Math.abs(dy);
+      swipe.horizontal = Math.abs(dx) > Math.abs(dy);
       if (swipe.horizontal) this.host.nativeElement.setPointerCapture(event.pointerId);
       else this.swipe = null;
     }
-    if (swipe.horizontal) this.offset.set(Math.max(0, dx));
+    if (swipe.horizontal) this.offset.set(dx);
   }
 
-  /** A rightward swipe slides the article out and goes back to the list. */
+  /** Swiping right opens the next article, left the previous one; without one, back to the list. */
   protected swipeEnd(event: PointerEvent): void {
     const swipe = this.swipe;
     this.swipe = null;
     if (!swipe?.horizontal || event.pointerId !== swipe.id) return;
     this.host.nativeElement.releasePointerCapture?.(event.pointerId);
     this.animating.set(true);
-    if (event.type === 'pointerup' && this.offset() > 80) {
-      this.offset.set(this.width);
-      setTimeout(() => void this.router.navigateByUrl('/'), 200);
+    const offset = this.offset();
+    if (event.type === 'pointerup' && Math.abs(offset) > 80) {
+      const target = this.target();
+      this.offset.set(offset > 0 ? this.width : -this.width);
+      setTimeout(() => void this.router.navigate(target ? ['/article', target.id] : ['/']), 200);
     } else {
       this.offset.set(0);
       setTimeout(() => this.animating.set(false), 200);
@@ -73,6 +94,17 @@ export class ArticlePage {
   }
 
   constructor() {
+    effect(() => {
+      const id = this.id();
+      untracked(() => {
+        if (!this.order().includes(id)) {
+          const ids = this.store.visible().map((a) => a.id);
+          this.order.set(ids.includes(id) ? ids : [id]);
+        }
+        this.offset.set(0);
+        this.animating.set(false);
+      });
+    });
     let autoReadId: string | null = null;
     effect(() => {
       const a = this.article();

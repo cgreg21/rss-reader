@@ -1,19 +1,27 @@
+<ng-template #body let-a>
+  <article class="mx-auto max-w-3xl">
+    <h1 class="text-2xl leading-tight font-bold sidebar:text-3xl">{{ a.title }}</h1>
+    <p class="text-muted">{{ feedName(a.feedId) }} · {{ a.published | date: 'dd/MM/yyyy HH:mm' }}</p>
+    @if (a.content) { <div class="body" [innerHTML]="a.content"></div> } @else { <p>{{ a.summary }}</p> }
+  </article>
+</ng-template>
+
 @if (article(); as a) {
-  @if (offset() > 0) {
-    <div class="pointer-events-none absolute inset-x-0 overflow-hidden" [style.top.px]="underTop()" [style.height.px]="underHeight()"
-         [style.transform]="'translateX(' + (-(1 - offset() / width) * 80) + 'px)'"
-         [class.transition-transform]="animating()" [style.opacity]="0.5 + 0.5 * offset() / width">
-      <rss-articles />
+  @if (offset() !== 0) {
+    <div class="pointer-events-none absolute inset-x-0 overflow-hidden bg-bg" [style.top.px]="underTop()" [style.height.px]="underHeight()"
+         [style.transform]="'translateX(' + (offset() > 0 ? -1 : 1) * (1 - abs(offset()) / width) * 80 + 'px) scale(' + (0.94 + 0.06 * abs(offset()) / width) + ')'"
+         [style.transition]="animating() ? 'transform 200ms ease-out' : null" [style.opacity]="0.5 + 0.5 * abs(offset()) / width">
+      @if (target(); as t) {
+        <ng-container [ngTemplateOutlet]="body" [ngTemplateOutletContext]="{ $implicit: t }" />
+      } @else {
+        <rss-articles />
+      }
     </div>
   }
   <div class="relative bg-bg" [style.transform]="offset() ? 'translateX(' + offset() + 'px)' : null"
-       [style.box-shadow]="offset() ? '-12px 0 24px rgba(0,0,0,.45)' : null"
+       [style.box-shadow]="offset() ? (offset() > 0 ? '-12px' : '12px') + ' 0 24px rgba(0,0,0,.45)' : null"
        [style.transition]="animating() ? 'transform 200ms ease-out' : null" [style.min-height.px]="offset() ? underHeight() : null">
-    <article class="mx-auto max-w-3xl">
-      <h1 class="text-2xl leading-tight font-bold sidebar:text-3xl">{{ a.title }}</h1>
-      <p class="text-muted">{{ feedTitle() }} · {{ a.published | date: 'dd/MM/yyyy HH:mm' }}</p>
-      @if (a.content) { <div class="body" [innerHTML]="a.content"></div> } @else { <p>{{ a.summary }}</p> }
-    </article>
+    <ng-container [ngTemplateOutlet]="body" [ngTemplateOutletContext]="{ $implicit: a }" />
   </div>
 } @else {
   <p class="mt-16 text-center text-accent"><a routerLink="/">Article introuvable.</a></p>
