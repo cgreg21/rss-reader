@@ -120,3 +120,9 @@
   <p class="mb-2 text-[13px] text-muted">  La plupart des flux n'autorisent pas la lecture directe depuis un navigateur. Saisissez l'adresse de votre déploiement de budget-caldav-proxy (par ex. https://budget-caldav-proxy.compte.workers.dev) ; désactivé ou vide, l'accès est direct.</p>
     <input class="field w-full disabled:opacity-50" name="proxy" placeholder="https://budget-caldav-proxy.compte.workers.dev" [disabled]="!store.proxyEnabled()" [ngModel]="store.proxy()" (ngModelChange)="store.setProxy($event)">
 </section>
+
+<section class="panel">
+  <h2 class="mb-2.5 text-base font-bold">Cache des images</h2>
+  <p class="mb-2 text-[13px] text-muted">Les images chargées via le proxy sont conservées sur l'appareil ({{ store.imageCacheCount() }} en cache).</p>
+  <button type="button" class="btn" [disabled]="store.imageCacheCount() === 0" (click)="clearImageCache()">Vider le cache</button>
+</section>

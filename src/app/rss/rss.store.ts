@@ -343,18 +343,16 @@ export class RssStore {
   }
 
   private readonly images = new Map<string, Promise<string>>();
+  private static readonly IMAGE_CACHE = 'rss-images';
+  readonly imageCacheCount = signal(0);
 
-  /** URL to display for an image: fetched through the proxy as a blob when enabled, else the original URL. */
+  /** URL to display for an image: fetched through the proxy as a blob when enabled (persisted in the Cache API), else the original URL. */
   imageUrl(url: string): Promise<string> {
     const proxied = this.proxyEnabled() && proxyOrigin(this.proxy()) !== '' && /^https?:/i.test(url);
     if (!proxied) return Promise.resolve(url);
     let blob = this.images.get(url);
     if (!blob) {
-      blob = this.request(url)
-        .then(async (r) => {
-          if (!r.ok) throw new Error(`HTTP ${r.status}`);
-          return URL.createObjectURL(await r.blob());
-        })
+      blob = this.cachedImage(url)
         .catch(() => {
           this.images.delete(url);
           return url;
@@ -362,5 +360,30 @@ export class RssStore {
       this.images.set(url, blob);
     }
     return blob;
+  }
+
+  private async cachedImage(url: string): Promise<string> {
+    const cache = 'caches' in globalThis ? await caches.open(RssStore.IMAGE_CACHE) : null;
+    let response = (await cache?.match(url)) ?? null;
+    if (!response) {
+      response = await this.request(url);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (cache) {
+        await cache.put(url, response.clone());
+        void this.refreshImageCacheCount();
+      }
+    }
+    return URL.createObjectURL(await response.blob());
+  }
+
+  async refreshImageCacheCount(): Promise<void> {
+    this.imageCacheCount.set('caches' in globalThis ? (await (await caches.open(RssStore.IMAGE_CACHE)).keys()).length : 0);
+  }
+
+  async clearImageCache(): Promise<void> {
+    for (const blob of this.images.values()) void blob.then((u) => u.startsWith('blob:') && URL.revokeObjectURL(u));
+    this.images.clear();
+    if ('caches' in globalThis) await caches.delete(RssStore.IMAGE_CACHE);
+    this.imageCacheCount.set(0);
   }
 }

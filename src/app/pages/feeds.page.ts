@@ -36,7 +36,12 @@ export class FeedsPage {
   protected readonly searchError = signal('');
   protected readonly searched = signal(false);
 
+  protected async clearImageCache(): Promise<void> {
+    if (await this.dialog.confirm('Supprimer toutes les images en cache ?', { title: 'Vider le cache' })) await this.store.clearImageCache();
+  }
+
   constructor() {
+    void this.store.refreshImageCacheCount();
     // Opened from a share (Android share target, iOS shortcut) or a link: ?url=<site or feed>.
     inject(ActivatedRoute).queryParamMap.pipe(takeUntilDestroyed()).subscribe((params) => {
       const shared = params.get('url') ?? /https?:\/\/\S+/.exec(params.get('text') ?? '')?.[0];
