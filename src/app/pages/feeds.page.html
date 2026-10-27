@@ -42,7 +42,7 @@
   <ul class="mt-2.5">
     @for (c of store.categories(); track c.id) {
       <li class="flex flex-wrap items-center gap-2.5 border-t border-line py-2">
-        <span class="min-w-0 flex-1">{{ c.name }}</span><button class="icon-btn" type="button" aria-label="Supprimer" (click)="store.removeCategory(c.id)">{{ ui.trash }}</button>
+        <span class="min-w-0 flex-1">{{ c.name }}</span><button class="icon-btn !text-red-400 hover:!bg-red-500/10" type="button" aria-label="Supprimer" (click)="store.removeCategory(c.id)">{{ ui.trash }}</button>
       </li>
     }
   </ul>
@@ -61,7 +61,7 @@
           @for (c of store.categories(); track c.id) { <option [ngValue]="c.id">{{ c.name }}</option> }
         </select>
         <button class="icon-btn" type="button" aria-label="Détails du flux" (click)="showFeedInfo(f)">{{ ui.info }}</button>
-        <button class="icon-btn" type="button" aria-label="Se désabonner" (click)="store.removeFeed(f.id)">{{ ui.trash }}</button>
+        <button class="icon-btn !text-red-400 hover:!bg-red-500/10" type="button" aria-label="Se désabonner" (click)="store.removeFeed(f.id)">{{ ui.trash }}</button>
       </li>
     } @empty { <li>Aucun abonnement.</li> }
   </ul>

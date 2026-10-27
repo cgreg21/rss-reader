@@ -4,7 +4,7 @@
     <div class="w-full max-w-sm rounded-2xl border border-line bg-side p-5 shadow-2xl" role="dialog" aria-modal="true" animate.enter="anim-pop-in"
       [attr.aria-label]="d.title || d.message" (click)="$event.stopPropagation()">
       @if (d.title) { <h2 class="mb-2 text-lg font-semibold">{{ d.title }}</h2> }
-      @if (d.message) { <p class="whitespace-pre-line text-muted">{{ d.message }}</p> }
+      @if (d.message) { <p class="whitespace-pre-line break-words text-muted [overflow-wrap:anywhere]">{{ d.message }}</p> }
       @if (d.input; as input) {
         <input #field class="field mt-3 w-full" [type]="input.type || 'text'" [placeholder]="input.placeholder || ''"
           [value]="d.text" (input)="dialog.setText($any($event.target).value)"

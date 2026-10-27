@@ -25,6 +25,7 @@ export class CoverflowDirective implements OnDestroy {
   constructor() {
     afterNextRender(() => {
       this.scroller = this.host.closest('main');
+      if (this.tilt() > 0 && this.scroller) this.scroller.style.scrollSnapType = 'y mandatory';
       (this.scroller ?? window).addEventListener('scroll', this.schedule, { passive: true });
       window.addEventListener('resize', this.schedule);
       this.mutations = new MutationObserver(this.schedule);
@@ -38,20 +39,29 @@ export class CoverflowDirective implements OnDestroy {
     const middle = bounds.top + bounds.height / 2;
     const half = bounds.height / 2 || 1;
     for (const el of Array.from(this.host.querySelectorAll<HTMLElement>('[data-coverflow]'))) {
-      const rect = el.getBoundingClientRect();
+      // Measured on the wrapper, which isn't moved by this effect, so the result doesn't feed back.
+      const rect = (el.parentElement ?? el).getBoundingClientRect();
       const d = Math.max(-1, Math.min(1, (rect.top + rect.height / 2 - middle) / half));
       const a = Math.abs(d);
       if (this.tilt() === 0) {
         el.style.scale = (1 - 0.1 * a).toFixed(3);
         el.style.filter = `opacity(${(1 - 0.45 * a * a).toFixed(3)})`;
       } else {
-        el.style.transform = `rotateX(${(d * this.tilt()).toFixed(2)}deg) scale(${(1 - 0.1 * a).toFixed(3)})`;
+        // Neighbours slide under the centered card, so a third of their height stays hidden.
+        const gap = parseFloat(getComputedStyle(this.host).rowGap) || 0;
+        const ramp = Math.min(1, a / 0.4);
+        const shift = -Math.sign(d) * (rect.height / 3 + gap) * ramp * ramp * (3 - 2 * ramp);
+        el.style.position = 'relative';
+        if (el.parentElement) el.parentElement.style.scrollSnapAlign = 'center';
+        el.style.zIndex = String(Math.round((1 - a) * 100));
+        el.style.transform = `translateY(${shift.toFixed(1)}px) rotateX(${(d * this.tilt()).toFixed(2)}deg) scale(${(1 - 0.1 * a).toFixed(3)})`;
         el.style.opacity = (1 - 0.45 * a * a).toFixed(3);
       }
     }
   }
 
   ngOnDestroy(): void {
+    if (this.scroller) this.scroller.style.scrollSnapType = '';
     (this.scroller ?? window).removeEventListener('scroll', this.schedule);
     window.removeEventListener('resize', this.schedule);
     this.mutations?.disconnect();
