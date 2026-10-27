@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { DatePipe } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { FeedHit, RssStore } from '../rss/rss.store';
 import { Feed } from '../rss/models';
@@ -14,7 +14,7 @@ import { UI_ICONS } from '../ui/icons';
 @Component({
   selector: 'rss-feeds',
   host: { class: 'block anim-fade-in' },
-  imports: [FormsModule, RouterLink, DatePipe],
+  imports: [FormsModule, DatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './feeds.page.html',
 })

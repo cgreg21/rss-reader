@@ -38,6 +38,7 @@ export class RootComponent {
   private readonly librarySync = inject(SyncService);
   protected readonly onArticles = signal(this.isArticles());
   protected readonly articleId = signal(this.currentArticleId());
+  protected readonly onOptions = signal(this.isOptions());
   protected readonly ui = UI_ICONS;
   protected readonly refresh = (): Promise<void> => this.store.refreshAll();
 
@@ -62,6 +63,10 @@ export class RootComponent {
     return this.router.url.split(/[?#]/)[0] === '/';
   }
 
+  private isOptions(): boolean {
+    return this.router.url.split(/[?#]/)[0] === '/feeds';
+  }
+
   constructor() {
     void this.store.load();
     effect(() => {
@@ -74,6 +79,7 @@ export class RootComponent {
       this.drawer.close();
       this.onArticles.set(this.isArticles());
       this.articleId.set(this.currentArticleId());
+      this.onOptions.set(this.isOptions());
     });
 
     // Non-passive so the browser's back/forward swipe is cancelled: while the drawer is dragged, and

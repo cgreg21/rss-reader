@@ -5,9 +5,13 @@
     }
   </button>
   @if (articleId()) { <a class="icon-btn hidden sidebar:inline-grid" routerLink="/" aria-label="Précédent">{{ ui.back }}</a> }
-  <strong class="min-w-0 flex-1 truncate text-center sidebar:text-left   sidebar:flex-none sidebar:text-xl">{{ store.scopeTitle() || 'RSS' }}
-    <small class="hidden text-[15px] font-normal text-muted sidebar:inline">({{ store.unreadTotal() }} non lus)</small></strong>
-  @if (articleId(); as id) {
+  @if (options()) { <a class="icon-btn hidden sidebar:inline-grid" routerLink="/" aria-label="Retour">{{ ui.back }}</a> }
+  <strong class="min-w-0 flex-1 truncate text-center sidebar:text-left   sidebar:flex-none sidebar:text-xl">{{ options() ? 'Options' : store.scopeTitle() || 'RSS' }}
+    @if (!options()) { <small class="hidden text-[15px] font-normal text-muted sidebar:inline">({{ store.unreadTotal() }} non lus)</small> }</strong>
+  @if (options()) {
+    <span class="hidden flex-1 sidebar:block"></span>
+    <a class="icon-btn sidebar:hidden" routerLink="/" aria-label="Retour">{{ ui.back }}</a>
+  } @else if (articleId(); as id) {
     <span class="hidden flex-1 sidebar:block"></span>
     <div class="hidden sidebar:block"><rss-article-detail-actions [id]="id" /></div>
     <span class="size-11 sidebar:hidden"></span>

@@ -21,6 +21,7 @@ export class TopBarComponent {
   protected readonly ui = UI_ICONS;
   readonly actions = input(false);
   readonly articleId = input<string | null>(null);
+  readonly options = input(false);
   protected readonly searching = signal(this.store.search() !== '');
   private readonly field = viewChild<ElementRef<HTMLInputElement>>('field');
 
