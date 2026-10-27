@@ -15,8 +15,33 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Unit and end-to-end tests gate everything else: no bump, build or deploy if one fails.
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run typecheck
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: End-to-end tests
+        run: npm run e2e
+
   # Bumps the patch version first so the deployed build already shows the new number.
   bump:
+    needs: test
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
@@ -42,9 +67,9 @@ jobs:
           echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
   build:
-    needs: bump
+    needs: [test, bump]
     # Also runs on manual dispatch, where the bump job is skipped.
-    if: ${{ !cancelled() && (needs.bump.result == 'success' || needs.bump.result == 'skipped') }}
+    if: ${{ !cancelled() && needs.test.result == 'success' && (needs.bump.result == 'success' || needs.bump.result == 'skipped') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5

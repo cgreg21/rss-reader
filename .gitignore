@@ -11,5 +11,7 @@ yarn-error.log*
 .vscode/*
 /dist
 /.angular
+/test-results
+/playwright-report
 
 .idea/
