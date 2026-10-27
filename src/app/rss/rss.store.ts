@@ -1,7 +1,7 @@
 import { Injectable, computed, signal } from '@angular/core';
 
 import { db } from './db';
-import { parseFeed } from './feed-parser';
+import { discoverFeedUrl, looksLikeHtml, parseFeed } from './feed-parser';
 import { Article, Category, Feed } from './models';
 import { buildOpml, parseOpml } from './opml';
 
@@ -179,10 +179,17 @@ export class RssStore {
   }
 
   async addFeed(rawUrl: string, categoryId: string | null): Promise<void> {
-    const url = new URL(rawUrl.trim()).href;
+    let url = new URL(rawUrl.trim()).href;
+    let body = await this.download(url);
+    if (looksLikeHtml(body)) {
+      const discovered = discoverFeedUrl(body, url);
+      if (!discovered) throw new Error('Aucun flux trouvé sur cette page');
+      url = discovered;
+      body = await this.download(url);
+    }
     if (this.feeds().some((f) => f.url === url)) throw new Error('Flux déjà suivi');
     const id = `f${Date.now().toString(36)}`;
-    const parsed = parseFeed(await this.download(url), id);
+    const parsed = parseFeed(body, id);
     const feed: Feed = { id, url, title: parsed.title || new URL(url).hostname, siteUrl: parsed.siteUrl, categoryId, lastFetched: Date.now() };
     await db.put('feeds', feed);
     this.feeds.update((l) => [...l, feed]);

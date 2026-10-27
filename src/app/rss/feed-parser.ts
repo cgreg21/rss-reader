@@ -45,15 +45,77 @@ function hash(value: string): string {
   return (h >>> 0).toString(36);
 }
 
+const FEED_LINK_TYPES = /^application\/(rss\+xml|atom\+xml|feed\+json|json|rdf\+xml)$/i;
+
+export const looksLikeHtml = (body: string): boolean => /^\s*(<!doctype\s+html|<html[\s>])/i.test(body);
+
+/** Finds the feed advertised by a web page through its <link rel="alternate"> tags. */
+export function discoverFeedUrl(html: string, baseUrl: string): string | null {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  for (const link of Array.from(doc.querySelectorAll('link[rel~="alternate"][href]'))) {
+    if (!FEED_LINK_TYPES.test(link.getAttribute('type')?.trim() ?? '')) continue;
+    try {
+      return new URL(link.getAttribute('href') ?? '', baseUrl).href;
+    } catch {
+      continue;
+    }
+  }
+  return null;
+}
+
+interface JsonFeedItem {
+  id?: string | number;
+  url?: string;
+  external_url?: string;
+  title?: string;
+  content_html?: string;
+  content_text?: string;
+  summary?: string;
+  image?: string;
+  banner_image?: string;
+  date_published?: string;
+  date_modified?: string;
+}
+
+function parseJsonFeed(json: string, feedId: string): ParsedFeed {
+  let data: { title?: string; home_page_url?: string; items?: JsonFeedItem[] };
+  try {
+    data = JSON.parse(json);
+  } catch {
+    throw new Error('Flux invalide');
+  }
+  if (!data || !Array.isArray(data.items)) throw new Error('Flux invalide');
+  const items = data.items.map((item) => {
+    const link = item.url ?? item.external_url ?? '';
+    const escaped = (item.content_text ?? '').replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c] ?? c);
+    const content = sanitizeHtml(item.content_html ?? (escaped ? `<p>${escaped.replace(/\n/g, '<br>')}</p>` : ''));
+    const date = Date.parse(item.date_published ?? item.date_modified ?? '');
+    const title = toText(item.title ?? '');
+    return {
+      id: `${feedId}:${hash(String(item.id ?? (link || title)))}`,
+      title: title || '(sans titre)',
+      link,
+      summary: toText(item.summary ?? content ?? '').slice(0, 280),
+      content,
+      image: item.image ?? item.banner_image ?? new DOMParser().parseFromString(content, 'text/html').querySelector('img')?.getAttribute('src') ?? undefined,
+      published: Number.isNaN(date) ? Date.now() : date,
+    };
+  });
+  return { title: toText(data.title ?? ''), siteUrl: data.home_page_url, items };
+}
+
 export function parseFeed(xml: string, feedId: string): ParsedFeed {
+  if (xml.trimStart().startsWith('{')) return parseJsonFeed(xml, feedId);
   const doc = new DOMParser().parseFromString(xml, 'application/xml');
   if (doc.querySelector('parsererror') || !doc.documentElement) throw new Error('Flux invalide');
   const root = doc.documentElement;
   const isAtom = root.localName === 'feed';
+  const isRdf = root.localName === 'RDF';
   const channel = isAtom ? root : first(root, 'channel');
   if (!channel) throw new Error('Flux invalide');
 
-  const entries = Array.from(isAtom ? root.children : channel.children).filter((c) => c.localName === (isAtom ? 'entry' : 'item'));
+  // RSS 1.0 (RDF) lists its items next to the channel instead of inside it.
+  const entries = Array.from(isAtom || isRdf ? root.children : channel.children).filter((c) => c.localName === (isAtom ? 'entry' : 'item'));
   const siteLink = isAtom
     ? Array.from(channel.children).find((c) => c.localName === 'link' && (c.getAttribute('rel') ?? 'alternate') === 'alternate')?.getAttribute('href') ?? undefined
     : text(channel, 'link') || undefined;
