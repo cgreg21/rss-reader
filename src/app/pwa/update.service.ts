@@ -30,6 +30,15 @@ export class UpdateService {
     location.reload();
   }
 
+  /** Manual check: 'ready' when a new version is downloaded, 'none' when up to date, 'unavailable' without a service worker. */
+  async check(): Promise<'ready' | 'none' | 'unavailable'> {
+    if (!this.updates?.isEnabled) return 'unavailable';
+    if (this.readyState()) return 'ready';
+    const found = await this.updates.checkForUpdate();
+    if (found) this.readyState.set(true);
+    return found ? 'ready' : 'none';
+  }
+
   dismiss(): void {
     this.dismissed.set(true);
   }

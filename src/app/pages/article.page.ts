@@ -14,11 +14,7 @@ import { ArticlesPage } from './articles.page';
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './article.page.html',
   host: {
-    class: 'relative block min-h-full touch-none anim-fade-in',
-    '(pointerdown)': 'swipeStart($event)',
-    '(pointermove)': 'swipeMove($event)',
-    '(pointerup)': 'swipeEnd($event)',
-    '(pointercancel)': 'swipeEnd($event)',
+    class: 'relative block min-h-full touch-pan-y anim-fade-in',
   },
 })
 export class ArticlePage {
@@ -47,7 +43,7 @@ export class ArticlePage {
     return o > 0 ? this.neighbours().next : o < 0 ? this.neighbours().previous : undefined;
   });
 
-  private swipe: { x: number; y: number; id: number; axis: 'x' | 'y' | null } | null = null;
+  private swipe: { x: number; y: number; axis: 'x' | 'y' | null; atTop: boolean } | null = null;
   private readonly router = inject(Router);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   protected readonly width = window.innerWidth;
@@ -75,40 +71,40 @@ export class ArticlePage {
     return this.store.feeds().find((f) => f.id === feedId)?.title ?? '';
   }
 
-  protected swipeStart(event: PointerEvent): void {
-    if (event.pointerType === 'mouse' || this.animating()) return;
+  /** Touch events (not pointer ones) so vertical scrolling stays native: the page only takes over horizontal
+   *  moves, and a pull down when the article is already scrolled to the top. */
+  private swipeStart(event: TouchEvent): void {
+    if (this.animating() || event.touches.length !== 1 || (event.target as Element).closest('audio, video, iframe')) return;
     const main = this.host.nativeElement.closest('main');
     this.underTop.set(main ? main.getBoundingClientRect().top - this.host.nativeElement.getBoundingClientRect().top : 0);
     this.underHeight.set(main?.clientHeight ?? window.innerHeight);
-    this.swipe = { x: event.clientX, y: event.clientY, id: event.pointerId, axis: null };
+    const t = event.touches[0];
+    this.swipe = { x: t.clientX, y: t.clientY, axis: null, atTop: (main?.scrollTop ?? 0) <= 0 };
   }
 
-  protected swipeMove(event: PointerEvent): void {
+  private swipeMove(event: TouchEvent): void {
     const swipe = this.swipe;
-    if (!swipe || event.pointerId !== swipe.id) return;
-    const dx = event.clientX - swipe.x;
-    const dy = event.clientY - swipe.y;
+    if (!swipe) return;
+    const t = event.touches[0];
+    const dx = t.clientX - swipe.x;
+    const dy = t.clientY - swipe.y;
     if (swipe.axis === null && Math.max(Math.abs(dx), Math.abs(dy)) >= 10) {
       const horizontal = Math.abs(dx) > Math.abs(dy);
-      if (horizontal || dy > 0) {
-        swipe.axis = horizontal ? 'x' : 'y';
-        this.host.nativeElement.setPointerCapture(event.pointerId);
-      } else {
-        this.swipe = null;
-      }
+      if (horizontal || (dy > 0 && swipe.atTop)) swipe.axis = horizontal ? 'x' : 'y';
+      else return void (this.swipe = null);
     }
+    if (!swipe.axis) return;
+    if (event.cancelable) event.preventDefault();
     if (swipe.axis === 'x') this.offset.set(dx);
-    else if (swipe.axis === 'y') this.offsetY.set(Math.max(0, dy));
+    else this.offsetY.set(Math.max(0, dy));
   }
 
   /** Right: next article, left: previous one, down: the list; without a neighbour, back to the list. */
-  protected swipeEnd(event: PointerEvent): void {
+  private swipeEnd(committed: boolean): void {
     const swipe = this.swipe;
     this.swipe = null;
-    if (!swipe?.axis || event.pointerId !== swipe.id) return;
-    this.host.nativeElement.releasePointerCapture?.(event.pointerId);
+    if (!swipe?.axis) return;
     this.animating.set(true);
-    const committed = event.type === 'pointerup';
     if (swipe.axis === 'y') {
       if (committed && this.offsetY() > 80) {
         this.offsetY.set(this.height);
@@ -128,6 +124,12 @@ export class ArticlePage {
   }
 
   constructor() {
+    const el = this.host.nativeElement;
+    el.addEventListener('touchstart', (e) => this.swipeStart(e), { passive: true });
+    // Non-passive: preventDefault stops the native scroll once the swipe is ours.
+    el.addEventListener('touchmove', (e) => this.swipeMove(e), { passive: false });
+    el.addEventListener('touchend', () => this.swipeEnd(true));
+    el.addEventListener('touchcancel', () => this.swipeEnd(false));
     effect(() => {
       const id = this.id();
       untracked(() => {

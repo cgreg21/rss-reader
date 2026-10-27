@@ -6,7 +6,7 @@
   </button>
   @if (articleId()) { <a class="icon-btn hidden sidebar:inline-grid" routerLink="/" aria-label="Précédent">{{ ui.back }}</a> }
   @if (options()) { <a class="icon-btn hidden sidebar:inline-grid" routerLink="/" aria-label="Retour">{{ ui.back }}</a> }
-  <strong class="min-w-0 flex-1 truncate text-center sidebar:text-left   sidebar:flex-none sidebar:text-xl">{{ options() ? 'Options' : store.scopeTitle() || 'RSS' }}
+  <strong class="min-w-0 flex-1 truncate text-center sidebar:text-left   sidebar:flex-none sidebar:text-xl">{{ options() || store.scopeTitle() || 'RSS' }}
     @if (!options()) { <small class="hidden text-[15px] font-normal text-muted sidebar:inline">({{ store.unreadTotal() }} non lus)</small> }</strong>
   @if (options()) {
     <span class="hidden flex-1 sidebar:block"></span>

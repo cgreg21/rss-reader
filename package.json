@@ -4,8 +4,12 @@
   "description": "Installable RSS reader with offline reading.",
   "private": true,
   "scripts": {
+    "credits": "node scripts/credits.mjs",
+    "prestart": "npm run credits",
     "start": "ng serve",
+    "prebuild": "npm run credits",
     "build": "ng build",
+    "pretypecheck": "npm run credits",
     "typecheck": "tsc --noEmit -p tsconfig.app.json",
     "test": "ng test --watch=false",
     "e2e": "playwright test"

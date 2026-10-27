@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Angular",
+    "version": "22.2.3",
+    "license": "MIT",
+    "url": "https://github.com/angular/angular"
+  },
+  {
+    "name": "DM Sans",
+    "license": "OFL-1.1",
+    "url": "https://fonts.google.com/specimen/DM+Sans"
+  },
+  {
+    "name": "Material Design Icons",
+    "license": "Apache-2.0",
+    "url": "https://pictogrammers.com/library/mdi/"
+  },
+  {
+    "name": "rxjs",
+    "version": "7.8.2",
+    "license": "Apache-2.0",
+    "url": "https://rxjs.dev"
+  },
+  {
+    "name": "tailwindcss",
+    "version": "4.3.3",
+    "license": "MIT",
+    "url": "https://tailwindcss.com"
+  },
+  {
+    "name": "tslib",
+    "version": "2.8.1",
+    "license": "0BSD",
+    "url": "https://www.typescriptlang.org/"
+  },
+  {
+    "name": "zone.js",
+    "version": "0.16.3",
+    "license": "MIT",
+    "url": "https://github.com/angular/angular"
+  }
+]

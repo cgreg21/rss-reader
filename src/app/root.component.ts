@@ -63,8 +63,9 @@ export class RootComponent {
     return this.router.url.split(/[?#]/)[0] === '/';
   }
 
-  private isOptions(): boolean {
-    return this.router.url.split(/[?#]/)[0] === '/feeds';
+  private isOptions(): string {
+    const path = this.router.url.split(/[?#]/)[0];
+    return path === '/feeds' ? 'Options' : path === '/about' ? 'À propos' : '';
   }
 
   constructor() {
