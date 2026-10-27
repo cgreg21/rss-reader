@@ -29,23 +29,13 @@ const REMOVED_KEY = 'rssreader:removed-feeds';
 
 /** Cross-device synchronised library: article states are keyed by the feed-independent part of the article id. */
 export interface SyncDoc {
-  feeds: { url: string; title: string; category: string | null; /** Last category change. */ at?: number }[];
+  feeds: { url: string; title: string; category: string | null }[];
   removed: string[];
-  /** Per article: [bit flags (1 read, 2 favorite, 4 later), time of the last change]; a bare number is the legacy format. */
-  states: Record<string, number | [number, number]>;
+  /** Bit flags per article: 1 read, 2 favorite, 4 later. */
+  states: Record<string, number>;
 }
 const stateKey = (articleId: string): string => articleId.slice(articleId.indexOf(':') + 1);
 const flags = (a: Article): number => (a.read ? 1 : 0) | (a.favorite ? 2 : 0) | (a.later ? 4 : 0);
-const normState = (s: number | [number, number]): [number, number] => (typeof s === 'number' ? [s, 0] : s);
-const MAX_SYNC_STATES = 5000;
-const STATE_TTL_MS = 30 * 86_400_000;
-
-/** Stable serialisation of a document, to tell whether two devices already agree. */
-export function canonicalSyncDoc(doc: SyncDoc): string {
-  const states = Object.keys(doc.states ?? {}).sort().map((k) => [k, ...normState(doc.states[k])]);
-  const feeds = [...(doc.feeds ?? [])].sort((a, b) => a.url.localeCompare(b.url)).map((f) => [f.url, f.title, f.category, f.at ?? 0]);
-  return JSON.stringify({ feeds, removed: [...new Set(doc.removed ?? [])].sort(), states });
-}
 
 export type Theme = 'dark' | 'light';
 const applyAppearance = (theme: Theme, fontSize: number): void => {
@@ -348,7 +338,7 @@ export class RssStore {
   async setFeedCategory(feedId: string, categoryId: string | null): Promise<void> {
     const feed = this.feeds().find((f) => f.id === feedId);
     if (!feed) return;
-    const updated = { ...feed, categoryId, categoryAt: Date.now() };
+    const updated = { ...feed, categoryId };
     await db.put('feeds', updated);
     this.feeds.update((l) => l.map((f) => (f.id === feedId ? updated : f)));
   }
@@ -395,16 +385,15 @@ export class RssStore {
   async patch(id: string, changes: Partial<Pick<Article, 'read' | 'favorite' | 'later'>>): Promise<void> {
     const article = this.article(id);
     if (!article) return;
-    const updated = { ...article, ...changes, stateAt: Date.now() };
+    const updated = { ...article, ...changes };
     this.articles.update((l) => l.map((a) => (a.id === id ? updated : a)));
     await db.put('articles', updated);
   }
 
   async markAllRead(): Promise<void> {
-    const at = Date.now();
-    const changed = this.visible().filter((a) => !a.read).map((a) => ({ ...a, read: true, stateAt: at }));
-    const byId = new Map(changed.map((a) => [a.id, a]));
-    this.articles.update((l) => l.map((a) => byId.get(a.id) ?? a));
+    const changed = this.visible().filter((a) => !a.read).map((a) => ({ ...a, read: true }));
+    const ids = new Set(changed.map((a) => a.id));
+    this.articles.update((l) => l.map((a) => (ids.has(a.id) ? { ...a, read: true } : a)));
     await db.putMany('articles', changed);
   }
 
@@ -464,62 +453,37 @@ export class RssStore {
 
   buildSyncDoc(): SyncDoc {
     const categories = new Map(this.categories().map((c) => [c.id, c.name]));
-    const all = new Map<string, [number, number]>();
-    for (const [key, value] of Object.entries(this.remoteStates)) all.set(key, normState(value));
-    for (const a of this.articles()) {
-      const f = flags(a);
-      const t = a.stateAt ?? 0;
-      const known = all.get(stateKey(a.id));
-      if ((f || t) && (!known || t >= known[1])) all.set(stateKey(a.id), [f, t]);
-    }
-    const limit = Date.now() - STATE_TTL_MS;
-    const kept = [...all].filter(([, [f, t]]) => f !== 0 || t > limit).sort((a, b) => b[1][1] - a[1][1]).slice(0, MAX_SYNC_STATES);
+    const states: Record<string, number> = {};
+    for (const a of this.articles()) if (flags(a)) states[stateKey(a.id)] = flags(a);
     return {
-      feeds: this.feeds().map((f) => ({ url: f.url, title: f.title, category: f.categoryId ? categories.get(f.categoryId) ?? null : null, at: f.categoryAt ?? 0 })),
+      feeds: this.feeds().map((f) => ({ url: f.url, title: f.title, category: f.categoryId ? categories.get(f.categoryId) ?? null : null })),
       removed: this.removedFeeds(),
-      states: Object.fromEntries(kept),
+      states,
     };
   }
 
-  private async categoryIdByName(name: string | null): Promise<string | null> {
-    if (!name) return null;
-    const find = (): string | null => this.categories().find((c) => c.name.toLowerCase() === name.toLowerCase())?.id ?? null;
-    if (!find()) await this.addCategory(name);
-    return find();
-  }
-
-  /** Merges a remote document into the local library: feeds are unions, removals win, the latest change wins for states and categories. */
+  /** Merges a remote document into the local library: feeds and states are unions, removals win. */
   async applySyncDoc(doc: SyncDoc): Promise<void> {
     const removed = new Set([...this.removedFeeds(), ...(doc.removed ?? []).filter((u) => !this.readded.has(u))]);
     for (const f of this.feeds().filter((x) => removed.has(x.url))) await this.removeFeedLocal(f.id);
     this.setRemovedFeeds([...removed]);
     for (const remote of doc.feeds ?? []) {
-      if (removed.has(remote.url)) continue;
-      const local = this.feeds().find((f) => f.url === remote.url);
-      if (local) {
-        if ((remote.at ?? 0) > (local.categoryAt ?? 0)) {
-          const updated = { ...local, categoryId: await this.categoryIdByName(remote.category), categoryAt: remote.at };
-          await db.put('feeds', updated);
-          this.feeds.update((l) => l.map((f) => (f.id === local.id ? updated : f)));
-        }
-        continue;
+      if (removed.has(remote.url) || this.feeds().some((f) => f.url === remote.url)) continue;
+      let categoryId: string | null = null;
+      if (remote.category) {
+        await this.addCategory(remote.category);
+        categoryId = this.categories().find((c) => c.name.toLowerCase() === remote.category!.toLowerCase())?.id ?? null;
       }
-      const categoryId = await this.categoryIdByName(remote.category);
-      const feed: Feed = { id: `f${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`, url: remote.url, title: remote.title, categoryId, categoryAt: remote.at || undefined };
+      const feed: Feed = { id: `f${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`, url: remote.url, title: remote.title, categoryId };
       await db.put('feeds', feed);
       this.feeds.update((l) => [...l, feed]);
     }
     const changed: Article[] = [];
     const next = this.articles().map((a) => {
-      const remote = doc.states?.[stateKey(a.id)];
-      if (remote === undefined) return a;
-      const [rf, rt] = normState(remote);
-      const lf = flags(a);
-      const lt = a.stateAt ?? 0;
-      const f = rt > lt ? rf : rt === lt ? lf | rf : lf;
-      const t = Math.max(rt, lt);
-      if (f === lf && t === lt) return a;
-      const updated = { ...a, read: !!(f & 1), favorite: !!(f & 2), later: !!(f & 4), stateAt: t || undefined };
+      const remote = doc.states?.[stateKey(a.id)] ?? 0;
+      const merged = flags(a) | remote;
+      if (merged === flags(a)) return a;
+      const updated = { ...a, read: !!(merged & 1), favorite: !!(merged & 2), later: !!(merged & 4) };
       changed.push(updated);
       return updated;
     });
@@ -531,7 +495,7 @@ export class RssStore {
   }
 
   /** Remote states for articles not downloaded yet, applied once they arrive. */
-  private remoteStates: SyncDoc['states'] = {};
+  private remoteStates: Record<string, number> = {};
 
   private async applyPendingStates(): Promise<void> {
     const changed = this.articles().filter((a) => this.pendingStates.has(a.id)).map((a) => ({ ...a, ...this.pendingStates.get(a.id)! }));
@@ -545,8 +509,8 @@ export class RssStore {
   private async merge(feedId: string, items: ParsedFeed['items']): Promise<void> {
     const existing = new Set(this.articles().map((a) => a.id));
     const fresh: Article[] = items.filter((i) => !existing.has(i.id)).map((i) => {
-      const [rf, rt] = normState(this.remoteStates[stateKey(i.id)] ?? 0);
-      return { ...i, feedId, read: !!(rf & 1), favorite: !!(rf & 2), later: !!(rf & 4), ...(rt ? { stateAt: rt } : {}) };
+      const remote = this.remoteStates[stateKey(i.id)] ?? 0;
+      return { ...i, feedId, read: !!(remote & 1), favorite: !!(remote & 2), later: !!(remote & 4) };
     });
     if (!fresh.length) return;
     await db.putMany('articles', fresh);

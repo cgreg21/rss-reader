@@ -16,31 +16,16 @@ export class PushService {
   readonly enabled = signal(false);
   readonly busy = signal(false);
   readonly error = signal('');
-  /** Sync token of the library: lets the worker wake this library's other devices (empty without synchronisation). */
-  readonly syncToken = signal('');
-  /** Push endpoint of this device, sent along with sync uploads so it is not woken by its own changes. */
-  readonly deviceEndpoint = signal<string | undefined>(undefined);
 
   constructor() {
     if (!this.supported) return;
-    this.swPush!.subscription.subscribe((sub) => {
-      this.enabled.set(!!sub);
-      this.deviceEndpoint.set(sub?.endpoint);
-    });
+    this.swPush!.subscription.subscribe((sub) => this.enabled.set(!!sub));
     let timer: ReturnType<typeof setTimeout> | undefined;
     effect(() => {
       const urls = this.store.feeds().map((f) => f.url);
-      this.syncToken();
       if (!this.enabled() || !this.endpoint()) return;
       clearTimeout(timer);
       timer = setTimeout(() => void this.sync(urls).catch(() => undefined), 1500);
-    });
-  }
-
-  /** Calls back when another device of the library announces a change. */
-  onSyncMessage(callback: () => void): void {
-    this.swPush?.messages.subscribe((message) => {
-      if ((message as { sync?: boolean } | null)?.sync) callback();
     });
   }
 
@@ -101,7 +86,7 @@ export class PushService {
   private async post(path: string, body: unknown): Promise<void> {
     const response = await fetch(`${this.endpoint()}${path}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...(this.syncToken() ? { Authorization: `Bearer ${this.syncToken()}` } : {}) },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
     if (!response.ok) throw new Error(`Worker : erreur ${response.status}`);
