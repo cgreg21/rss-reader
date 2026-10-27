@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, ElementRef, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { DatePipe, NgTemplateOutlet } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 import { RssStore } from '../rss/rss.store';
 import { UI_ICONS } from '../ui/icons';
@@ -25,7 +26,11 @@ export class ArticlePage {
   protected readonly store = inject(RssStore);
   protected readonly ui = UI_ICONS;
   protected readonly article = computed(() => this.store.article(this.id()));
+  private readonly sanitizer = inject(DomSanitizer);
 
+  protected youtube(videoId: string): SafeResourceUrl {
+    return this.sanitizer.bypassSecurityTrustResourceUrl(`https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}`);
+  }
   /** Snapshot of the list order, so neighbours stay stable when reading an article hides it from the list. */
   private readonly order = signal<string[]>([]);
   private readonly neighbours = computed(() => {

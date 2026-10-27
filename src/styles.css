@@ -43,6 +43,17 @@
 
 @layer base {
   :root { color-scheme: dark; }
+  :root[data-theme='light'] {
+    color-scheme: light;
+    --color-bg: #f4f6fa;
+    --color-side: #ffffff;
+    --color-active: #dfe6f1;
+    --color-line: #d5dce8;
+    --color-muted: #5b6880;
+    --color-accent: #0f8f8a;
+    --color-slate-100: #0f172a;
+    --color-slate-300: #334155;
+  }
   html, body { @apply bg-bg text-slate-100 antialiased; height: 100vh; margin: 0; font-family: var(--font-sans); -webkit-tap-highlight-color: transparent; overscroll-behavior: none; touch-action: pan-x pan-y; }
   button, input, select { font: inherit; color: inherit; }
   /* Below 16px iOS zooms into a focused field and the page stays zoomed afterwards. */
@@ -66,7 +77,7 @@
 }
 
 /* Remote article HTML cannot carry utility classes. */
-.body { @apply wrap-anywhere text-base leading-7 wide:text-[17px] wide:leading-8; }
+.body { @apply wrap-anywhere; font-size: var(--body-size, 17px); line-height: 1.7; }
 .body p, .body ul, .body ol, .body figure { @apply my-4; }
 .body img, .body video { @apply h-auto max-w-full rounded-lg; }
 .body a { @apply text-accent underline; }

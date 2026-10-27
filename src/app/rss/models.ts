@@ -5,6 +5,11 @@ export interface Category {
 
 export type FeedFormat = 'RSS 2.0' | 'Atom' | 'RSS 1.0 (RDF)' | 'JSON Feed';
 
+export interface Media {
+  url: string;
+  kind: 'audio' | 'video' | 'youtube';
+}
+
 export interface Feed {
   id: string;
   url: string;
@@ -15,6 +20,8 @@ export interface Feed {
   categoryId: string | null;
   lastFetched?: number;
   error?: string;
+  /** Consecutive failed refreshes. */
+  failures?: number;
 }
 
 export interface Article {
@@ -25,9 +32,12 @@ export interface Article {
   summary: string;
   content: string;
   image?: string;
+  media?: Media;
   published: number;
   read: boolean;
   favorite: boolean;
+  later?: boolean;
+  fullText?: boolean;
 }
 
 export interface ParsedFeed {
@@ -35,5 +45,5 @@ export interface ParsedFeed {
   siteUrl?: string;
   description?: string;
   format?: FeedFormat;
-  items: Omit<Article, 'feedId' | 'read' | 'favorite'>[];
+  items: Omit<Article, 'feedId' | 'read' | 'favorite' | 'later' | 'fullText'>[];
 }

@@ -124,6 +124,35 @@ export class FeedsPage {
     }
   }
 
+  protected async importBackupFile(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+    try {
+      const { feeds } = await this.store.importBackup(await file.text());
+      this.opmlMessage.set(`Sauvegarde restaurée : ${feeds} flux ajouté(s).`);
+    } catch (e) {
+      this.opmlMessage.set(e instanceof Error ? e.message : 'Import impossible');
+    }
+  }
+
+  protected exportBackupFile(): void {
+    const url = URL.createObjectURL(new Blob([this.store.exportBackup()], { type: 'application/json' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'rssreader-backup.json';
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  protected readonly retentionOptions = [7, 30, 90];
+  protected readonly fontSizes = [14, 15, 16, 17, 18, 20, 22];
+
+  protected setMuted(text: string): void {
+    this.store.setMutedWords(text.split('\n'));
+  }
+
   protected exportFile(): void {
     const url = URL.createObjectURL(new Blob([this.store.exportOpml()], { type: 'text/x-opml' }));
     const link = document.createElement('a');

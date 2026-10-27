@@ -1,21 +1,36 @@
 import { Injectable, computed, signal } from '@angular/core';
 
 import { db } from './db';
-import { discoverFeedUrl, looksLikeHtml, parseFeed } from './feed-parser';
-import { Article, Category, Feed } from './models';
+import { deduceFeedUrl, discoverFeedUrl, extractReadable, looksLikeHtml, parseFeed } from './feed-parser';
+import { Article, Category, Feed, ParsedFeed } from './models';
 import { buildOpml, parseOpml } from './opml';
+
+const toPlainLength = (html: string): number => html.replace(/<[^>]*>/g, '').trim().length;
 
 export type Scope =
   | { type: 'all' }
   | { type: 'today' }
   | { type: 'favorites' }
+  | { type: 'later' }
   | { type: 'feed'; id: string }
   | { type: 'category'; id: string };
 
 const PROXY_KEY = 'rssreader:caldav-proxy';
 const PROXY_ENABLED_KEY = 'rssreader:proxy-enabled';
 const AUTO_REFRESH_KEY = 'rssreader:auto-refresh';
+const MUTED_KEY = 'rssreader:muted-words';
+const RETENTION_KEY = 'rssreader:retention-days';
+const FONT_KEY = 'rssreader:font-size';
+const THEME_KEY = 'rssreader:theme';
 const DEFAULT_PROXY = '';
+const MAX_CACHED_IMAGES = 300;
+const DEAD_FEED_FAILURES = 5;
+
+export type Theme = 'dark' | 'light';
+const applyAppearance = (theme: Theme, fontSize: number): void => {
+  document.documentElement.dataset['theme'] = theme;
+  document.documentElement.style.setProperty('--body-size', `${fontSize}px`);
+};
 
 /** The proxy relays the path as is, so only its origin matters; an invalid value means no proxy. */
 const proxyOrigin = (value: string): string => {
@@ -60,6 +75,36 @@ export class RssStore {
   readonly layout = signal<ArticleLayout>(readLayout());
   /** Minutes between automatic refreshes while online; 0 disables it. */
   readonly autoRefresh = signal(Number(localStorage.getItem(AUTO_REFRESH_KEY) ?? 15) || 0);
+  /** One muted word or phrase per entry; matching articles are hidden. */
+  readonly mutedWords = signal<string[]>(JSON.parse(localStorage.getItem(MUTED_KEY) ?? '[]') as string[]);
+  /** Read, non-favorite articles older than this many days are purged; 0 keeps everything. */
+  readonly retentionDays = signal(Number(localStorage.getItem(RETENTION_KEY) ?? 0) || 0);
+  readonly fontSize = signal(Number(localStorage.getItem(FONT_KEY) ?? 17) || 17);
+  readonly theme = signal<Theme>(localStorage.getItem(THEME_KEY) === 'light' ? 'light' : 'dark');
+
+  setMutedWords(words: string[]): void {
+    const clean = words.map((w) => w.trim().toLowerCase()).filter(Boolean);
+    this.mutedWords.set(clean);
+    localStorage.setItem(MUTED_KEY, JSON.stringify(clean));
+  }
+
+  setRetentionDays(days: number): void {
+    this.retentionDays.set(days);
+    localStorage.setItem(RETENTION_KEY, String(days));
+    void this.purge();
+  }
+
+  setFontSize(size: number): void {
+    this.fontSize.set(size);
+    localStorage.setItem(FONT_KEY, String(size));
+    applyAppearance(this.theme(), size);
+  }
+
+  setTheme(theme: Theme): void {
+    this.theme.set(theme);
+    localStorage.setItem(THEME_KEY, theme);
+    applyAppearance(theme, this.fontSize());
+  }
 
   setLayout(value: ArticleLayout): void {
     this.layout.set(value);
@@ -70,23 +115,30 @@ export class RssStore {
     const s = this.scope();
     if (s.type === 'feed') return this.feeds().find((f) => f.id === s.id)?.title ?? '';
     if (s.type === 'category') return this.categories().find((c) => c.id === s.id)?.name ?? '';
-    return { all: 'Tous les flux', today: "Aujourd'hui", favorites: 'Favoris' }[s.type];
+    return { all: 'Tous les flux', today: "Aujourd'hui", favorites: 'Favoris', later: 'À lire plus tard' }[s.type];
   });
 
   readonly visible = computed(() => {
     const s = this.scope();
     const unreadOnly = this.unreadOnly();
     const q = this.search().trim().toLowerCase();
+    const muted = this.mutedWords();
     const feedIds = s.type === 'category' ? new Set(this.feeds().filter((f) => f.categoryId === s.id).map((f) => f.id)) : null;
     const today = startOfToday();
+    const plain = (a: Article): string => `${a.title} ${a.summary} ${a.content.replace(/<[^>]*>/g, ' ')}`.toLowerCase();
     return this.articles()
       .filter((a) => {
         if (s.type === 'feed' && a.feedId !== s.id) return false;
         if (feedIds && !feedIds.has(a.feedId)) return false;
         if (s.type === 'today' && a.published < today) return false;
         if (s.type === 'favorites' && !a.favorite) return false;
-        if (unreadOnly && a.read && s.type !== 'favorites') return false;
-        return !q || `${a.title} ${a.summary}`.toLowerCase().includes(q);
+        if (s.type === 'later' && !a.later) return false;
+        if (unreadOnly && a.read && s.type !== 'favorites' && s.type !== 'later') return false;
+        if (muted.length && !a.favorite && !a.later) {
+          const hay = `${a.title} ${a.summary}`.toLowerCase();
+          if (muted.some((w) => hay.includes(w))) return false;
+        }
+        return !q || plain(a).includes(q);
       })
       .sort((a, b) => b.published - a.published);
   });
@@ -102,6 +154,8 @@ export class RssStore {
     return this.articles().filter((a) => !a.read && a.published >= today).length;
   });
   readonly favoriteCount = computed(() => this.articles().filter((a) => a.favorite).length);
+  readonly laterCount = computed(() => this.articles().filter((a) => a.later).length);
+  readonly deadFeeds = computed(() => this.feeds().filter((f) => (f.failures ?? 0) >= DEAD_FEED_FAILURES));
 
   /** Feeds grouped by category; uncategorised feeds go last. */
   readonly groups = computed(() => {
@@ -125,6 +179,7 @@ export class RssStore {
   private autoTimer: ReturnType<typeof setInterval> | null = null;
 
   constructor() {
+    applyAppearance(this.theme(), this.fontSize());
     window.addEventListener('online', () => {
       this.online.set(true);
       void this.refreshAll();
@@ -179,7 +234,7 @@ export class RssStore {
   }
 
   async addFeed(rawUrl: string, categoryId: string | null): Promise<void> {
-    let url = new URL(rawUrl.trim()).href;
+    let url = deduceFeedUrl(rawUrl.trim()) ?? new URL(rawUrl.trim()).href;
     let body = await this.download(url);
     if (looksLikeHtml(body)) {
       const discovered = discoverFeedUrl(body, url);
@@ -274,9 +329,21 @@ export class RssStore {
       this.lastRefresh = Date.now();
       this.syncing.set(false);
     }
+    await this.purge();
   }
 
-  async patch(id: string, changes: Partial<Pick<Article, 'read' | 'favorite'>>): Promise<void> {
+  async purge(): Promise<void> {
+    const days = this.retentionDays();
+    if (days <= 0) return;
+    const limit = Date.now() - days * 86_400_000;
+    const stale = this.articles().filter((a) => a.read && !a.favorite && !a.later && a.published < limit);
+    if (!stale.length) return;
+    for (const a of stale) await db.remove('articles', a.id);
+    const gone = new Set(stale.map((a) => a.id));
+    this.articles.update((l) => l.filter((a) => !gone.has(a.id)));
+  }
+
+  async patch(id: string, changes: Partial<Pick<Article, 'read' | 'favorite' | 'later'>>): Promise<void> {
     const article = this.article(id);
     if (!article) return;
     const updated = { ...article, ...changes };
@@ -296,15 +363,65 @@ export class RssStore {
     try {
       const parsed = parseFeed(await this.download(feed.url), feed.id);
       await this.merge(feed.id, parsed.items);
-      updated = { ...feed, siteUrl: feed.siteUrl ?? parsed.siteUrl, description: parsed.description ?? feed.description, format: parsed.format, lastFetched: Date.now(), error: undefined };
+      updated = { ...feed, siteUrl: feed.siteUrl ?? parsed.siteUrl, description: parsed.description ?? feed.description, format: parsed.format, lastFetched: Date.now(), error: undefined, failures: 0 };
     } catch (error) {
-      updated = { ...feed, error: error instanceof Error ? error.message : 'Erreur' };
+      updated = { ...feed, error: error instanceof Error ? error.message : 'Erreur', failures: (feed.failures ?? 0) + 1 };
     }
     await db.put('feeds', updated);
     this.feeds.update((l) => l.map((f) => (f.id === feed.id ? updated : f)));
   }
 
-  private async merge(feedId: string, items: Omit<Article, 'feedId' | 'read' | 'favorite'>[]): Promise<void> {
+  /** Downloads the article's web page and replaces its content with the extracted full text. */
+  async fetchFullText(id: string): Promise<void> {
+    const article = this.article(id);
+    if (!article?.link) throw new Error("Pas d'adresse d'origine");
+    const content = extractReadable(await this.download(article.link), article.link);
+    if (toPlainLength(content) < 200) throw new Error('Texte complet introuvable');
+    const updated = { ...article, content, fullText: true };
+    this.articles.update((l) => l.map((a) => (a.id === id ? updated : a)));
+    await db.put('articles', updated);
+  }
+
+  /** Feeds, categories and article states as JSON, to move the library to another device. */
+  exportBackup(): string {
+    const states = this.articles().filter((a) => a.read || a.favorite || a.later).map((a) => ({ id: a.id, read: a.read, favorite: a.favorite, later: !!a.later }));
+    return JSON.stringify({ version: 1, categories: this.categories(), feeds: this.feeds().map(({ error, failures, ...f }) => f), states });
+  }
+
+  async importBackup(json: string): Promise<{ feeds: number }> {
+    const data = JSON.parse(json) as { categories?: Category[]; feeds?: Feed[]; states?: { id: string; read: boolean; favorite: boolean; later: boolean }[] };
+    if (!Array.isArray(data.feeds)) throw new Error('Sauvegarde invalide');
+    for (const c of data.categories ?? []) {
+      if (this.categories().some((x) => x.id === c.id)) continue;
+      await db.put('categories', c);
+      this.categories.update((l) => [...l, c]);
+    }
+    const known = new Set(this.feeds().map((f) => f.url));
+    let feeds = 0;
+    for (const f of data.feeds) {
+      if (known.has(f.url)) continue;
+      await db.put('feeds', f);
+      this.feeds.update((l) => [...l, f]);
+      feeds++;
+    }
+    this.pendingStates = new Map((data.states ?? []).map((s) => [s.id, s]));
+    await this.refreshAll();
+    await this.applyPendingStates();
+    return { feeds };
+  }
+
+  private pendingStates = new Map<string, { read: boolean; favorite: boolean; later: boolean }>();
+
+  private async applyPendingStates(): Promise<void> {
+    const changed = this.articles().filter((a) => this.pendingStates.has(a.id)).map((a) => ({ ...a, ...this.pendingStates.get(a.id)! }));
+    this.pendingStates.clear();
+    if (!changed.length) return;
+    const byId = new Map(changed.map((a) => [a.id, a]));
+    this.articles.update((l) => l.map((a) => byId.get(a.id) ?? a));
+    await db.putMany('articles', changed);
+  }
+
+  private async merge(feedId: string, items: ParsedFeed['items']): Promise<void> {
     const existing = new Set(this.articles().map((a) => a.id));
     const fresh: Article[] = items.filter((i) => !existing.has(i.id)).map((i) => ({ ...i, feedId, read: false, favorite: false }));
     if (!fresh.length) return;
@@ -370,6 +487,8 @@ export class RssStore {
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       if (cache) {
         await cache.put(url, response.clone());
+        const keys = await cache.keys();
+        for (const old of keys.slice(0, Math.max(0, keys.length - MAX_CACHED_IMAGES))) await cache.delete(old);
         void this.refreshImageCacheCount();
       }
     }

@@ -20,6 +20,9 @@
   <button type="button" class="nav-item" [class.active]="is('favorites')" (click)="go({ type: 'favorites' })">
     <span class="flex items-center gap-3"><span class="font-mdi text-[22px]">{{ ui.favorite }}</span>Favoris</span><em class="nav-count">{{ store.favoriteCount() }}</em>
   </button>
+  <button type="button" class="nav-item" [class.active]="is('later')" (click)="go({ type: 'later' })">
+    <span class="flex items-center gap-3"><span class="font-mdi text-[22px]">{{ ui.later }}</span>À lire plus tard</span><em class="nav-count">{{ store.laterCount() }}</em>
+  </button>
   <hr class="mx-1 my-2.5 border-line">
   @for (g of store.groups(); track g.id) {
     @if (g.id) {

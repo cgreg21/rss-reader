@@ -1,4 +1,4 @@
-import { FeedFormat, ParsedFeed } from './models';
+import { FeedFormat, Media, ParsedFeed } from './models';
 
 const BLOCKED = 'script,iframe,object,embed,style,link,form,meta';
 
@@ -47,6 +47,52 @@ function hash(value: string): string {
 
 const FEED_LINK_TYPES = /^application\/(rss\+xml|atom\+xml|feed\+json|json|rdf\+xml)$/i;
 
+/** Feed URL implied by a Reddit, YouTube or Mastodon address, or null for anything else. */
+export function deduceFeedUrl(raw: string): string | null {
+  let url: URL;
+  try {
+    url = new URL(raw);
+  } catch {
+    return null;
+  }
+  const host = url.hostname.replace(/^(www|m|old)\./, '');
+  const path = url.pathname.replace(/\/+$/, '');
+  if (host === 'reddit.com' && /^\/(r|u|user)\/[^/]+$/.test(path)) return `https://www.reddit.com${path}/.rss`;
+  if (host === 'youtube.com') {
+    const channel = /^\/channel\/([\w-]+)/.exec(path);
+    if (channel) return `https://www.youtube.com/feeds/videos.xml?channel_id=${channel[1]}`;
+    const playlist = url.searchParams.get('list');
+    if (path === '/playlist' && playlist) return `https://www.youtube.com/feeds/videos.xml?playlist_id=${playlist}`;
+  }
+  // Mastodon-style profile: https://instance/@user (the HTML page is also discoverable, this skips a request).
+  if (/^\/@[\w.-]+$/.test(path) && host !== 'youtube.com' && host !== 'medium.com') return `${url.origin}${path}.rss`;
+  return null;
+}
+
+/** Extracts the main readable block of a full web page (article, main, or the densest container). */
+export function extractReadable(html: string, baseUrl: string): string {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  doc.querySelectorAll('nav,header,footer,aside,form,noscript').forEach((el) => el.remove());
+  let best: Element | null = doc.querySelector('article') ?? doc.querySelector('main');
+  if (!best) {
+    let score = 0;
+    doc.body?.querySelectorAll('div,section').forEach((el) => {
+      const own = Array.from(el.querySelectorAll('p')).reduce((n, p) => n + (p.textContent?.length ?? 0), 0);
+      if (own > score) { score = own; best = el; }
+    });
+  }
+  const root = (best ?? doc.body) as Element | null;
+  if (!root) return '';
+  root.querySelectorAll('[src],[href]').forEach((el) => {
+    for (const name of ['src', 'href']) {
+      const value = el.getAttribute(name);
+      if (!value) continue;
+      try { el.setAttribute(name, new URL(value, baseUrl).href); } catch { /* keep as is */ }
+    }
+  });
+  return sanitizeHtml(root.innerHTML);
+}
+
 export const looksLikeHtml = (body: string): boolean => /^\s*(<!doctype\s+html|<html[\s>])/i.test(body);
 
 /** Finds the feed advertised by a web page through its <link rel="alternate"> tags. */
@@ -75,6 +121,7 @@ interface JsonFeedItem {
   banner_image?: string;
   date_published?: string;
   date_modified?: string;
+  attachments?: { url?: string; mime_type?: string }[];
 }
 
 function parseJsonFeed(json: string, feedId: string): ParsedFeed {
@@ -91,12 +138,14 @@ function parseJsonFeed(json: string, feedId: string): ParsedFeed {
     const content = sanitizeHtml(item.content_html ?? (escaped ? `<p>${escaped.replace(/\n/g, '<br>')}</p>` : ''));
     const date = Date.parse(item.date_published ?? item.date_modified ?? '');
     const title = toText(item.title ?? '');
+    const attachment = item.attachments?.find((x) => /^(audio|video)\//.test(x.mime_type ?? ''));
     return {
       id: `${feedId}:${hash(String(item.id ?? (link || title)))}`,
       title: title || '(sans titre)',
       link,
       summary: toText(item.summary ?? content ?? '').slice(0, 280),
       content,
+      media: attachment?.url ? { url: attachment.url, kind: attachment.mime_type?.startsWith('video') ? ('video' as const) : ('audio' as const) } : undefined,
       image: item.image ?? item.banner_image ?? new DOMParser().parseFromString(content, 'text/html').querySelector('img')?.getAttribute('src') ?? undefined,
       published: Number.isNaN(date) ? Date.now() : date,
     };
@@ -134,6 +183,14 @@ export function parseFeed(xml: string, feedId: string): ParsedFeed {
         && (c.getAttribute('type')?.startsWith('image') || c.localName === 'thumbnail' || c.getAttribute('medium') === 'image'),
     )?.getAttribute('url');
     const image = media ?? new DOMParser().parseFromString(content, 'text/html').querySelector('img')?.getAttribute('src') ?? undefined;
+    const youtubeId = text(entry, 'videoId');
+    const enclosure = Array.from(entry.children).find(
+      (c) => (c.localName === 'enclosure' || (c.localName === 'link' && c.getAttribute('rel') === 'enclosure')) && /^(audio|video)\//.test(c.getAttribute('type') ?? ''),
+    );
+    const enclosureUrl = enclosure?.getAttribute('url') ?? enclosure?.getAttribute('href');
+    const mediaItem: Media | undefined = youtubeId
+      ? { url: youtubeId, kind: 'youtube' }
+      : enclosureUrl ? { url: enclosureUrl, kind: enclosure?.getAttribute('type')?.startsWith('video') ? 'video' : 'audio' } : undefined;
     return {
       id: `${feedId}:${hash(guid)}`,
       title: toText(text(entry, 'title')) || '(sans titre)',
@@ -141,6 +198,7 @@ export function parseFeed(xml: string, feedId: string): ParsedFeed {
       summary: toText(rawSummary).slice(0, 280),
       content,
       image,
+      media: mediaItem,
       published: Number.isNaN(date) ? Date.now() : date,
     };
   });
