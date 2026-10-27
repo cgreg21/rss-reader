@@ -1,30 +1,31 @@
 import { Directive, ElementRef, OnDestroy, effect, inject, input } from '@angular/core';
 
 import { sanitizeHtml } from '../rss/feed-parser';
-import { RssStore } from '../rss/rss.store';
+import { ImageCache } from '../rss/image-cache.service';
+import { SettingsStore } from '../rss/settings.store';
 
-const loadVia = async (store: RssStore, img: HTMLImageElement, url: string): Promise<void> => {
-  img.src = await store.imageUrl(url);
+const loadVia = async (images: ImageCache, img: HTMLImageElement, url: string): Promise<void> => {
+  img.src = await images.url(url);
 };
 
 /** Loads an image through the CORS proxy (when enabled) once it is about to scroll into view. */
 @Directive({ selector: 'img[rssProxyImg]' })
 export class ProxyImgDirective implements OnDestroy {
   readonly url = input.required<string>({ alias: 'rssProxyImg' });
-  private readonly store = inject(RssStore);
+  private readonly images = inject(ImageCache);
+  private readonly settings = inject(SettingsStore);
   private readonly img = inject<ElementRef<HTMLImageElement>>(ElementRef).nativeElement;
   private observer: IntersectionObserver | null = null;
 
   constructor() {
     effect(() => {
       const url = this.url();
-      this.store.proxyEnabled();
-      this.store.proxy();
+      this.settings.activeProxy();
       this.observer?.disconnect();
       this.observer = new IntersectionObserver((entries) => {
         if (!entries.some((e) => e.isIntersecting)) return;
         this.observer?.disconnect();
-        void loadVia(this.store, this.img, url);
+        void loadVia(this.images, this.img, url);
       }, { rootMargin: '200px' });
       this.observer.observe(this.img);
     });
@@ -39,7 +40,7 @@ export class ProxyImgDirective implements OnDestroy {
 @Directive({ selector: '[rssProxyContent]' })
 export class ProxyContentDirective {
   readonly html = input.required<string>({ alias: 'rssProxyContent' });
-  private readonly store = inject(RssStore);
+  private readonly images = inject(ImageCache);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
 
   constructor() {
@@ -53,7 +54,7 @@ export class ProxyContentDirective {
         if (url) images.push([img, url]);
       }
       this.host.replaceChildren(...Array.from(doc.body.childNodes).map((n) => document.adoptNode(n)));
-      for (const [img, url] of images) void loadVia(this.store, img, url);
+      for (const [img, url] of images) void loadVia(this.images, img, url);
     });
   }
 }

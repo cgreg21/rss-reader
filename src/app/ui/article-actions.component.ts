@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 
-import { ArticleLayout, RssStore } from '../rss/rss.store';
+import { RssStore } from '../rss/rss.store';
+import { ArticleLayout, SettingsStore } from '../rss/settings.store';
 import { DialogService } from './dialog.service';
 import { UI_ICONS } from './icons';
 
@@ -13,14 +14,15 @@ import { UI_ICONS } from './icons';
     <button class="icon-btn" type="button" aria-label="Tout marquer comme lu" (click)="markAllRead()">{{ ui.markAllRead }}</button>
     <div class="flex rounded-full bg-side p-0.5 sidebar:bg-bg" role="group" aria-label="Mise en page">
       @for (l of layouts; track l.id) {
-        <button class="icon-btn !size-9 !min-w-9" type="button" [attr.aria-label]="l.label" [attr.aria-pressed]="store.layout() === l.id"
-          [class]="store.layout() === l.id ? 'bg-accent !text-white' : ''" (click)="store.setLayout(l.id)">{{ l.icon }}</button>
+        <button class="icon-btn !size-9 !min-w-9" type="button" [attr.aria-label]="l.label" [attr.aria-pressed]="settings.layout() === l.id"
+          [class]="settings.layout() === l.id ? 'bg-accent !text-white' : ''" (click)="settings.layout.set(l.id)">{{ l.icon }}</button>
       }
     </div>
   `,
 })
 export class ArticleActionsComponent {
   protected readonly store = inject(RssStore);
+  protected readonly settings = inject(SettingsStore);
   private readonly dialog = inject(DialogService);
   protected readonly ui = UI_ICONS;
   protected readonly layouts: { id: ArticleLayout; label: string; icon: string }[] = [

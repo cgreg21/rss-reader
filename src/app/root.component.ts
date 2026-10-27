@@ -78,7 +78,9 @@ export class RootComponent {
     this.router.events.pipe(filter((e) => e instanceof NavigationEnd)).subscribe(() => {
       this.drawer.close();
       this.onArticles.set(this.isArticles());
-      this.articleId.set(this.currentArticleId());
+      const id = this.currentArticleId();
+      if (id && id !== this.articleId()) this.shell().nativeElement.querySelector('main')?.scrollTo(0, 0);
+      this.articleId.set(id);
       this.onOptions.set(this.isOptions());
     });
 

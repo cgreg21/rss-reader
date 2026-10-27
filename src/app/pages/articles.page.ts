@@ -3,6 +3,7 @@ import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
 import { RssStore } from '../rss/rss.store';
+import { SettingsStore } from '../rss/settings.store';
 import { Article } from '../rss/models';
 import { CardListComponent } from './card-list.component';
 import { RevealDirective } from '../ui/reveal.directive';
@@ -21,6 +22,7 @@ import { SnackbarService } from '../ui/snackbar.service';
 })
 export class ArticlesPage {
   protected readonly store = inject(RssStore);
+  protected readonly settings = inject(SettingsStore);
   protected readonly ui = UI_ICONS;
   private readonly snackbar = inject(SnackbarService);
 

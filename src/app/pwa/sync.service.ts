@@ -1,7 +1,10 @@
 import { Injectable, effect, inject, signal } from '@angular/core';
 
-import { RssStore, SyncDoc } from '../rss/rss.store';
+import { LibraryService, SyncDoc } from '../rss/library.service';
+import { RssStore } from '../rss/rss.store';
+import { SettingsStore, proxyOrigin } from '../rss/settings.store';
 import { SnackbarService } from '../ui/snackbar.service';
+import { LiveChannel } from './live-channel';
 
 const CODE_KEY = 'rssreader:sync-code';
 const PIN_LENGTH = 4;
@@ -9,38 +12,40 @@ const MAX_FAILURES = 5;
 /** Local changes are uploaded at most once an hour (or when the app is hidden). */
 const SYNC_INTERVAL_MS = 60 * 60_000;
 
-/** The worker wants a 16+ character secret: the PIN is stretched into one with SHA-256. */
-async function tokenFor(pin: string): Promise<string> {
+/** The server wants a 16+ character secret: the PIN is stretched into one with SHA-256. */
+export async function tokenFor(pin: string): Promise<string> {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`rssreader:${pin}`));
   return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, '0')).join('');
 }
 
-/** Keeps feeds, categories and read / favourite / later states in step across devices through the worker's /sync endpoint. */
+/** Keeps feeds, categories and read / favourite / later states in step across devices through the server's /sync endpoint. */
 @Injectable({ providedIn: 'root' })
 export class SyncService {
   private readonly store = inject(RssStore);
+  private readonly library = inject(LibraryService);
+  private readonly settings = inject(SettingsStore);
   private readonly snackbar = inject(SnackbarService);
-  private failures = 0;
-  /** Set after repeated failures: automatic syncs stop until the user retries by hand. */
-  readonly stopped = signal(false);
+  private readonly live = new LiveChannel(() => void this.sync());
 
   readonly code = signal(localStorage.getItem(CODE_KEY) ?? '');
   readonly busy = signal(false);
   readonly error = signal('');
   readonly lastSync = signal<number | null>(null);
+  /** Set after repeated failures: automatic syncs stop until the user retries by hand. */
+  readonly stopped = signal(false);
 
+  private failures = 0;
   private timer: ReturnType<typeof setTimeout> | undefined;
   private dirty = false;
-  private socket: WebSocket | undefined;
-  private socketKey = '';
-  private retry: ReturnType<typeof setTimeout> | undefined;
 
   constructor() {
     effect(() => {
-      this.code();
-      this.stopped();
-      this.store.proxy();
-      void this.connect();
+      const code = this.code();
+      const endpoint = this.enabled() ? this.endpoint() : '';
+      if (!endpoint) return this.live.close();
+      void tokenFor(code).then((token) => {
+        if (this.code() === code && this.enabled()) this.live.open(`${endpoint.replace(/^http/, 'ws')}/sync/ws?token=${token}`);
+      });
     });
     effect(() => {
       this.store.feeds();
@@ -61,11 +66,7 @@ export class SyncService {
   }
 
   enabled(): boolean {
-    return !this.stopped() && this.configured();
-  }
-
-  private configured(): boolean {
-    return new RegExp(`^\\d{${PIN_LENGTH}}$`).test(this.code()) && this.endpoint() !== '';
+    return !this.stopped() && new RegExp(`^\\d{${PIN_LENGTH}}$`).test(this.code()) && this.endpoint() !== '';
   }
 
   /** Manual retry: clears the failure stop, then syncs. */
@@ -78,9 +79,7 @@ export class SyncService {
   setCode(value: string): void {
     this.code.set(value.replace(/\D/g, '').slice(0, PIN_LENGTH));
     localStorage.setItem(CODE_KEY, this.code());
-    this.failures = 0;
-    this.stopped.set(false);
-    if (this.enabled()) void this.sync();
+    this.resume();
   }
 
   generateCode(): string {
@@ -106,12 +105,12 @@ export class SyncService {
         const doc = (await got.json()) as { rev: number; data: SyncDoc };
         rev = doc.rev;
         remote = JSON.stringify(doc.data);
-        await this.store.applySyncDoc(doc.data);
+        await this.library.applySyncDoc(doc.data);
       } else if (got.status !== 404) {
         throw new Error(`Synchronisation : erreur ${got.status}`);
       }
       for (let attempt = 0; attempt < 2; attempt++) {
-        const local = JSON.stringify(this.store.buildSyncDoc());
+        const local = JSON.stringify(this.library.buildSyncDoc());
         if (rev !== undefined && local === remote) break;
         const put = await this.call('PUT', { rev, data: JSON.parse(local) });
         if (put.ok) break;
@@ -119,7 +118,7 @@ export class SyncService {
         const current = (await put.json()) as { rev: number; data: SyncDoc };
         rev = current.rev;
         remote = JSON.stringify(current.data);
-        await this.store.applySyncDoc(current.data);
+        await this.library.applySyncDoc(current.data);
       }
       this.store.markSynced();
       this.lastSync.set(Date.now());
@@ -129,7 +128,6 @@ export class SyncService {
       this.error.set(e instanceof Error ? e.message : 'Synchronisation impossible');
       if (++this.failures >= MAX_FAILURES) {
         this.stopped.set(true);
-        this.socket?.close();
         this.snackbar.error('Synchronisation arrêtée après 5 échecs. Relancez-la depuis les options.');
       }
     } finally {
@@ -137,37 +135,8 @@ export class SyncService {
     }
   }
 
-  /** Live channel: the worker says "changed" when another device saved, then we pull. */
-  private async connect(): Promise<void> {
-    const enabled = this.enabled();
-    const key = enabled ? `${this.endpoint()}|${this.code()}` : '';
-    if (key === this.socketKey && (!enabled || this.socket)) return;
-    this.socketKey = key;
-    clearTimeout(this.retry);
-    this.socket?.close();
-    this.socket = undefined;
-    if (!enabled) return;
-    const token = await tokenFor(this.code());
-    if (this.socketKey !== key) return;
-    const url = `${this.endpoint().replace(/^http/, 'ws')}/sync/ws?token=${token}`;
-    const socket = new WebSocket(url);
-    this.socket = socket;
-    socket.onmessage = (event) => {
-      if (event.data === 'changed') void this.sync();
-    };
-    socket.onclose = () => {
-      if (this.socket !== socket) return;
-      this.socket = undefined;
-      this.retry = setTimeout(() => void this.connect(), 5000);
-    };
-  }
-
   private endpoint(): string {
-    try {
-      return new URL(this.store.proxy()).origin;
-    } catch {
-      return '';
-    }
+    return proxyOrigin(this.settings.proxy());
   }
 
   private async call(method: 'GET' | 'PUT', body?: unknown): Promise<Response> {
