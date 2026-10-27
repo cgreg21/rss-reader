@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 
 import { APP_VERSION } from '../pwa/app-info';
+import { SyncService } from '../pwa/sync.service';
 import { RssStore, Scope } from '../rss/rss.store';
 import { DrawerService } from './drawer.service';
 import { UI_ICONS } from './icons';
@@ -17,6 +18,13 @@ import { UI_ICONS } from './icons';
 export class DrawerContentComponent {
   protected readonly store = inject(RssStore);
   protected readonly drawer = inject(DrawerService);
+  private readonly sync = inject(SyncService);
+
+  /** Manual refresh: feeds, plus a sync retry (clears a failure stop). */
+  protected refresh(): void {
+    void this.store.refreshAll();
+    this.sync.resume();
+  }
   protected readonly ui = UI_ICONS;
   protected readonly version = APP_VERSION;
   private readonly router = inject(Router);

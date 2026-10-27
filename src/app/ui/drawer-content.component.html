@@ -5,7 +5,7 @@
     <button type="button" class="flex-1 rounded-full px-2.5 py-1 text-[13px]"
       [class]="!store.unreadOnly() ? 'bg-accent text-white' : 'text-muted'" (click)="store.unreadOnly.set(false)">Tous</button>
   </div>
-  <button class="icon-btn" type="button" aria-label="Actualiser" [class.animate-spin]="store.syncing()" (click)="store.refreshAll()">{{ ui.refresh }}</button>
+  <button class="icon-btn" type="button" aria-label="Actualiser" [class.animate-spin]="store.syncing()" (click)="refresh()">{{ ui.refresh }}</button>
   <a class="icon-btn" routerLink="/feeds" aria-label="Ajouter un flux" (click)="drawer.close()">{{ ui.add }}</a>
 </div>
 
