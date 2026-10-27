@@ -5,13 +5,12 @@ import { RouterLink } from '@angular/router';
 import { RssStore } from '../rss/rss.store';
 import { CardListComponent } from './card-list.component';
 import { RevealDirective } from '../ui/reveal.directive';
-import { CoverflowDirective } from '../ui/coverflow.directive';
 import { ProxyImgDirective } from '../ui/proxy-img.directive';
 
 @Component({
   selector: 'rss-articles',
   host: { class: 'block anim-fade-in' },
-  imports: [RouterLink, DatePipe, CardListComponent, RevealDirective, ProxyImgDirective, CoverflowDirective],
+  imports: [RouterLink, DatePipe, CardListComponent, RevealDirective, ProxyImgDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './articles.page.html',
 })
