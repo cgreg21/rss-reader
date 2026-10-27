@@ -58,7 +58,7 @@ export class SwipeActionsDirective {
       this.host.setPointerCapture(e.pointerId);
       this.host.style.transition = 'none';
     }
-    this.host.style.transform = `translateX(${dx}px)`;
+    this.host.style.transform = `translateX(${Math.sign(dx) * Math.pow(Math.abs(dx), 0.85)}px)`;
   }
 
   protected up(e: PointerEvent): void {
@@ -77,7 +77,7 @@ export class SwipeActionsDirective {
   protected reset(): void {
     this.start = null;
     this.horizontal = false;
-    this.host.style.transition = 'transform 200ms';
+    this.host.style.transition = 'transform 500ms cubic-bezier(0.34, 1.8, 0.64, 1)';
     this.host.style.transform = '';
   }
 }
