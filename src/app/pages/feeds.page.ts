@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { FeedHit, RssStore } from '../rss/rss.store';
 import { Feed } from '../rss/models';
@@ -19,6 +20,7 @@ export class FeedsPage {
   protected readonly store = inject(RssStore);
   protected readonly push = inject(PushService);
   private readonly dialog = inject(DialogService);
+  private readonly router = inject(Router);
   protected readonly autoRefreshOptions = [5, 15, 30, 60];
   protected readonly ui = UI_ICONS;
   protected url = '';
@@ -33,6 +35,17 @@ export class FeedsPage {
   protected readonly searching = signal(false);
   protected readonly searchError = signal('');
   protected readonly searched = signal(false);
+
+  constructor() {
+    // Opened from a share (Android share target, iOS shortcut) or a link: ?url=<site or feed>.
+    inject(ActivatedRoute).queryParamMap.pipe(takeUntilDestroyed()).subscribe((params) => {
+      const shared = params.get('url') ?? /https?:\/\/\S+/.exec(params.get('text') ?? '')?.[0];
+      if (!shared) return;
+      this.url = shared;
+      void this.router.navigate([], { queryParams: {}, replaceUrl: true });
+      void this.add();
+    });
+  }
 
   protected async search(): Promise<void> {
     if (!this.query.trim()) return;
