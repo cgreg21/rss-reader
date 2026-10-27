@@ -22,8 +22,16 @@ export class SyncService {
   readonly lastSync = signal<number | null>(null);
 
   private timer: ReturnType<typeof setTimeout> | undefined;
+  private socket: WebSocket | undefined;
+  private socketKey = '';
+  private retry: ReturnType<typeof setTimeout> | undefined;
 
   constructor() {
+    effect(() => {
+      this.code();
+      this.store.proxy();
+      void this.connect();
+    });
     effect(() => {
       this.store.feeds();
       this.store.articles();
@@ -90,6 +98,31 @@ export class SyncService {
     } finally {
       this.busy.set(false);
     }
+  }
+
+  /** Live channel: the worker says "changed" when another device saved, then we pull. */
+  private async connect(): Promise<void> {
+    const enabled = this.enabled();
+    const key = enabled ? `${this.endpoint()}|${this.code()}` : '';
+    if (key === this.socketKey && (!enabled || this.socket)) return;
+    this.socketKey = key;
+    clearTimeout(this.retry);
+    this.socket?.close();
+    this.socket = undefined;
+    if (!enabled) return;
+    const token = await tokenFor(this.code());
+    if (this.socketKey !== key) return;
+    const url = `${this.endpoint().replace(/^http/, 'ws')}/sync/ws?token=${token}`;
+    const socket = new WebSocket(url);
+    this.socket = socket;
+    socket.onmessage = (event) => {
+      if (event.data === 'changed') void this.sync();
+    };
+    socket.onclose = () => {
+      if (this.socket !== socket) return;
+      this.socket = undefined;
+      this.retry = setTimeout(() => void this.connect(), 5000);
+    };
   }
 
   private endpoint(): string {
