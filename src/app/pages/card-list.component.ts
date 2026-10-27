@@ -10,7 +10,7 @@ import { RevealDirective } from '../ui/reveal.directive';
   imports: [ArticleCardComponent, RevealDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="mx-auto flex w-full max-w-md flex-col gap-5 overflow-x-clip">
+    <div class="mx-auto flex w-full max-w-md flex-col gap-5">
       @for (a of articles(); track a.id) { <div rssReveal><rss-article-card [article]="a" /></div> }
     </div>`,
 })

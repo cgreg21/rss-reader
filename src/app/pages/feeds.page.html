@@ -62,16 +62,17 @@
   @if (opmlMessage()) { <p class="mb-2 text-sm text-muted">{{ opmlMessage() }}</p> }
   <ul>
     @for (f of store.feeds(); track f.id) {
-      <li class="flex flex-wrap items-center gap-2.5 border-t border-line py-2">
-        <div class="min-w-0 flex-1"><strong>{{ f.title }}</strong>
-          @if (f.description) { <small class="line-clamp-2 block text-muted">{{ f.description }}</small> }
+      <li class="flex flex-col gap-2 border-t border-line py-2">
+        <div class="min-w-0"><strong>{{ f.title }}</strong>
           @if (f.error) { <small class="block text-red-400">{{ f.error }}@if ((f.failures ?? 0) >= 5) { · inactif depuis {{ f.failures }} actualisations, à supprimer ? }</small> }</div>
-        <select class="field" [ngModel]="f.categoryId" (ngModelChange)="store.setFeedCategory(f.id, $event)">
-          <option [ngValue]="null">Sans catégorie</option>
-          @for (c of store.categories(); track c.id) { <option [ngValue]="c.id">{{ c.name }}</option> }
-        </select>
-        <button class="icon-btn" type="button" aria-label="Détails du flux" (click)="showFeedInfo(f)">{{ ui.info }}</button>
-        <button class="icon-btn !text-red-400 hover:!bg-red-500/10" type="button" aria-label="Se désabonner" (click)="store.removeFeed(f.id)">{{ ui.trash }}</button>
+        <div class="flex items-center gap-2.5">
+          <select class="field min-w-0 flex-1" [ngModel]="f.categoryId" (ngModelChange)="store.setFeedCategory(f.id, $event)">
+            <option [ngValue]="null">Sans catégorie</option>
+            @for (c of store.categories(); track c.id) { <option [ngValue]="c.id">{{ c.name }}</option> }
+          </select>
+          <button class="icon-btn" type="button" aria-label="Détails du flux" (click)="showFeedInfo(f)">{{ ui.info }}</button>
+          <button class="icon-btn !text-red-400 hover:!bg-red-500/10" type="button" aria-label="Se désabonner" (click)="store.removeFeed(f.id)">{{ ui.trash }}</button>
+        </div>
       </li>
     } @empty { <li>Aucun abonnement.</li> }
   </ul>
@@ -191,7 +192,7 @@
 </section>
 }
 
-<nav class="fixed inset-x-0 bottom-0 z-30 flex border-t border-line bg-side pb-[env(safe-area-inset-bottom)]" aria-label="Sections des options">
+<nav class="fixed inset-x-0 bottom-0 z-30 sidebar:left-[280px] flex border-t border-line bg-side pb-[env(safe-area-inset-bottom)]" aria-label="Sections des options">
   @for (t of tabs; track t.id) {
     <button type="button" class="flex-1 py-3 font-mdi text-2xl" [class]="tab() === t.id ? 'text-accent' : 'text-muted'" [attr.aria-label]="t.label" [attr.aria-current]="tab() === t.id ? 'page' : null" (click)="tab.set(t.id)">{{ t.icon }}</button>
   }

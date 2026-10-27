@@ -5,7 +5,7 @@
        [style.transform]="layout.sidebar() ? null : 'translateX(' + (1 + drawerX() / 280) * 48 + 'px)'">
     <rss-top-bar [actions]="onArticles()" [articleId]="articleId()" [options]="onOptions()" />
 
-    <main [rssPullRefresh]="refresh" [rssPullRefreshEnabled]="onArticles()" #pull="pullRefresh" class="min-h-0 flex-1 overscroll-contain p-3.5 sm:p-5 sidebar:p-8" [class.overflow-y-auto]="!articleId()" [class.overflow-y-hidden]="!!articleId()">
+    <main [rssPullRefresh]="refresh" [rssPullRefreshEnabled]="onArticles()" #pull="pullRefresh" class="min-h-0 flex-1 overflow-x-clip overscroll-contain p-3.5 sm:p-5 sidebar:p-8" [class.overflow-y-auto]="!articleId()" [class.overflow-y-hidden]="!!articleId()">
       <div class="flex items-end justify-center overflow-hidden text-xs text-muted" [class.transition-[height]]="!pull.pulling()"
            [style.height.px]="pull.distance()" aria-live="polite">
         @if (pull.distance() > 0) { <span class="pb-2">{{ pull.label() }}</span> }
