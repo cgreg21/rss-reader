@@ -1,5 +1,5 @@
 <header class="flex items-center justify-between gap-2 bg-side px-2.5 pb-1.5 pt-[calc(14px+env(safe-area-inset-top))] sidebar:px-8 sidebar:pt-3">
-  <button class="icon-btn relative sidebar:hidden" type="button" aria-label="Menu" (click)="drawer.show()">{{ ui.menu }}
+  <button class="icon-btn relative sidebar:hidden" type="button"   aria-label="Menu" [attr.aria-expanded]="drawer.opened()" (click)="drawer.show()"><span class="burger" [class.is-active]="drawer.opened()"><span class="burger-bar"></span></span>
     @if (store.unreadTotal() > 0) {
       <span animate.enter="anim-pop-in" class="absolute right-0.5 top-0.5 min-w-[18px] rounded-full bg-accent px-1 text-center font-sans text-[11px] font-bold leading-[18px] text-white">{{ store.unreadTotal() > 99 ? '99+' : store.unreadTotal() }}</span>
     }
