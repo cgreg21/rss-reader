@@ -1,6 +1,8 @@
 <div #shell class="fixed inset-0 flex h-screen touch-pan-y flex-col overflow-hidden bg-bg pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] sidebar:flex-row"
      (pointerdown)="onDown($event)" (pointermove)="onMove($event)" (pointerup)="onUp($event)" (pointercancel)="onUp($event)">
-  <div class="flex min-h-0 min-w-0 flex-1 flex-col sidebar:order-last">
+  <div class="flex min-h-0 min-w-0 flex-1 flex-col sidebar:order-last"
+       [class]="dragging() ? '' : 'transition-transform duration-200 ease-out'"
+       [style.transform]="layout.sidebar() ? null : 'translateX(' + (1 + drawerX() / 280) * 48 + 'px)'">
     <rss-top-bar [actions]="onArticles()" [articleId]="articleId()" />
 
     <main [rssPullRefresh]="refresh" [rssPullRefreshEnabled]="!articleId()" #pull="pullRefresh" class="min-h-0 flex-1 overscroll-contain p-3.5 sm:p-5 sidebar:px-8 sidebar:py-6" [class.overflow-y-auto]="!articleId()" [class.overflow-y-hidden]="!!articleId()">
