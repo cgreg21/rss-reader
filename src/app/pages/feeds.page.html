@@ -1,5 +1,6 @@
 <div class="mb-5 flex items-center gap-3"><h1 class="flex-1 text-xl font-bold sm:text-[22px]">Abonnements</h1><a class="icon-btn" routerLink="/" aria-label="Retour">{{ ui.back }}</a></div>
 
+@if (tab() === 'feeds') {
 <section class="panel">
   <h2 class="mb-2.5 text-base font-bold">Ajouter un flux</h2>
   <form class="flex flex-wrap gap-2" (ngSubmit)="add()">
@@ -78,6 +79,7 @@
   @if (opmlMessage()) { <p class="mt-2 text-sm text-muted">{{ opmlMessage() }}</p> }
 </section>
 
+} @else if (tab() === 'sync') {
 <section class="panel">
   <div class="mb-2.5 flex items-center justify-between gap-3">
     <h2 class="text-base font-bold">Synchronisation</h2>
@@ -104,6 +106,7 @@
   </div>
 </section>
 
+} @else if (tab() === 'reading') {
 <section class="panel">
   <h2 class="mb-2.5 text-base font-bold">Lecture</h2>
   <div class="flex items-center justify-between gap-3 py-1">
@@ -138,6 +141,7 @@
   <p class="mt-2 text-[13px] text-muted">Les articles lus de plus de N jours sont supprimés, sauf favoris et « à lire plus tard ».</p>
 </section>
 
+} @else {
 <section class="panel">
   <div class="flex items-center justify-between gap-3">
     <h2 class="text-base font-bold">Actualisation automatique</h2>
@@ -186,3 +190,11 @@
   <p class="mb-2 text-[13px] text-muted">Les images chargées via le proxy sont conservées sur l'appareil ({{ store.imageCacheCount() }} en cache).</p>
   <button type="button" class="btn" [disabled]="store.imageCacheCount() === 0" (click)="clearImageCache()">Vider le cache</button>
 </section>
+}
+
+<nav class="fixed inset-x-0 bottom-0 z-30 flex border-t border-line bg-side pb-[env(safe-area-inset-bottom)]" aria-label="Sections des options">
+  @for (t of tabs; track t.id) {
+    <button type="button" class="flex-1 py-3 font-mdi text-2xl" [class]="tab() === t.id ? 'text-accent' : 'text-muted'" [attr.aria-label]="t.label" [attr.aria-current]="tab() === t.id ? 'page' : null" (click)="tab.set(t.id)">{{ t.icon }}</button>
+  }
+</nav>
+<div class="h-16"></div>

@@ -26,6 +26,13 @@ export class FeedsPage {
   private readonly router = inject(Router);
   protected readonly autoRefreshOptions = [5, 15, 30, 60];
   protected readonly ui = UI_ICONS;
+  protected readonly tabs = [
+    { id: 'feeds', label: 'Flux', icon: UI_ICONS.all },
+    { id: 'reading', label: 'Lecture', icon: UI_ICONS.reader },
+    { id: 'sync', label: 'Synchro', icon: UI_ICONS.refresh },
+    { id: 'system', label: 'Système', icon: UI_ICONS.settings },
+  ] as const;
+  protected readonly tab = signal<(typeof this.tabs)[number]['id']>('feeds');
   protected url = '';
   protected categoryId: string | null = null;
   protected newCategory = '';
