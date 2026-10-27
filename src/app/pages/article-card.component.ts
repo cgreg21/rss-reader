@@ -12,6 +12,7 @@ const SWIPE_SLOP = 10;
 const TAP_SLOP = 6;
 const THRESHOLD = 100;
 const FLY_MS = 200;
+const LONG_PRESS_MS = 500;
 
 type Direction = 'left' | 'right';
 
@@ -50,13 +51,26 @@ export class ArticleCardComponent {
   protected onDown(event: PointerEvent): void {
     if (this.flying() || (event.pointerType === 'mouse' && event.button !== 0)) return;
     this.pointer = { x: event.clientX, y: event.clientY, id: event.pointerId, horizontal: null };
+    this.longFired = false;
+    clearTimeout(this.longTimer);
+    this.longTimer = setTimeout(() => {
+      this.longFired = true;
+      const article = this.article();
+      navigator.vibrate?.(30);
+      void this.store.patch(article.id, { later: !article.later });
+      this.snackbar.show(article.later ? 'Retiré de À lire plus tard' : 'Ajouté à À lire plus tard');
+    }, LONG_PRESS_MS);
   }
+
+  private longTimer: ReturnType<typeof setTimeout> | undefined;
+  private longFired = false;
 
   protected onMove(event: PointerEvent): void {
     const p = this.pointer;
     if (!p || event.pointerId !== p.id) return;
     const dx = event.clientX - p.x;
     const dy = event.clientY - p.y;
+    if (Math.hypot(dx, dy) > TAP_SLOP) clearTimeout(this.longTimer);
     if (p.horizontal === null && Math.max(Math.abs(dx), Math.abs(dy)) >= SWIPE_SLOP) {
       p.horizontal = Math.abs(dx) > Math.abs(dy);
       if (p.horizontal) {
@@ -73,6 +87,7 @@ export class ArticleCardComponent {
   protected onUp(event: PointerEvent): void {
     const p = this.pointer;
     this.pointer = null;
+    clearTimeout(this.longTimer);
     if (!p || event.pointerId !== p.id) return;
     const dx = event.clientX - p.x;
     const dy = event.clientY - p.y;
@@ -80,12 +95,13 @@ export class ArticleCardComponent {
       this.dragging.set(false);
       if (Math.abs(dx) >= THRESHOLD) this.fling(dx < 0 ? 'left' : 'right');
       else this.dragX.set(0);
-    } else if (p.horizontal === null && Math.hypot(dx, dy) < TAP_SLOP) {
+    } else if (p.horizontal === null && Math.hypot(dx, dy) < TAP_SLOP && !this.longFired) {
       void this.router.navigate(['/article', this.article().id]);
     }
   }
 
   protected onCancel(): void {
+    clearTimeout(this.longTimer);
     this.pointer = null;
     this.dragging.set(false);
     this.dragX.set(0);

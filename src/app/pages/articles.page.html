@@ -12,8 +12,8 @@
   @case ('list') {
     <div class="mx-auto flex max-w-3xl flex-col divide-y divide-line">
       @for (a of store.visible(); track a.id) {
-        <a rssReveal class="flex min-w-0 flex-col gap-1 py-3" [routerLink]="['/article', a.id]" [class.opacity-60]="a.read">
-          <h2 class="text-base font-bold">{{ a.title }}</h2>
+        <a rssReveal rssSwipe (swipeLeft)="toggleRead(a)" (swipeRight)="toggleFavorite(a)" (rssLongPress)="toggleLater(a)" class="flex min-w-0 flex-col gap-1 py-3" [routerLink]="['/article', a.id]" [class.opacity-60]="a.read">
+          <h2 class="text-base font-bold">@if (a.favorite) { <span class="mr-1 font-mdi text-yellow-300">{{ ui.favoriteOn }}</span> }@if (a.later) { <span class="mr-1 font-mdi text-accent">{{ ui.laterOn }}</span> }{{ a.title }}</h2>
           <span class="text-xs text-accent">{{ a.read ? '' : '● ' }}{{ a.published | date: 'dd/MM/yyyy HH:mm' }} · {{ feedTitle(a.feedId) }}</span>
           <p class="line-clamp-2 text-sm text-slate-300">{{ a.summary }}</p>
         </a>
@@ -23,8 +23,8 @@
   @default {
     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-5 sidebar:grid-cols-3 sidebar:gap-6">
       @for (a of store.visible(); track a.id) {
-        <a rssReveal class="flex min-w-0 flex-col gap-2.5 border-b border-line pb-6" [routerLink]="['/article', a.id]" [class.opacity-60]="a.read">
-          <h2 class="text-lg leading-tight font-bold sidebar:text-xl">{{ a.title }}</h2>
+        <a rssReveal rssSwipe (swipeLeft)="toggleRead(a)" (swipeRight)="toggleFavorite(a)" (rssLongPress)="toggleLater(a)" class="flex min-w-0 flex-col gap-2.5 border-b border-line pb-6" [routerLink]="['/article', a.id]" [class.opacity-60]="a.read">
+          <h2 class="text-lg leading-tight font-bold sidebar:text-xl">@if (a.favorite) { <span class="mr-1 font-mdi text-yellow-300">{{ ui.favoriteOn }}</span> }@if (a.later) { <span class="mr-1 font-mdi text-accent">{{ ui.laterOn }}</span> }{{ a.title }}</h2>
           @if (a.image) { <img class="aspect-[16/10] w-full rounded-xl bg-side object-cover" [rssProxyImg]="a.image" alt="" (error)="$any($event.target).remove()"> }
           <span class="text-xs text-accent">{{ a.read ? '' : '● ' }}{{ a.published | date: 'dd/MM/yyyy HH:mm' }} · {{ feedTitle(a.feedId) }}</span>
           <p class="line-clamp-5 flex-1 text-sm text-slate-300">{{ a.summary }}</p>
