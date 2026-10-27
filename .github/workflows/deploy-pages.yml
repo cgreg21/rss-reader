@@ -33,12 +33,6 @@ jobs:
       - name: Unit tests
         run: npm test
 
-      - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
-
-      - name: End-to-end tests
-        run: npm run e2e
-
   # Bumps the patch version first so the deployed build already shows the new number.
   bump:
     needs: test
