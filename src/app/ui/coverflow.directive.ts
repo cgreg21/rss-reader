@@ -8,6 +8,8 @@ interface Slot {
   /** Center of the wrapper from the top of the scrolling content, and its height. */
   center: number;
   height: number;
+  active: boolean;
+  settled?: number;
 }
 
 /**
@@ -62,8 +64,7 @@ export class CoverflowDirective implements OnDestroy {
         wrapper.style.scrollSnapAlign = 'center';
         card.style.position = 'relative';
       }
-      card.style.willChange = this.tilt() > 0 ? 'transform, opacity' : 'scale, filter';
-      return [{ card, wrapper, center: hostTop + wrapper.offsetTop + wrapper.offsetHeight / 2, height: wrapper.offsetHeight }];
+      return [{ card, wrapper, center: hostTop + wrapper.offsetTop + wrapper.offsetHeight / 2, height: wrapper.offsetHeight, active: false }];
     });
   }
 
@@ -73,7 +74,24 @@ export class CoverflowDirective implements OnDestroy {
     const middle = viewHeight / 2;
     const tilt = this.tilt();
     for (const slot of this.slots) {
-      const d = Math.max(-1, Math.min(1, (slot.center - scrollTop - middle) / (middle || 1)));
+      const raw = (slot.center - scrollTop - middle) / (middle || 1);
+      const margin = 1 + slot.height / (middle || 1);
+      // Cards far outside the viewport keep their last (clamped) style and release GPU layers.
+      if (Math.abs(raw) > margin) {
+        if (slot.active) {
+          slot.active = false;
+          slot.card.style.willChange = '';
+        }
+        if (slot.settled === Math.sign(raw)) continue;
+        slot.settled = Math.sign(raw);
+      } else {
+        slot.settled = 0;
+        if (!slot.active) {
+          slot.active = true;
+          slot.card.style.willChange = tilt > 0 ? 'transform, opacity' : 'scale, filter';
+        }
+      }
+      const d = Math.max(-1, Math.min(1, raw));
       const a = Math.abs(d);
       const scale = (1 - 0.1 * a).toFixed(3);
       const opacity = (1 - 0.45 * a * a).toFixed(3);
