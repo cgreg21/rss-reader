@@ -4,11 +4,12 @@ import { RouterLink, Router } from '@angular/router';
 
 import { RssStore } from '../rss/rss.store';
 import { UI_ICONS } from '../ui/icons';
+import { ProxyContentDirective } from '../ui/proxy-img.directive';
 import { ArticlesPage } from './articles.page';
 
 @Component({
   selector: 'rss-article',
-  imports: [RouterLink, DatePipe, NgTemplateOutlet, ArticlesPage],
+  imports: [RouterLink, DatePipe, NgTemplateOutlet, ArticlesPage, ProxyContentDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './article.page.html',
   host: {

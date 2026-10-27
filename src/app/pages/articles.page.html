@@ -25,7 +25,7 @@
       @for (a of store.visible(); track a.id) {
         <a rssReveal class="flex min-w-0 flex-col gap-2.5 border-b border-line pb-6" [routerLink]="['/article', a.id]" [class.opacity-60]="a.read">
           <h2 class="text-lg leading-tight font-bold sidebar:text-xl">{{ a.title }}</h2>
-          @if (a.image) { <img class="aspect-[16/10] w-full rounded-xl bg-side object-cover" [src]="a.image" alt="" loading="lazy" (error)="$any($event.target).remove()"> }
+          @if (a.image) { <img class="aspect-[16/10] w-full rounded-xl bg-side object-cover" [rssProxyImg]="a.image" alt="" (error)="$any($event.target).remove()"> }
           <span class="text-xs text-accent">{{ a.read ? '' : '● ' }}{{ a.published | date: 'dd/MM/yyyy HH:mm' }} · {{ feedTitle(a.feedId) }}</span>
           <p class="line-clamp-5 flex-1 text-sm text-slate-300">{{ a.summary }}</p>
         </a>

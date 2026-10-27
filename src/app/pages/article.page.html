@@ -2,7 +2,7 @@
   <article class="mx-auto max-w-3xl">
     <h1 class="text-2xl leading-tight font-bold sidebar:text-3xl">{{ a.title }}</h1>
     <p class="text-muted">{{ feedName(a.feedId) }} · {{ a.published | date: 'dd/MM/yyyy HH:mm' }}</p>
-    @if (a.content) { <div class="body" [innerHTML]="a.content"></div> } @else { <p>{{ a.summary }}</p> }
+    @if (a.content) { <div class="body" [rssProxyContent]="a.content"></div> } @else { <p>{{ a.summary }}</p> }
   </article>
 </ng-template>
 

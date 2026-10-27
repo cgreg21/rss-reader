@@ -321,17 +321,39 @@ export class RssStore {
       .map((r) => ({ url: r.feedId.slice(5), title: r.title ?? r.feedId.slice(5), website: r.website, description: r.description, subscribers: r.subscribers }));
   }
 
-  private async download(url: string): Promise<string> {
+  private async request(url: string): Promise<Response> {
     const proxy = this.proxyEnabled() ? proxyOrigin(this.proxy()) : '';
-    let response: Response;
-    if (proxy) {
-      // budget-caldav-proxy contract: same path and query on the proxy, target origin in X-Upstream.
-      const target = new URL(url);
-      response = await fetch(proxy + target.pathname + target.search, { credentials: 'omit', headers: { 'X-Upstream': target.origin } });
-    } else {
-      response = await fetch(url);
-    }
+    if (!proxy) return fetch(url);
+    // budget-caldav-proxy contract: same path and query on the proxy, target origin in X-Upstream.
+    const target = new URL(url);
+    return fetch(proxy + target.pathname + target.search, { credentials: 'omit', headers: { 'X-Upstream': target.origin } });
+  }
+
+  private async download(url: string): Promise<string> {
+    const response = await this.request(url);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     return response.text();
+  }
+
+  private readonly images = new Map<string, Promise<string>>();
+
+  /** URL to display for an image: fetched through the proxy as a blob when enabled, else the original URL. */
+  imageUrl(url: string): Promise<string> {
+    const proxied = this.proxyEnabled() && proxyOrigin(this.proxy()) !== '' && /^https?:/i.test(url);
+    if (!proxied) return Promise.resolve(url);
+    let blob = this.images.get(url);
+    if (!blob) {
+      blob = this.request(url)
+        .then(async (r) => {
+          if (!r.ok) throw new Error(`HTTP ${r.status}`);
+          return URL.createObjectURL(await r.blob());
+        })
+        .catch(() => {
+          this.images.delete(url);
+          return url;
+        });
+      this.images.set(url, blob);
+    }
+    return blob;
   }
 }

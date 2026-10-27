@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { Article } from '../rss/models';
 import { RssStore } from '../rss/rss.store';
 import { UI_ICONS } from '../ui/icons';
+import { ProxyImgDirective } from '../ui/proxy-img.directive';
 import { SnackbarService } from '../ui/snackbar.service';
 
 const SWIPE_SLOP = 10;
@@ -17,7 +18,7 @@ type Direction = 'left' | 'right';
 /** Card with a Tinder-style swipe: left toggles read/unread, right toggles favorite. */
 @Component({
   selector: 'rss-article-card',
-  imports: [DatePipe],
+  imports: [DatePipe, ProxyImgDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './article-card.component.html',
 })

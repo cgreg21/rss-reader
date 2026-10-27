@@ -4,7 +4,7 @@
     <div class="pointer-events-auto flex w-full max-w-[440px] items-center gap-3 rounded-xl border bg-side p-3 shadow-2xl"
          [class]="message.kind === 'error' ? 'border-red-400' : message.kind === 'success' ? 'border-accent' : 'border-line'"
          [attr.role]="message.kind === 'error' ? 'alert' : 'status'">
-      @if (message.image) { <img [src]="message.image" alt="" class="size-11 shrink-0 rounded-lg"> }
+      @if (message.image) { <img [rssProxyImg]="message.image" alt="" class="size-11 shrink-0 rounded-lg"> }
       <div class="min-w-0 flex-1">
         @if (message.title) { <div class="text-sm font-bold">{{ message.title }}</div> }
         <div class="text-sm" [class]="message.title ? 'text-xs text-muted' : message.kind === 'error' ? 'font-medium text-red-400' : 'font-medium'">{{ message.text }}</div>
