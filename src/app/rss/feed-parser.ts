@@ -1,4 +1,4 @@
-import { ParsedFeed } from './models';
+import { FeedFormat, ParsedFeed } from './models';
 
 const BLOCKED = 'script,iframe,object,embed,style,link,form,meta';
 
@@ -78,7 +78,7 @@ interface JsonFeedItem {
 }
 
 function parseJsonFeed(json: string, feedId: string): ParsedFeed {
-  let data: { title?: string; home_page_url?: string; items?: JsonFeedItem[] };
+  let data: { title?: string; description?: string; home_page_url?: string; items?: JsonFeedItem[] };
   try {
     data = JSON.parse(json);
   } catch {
@@ -101,7 +101,7 @@ function parseJsonFeed(json: string, feedId: string): ParsedFeed {
       published: Number.isNaN(date) ? Date.now() : date,
     };
   });
-  return { title: toText(data.title ?? ''), siteUrl: data.home_page_url, items };
+  return { title: toText(data.title ?? ''), siteUrl: data.home_page_url, description: toText(data.description ?? '') || undefined, format: 'JSON Feed', items };
 }
 
 export function parseFeed(xml: string, feedId: string): ParsedFeed {
@@ -145,5 +145,7 @@ export function parseFeed(xml: string, feedId: string): ParsedFeed {
     };
   });
 
-  return { title: toText(text(channel, 'title')), siteUrl: siteLink, items };
+  const description = toText(text(channel, 'description', 'subtitle')) || undefined;
+  const format: FeedFormat = isAtom ? 'Atom' : isRdf ? 'RSS 1.0 (RDF)' : 'RSS 2.0';
+  return { title: toText(text(channel, 'title')), siteUrl: siteLink, description, format, items };
 }

@@ -10,9 +10,9 @@
     <rss-card-list [articles]="store.visible()" />
   }
   @case ('list') {
-    <div class="mx-auto flex max-w-3xl flex-col divide-y divide-line">
+    <div [rssCoverflow]="0" class="mx-auto flex max-w-3xl flex-col divide-y divide-line">
       @for (a of store.visible(); track a.id) {
-        <a rssReveal class="flex min-w-0 flex-col gap-1 py-3" [routerLink]="['/article', a.id]" [class.opacity-60]="a.read">
+        <a rssReveal data-coverflow class="flex min-w-0 flex-col gap-1 py-3" [routerLink]="['/article', a.id]" [class.opacity-60]="a.read">
           <h2 class="text-base font-bold">{{ a.title }}</h2>
           <span class="text-xs text-accent">{{ a.read ? '' : '● ' }}{{ a.published | date: 'dd/MM/yyyy HH:mm' }} · {{ feedTitle(a.feedId) }}</span>
           <p class="line-clamp-2 text-sm text-slate-300">{{ a.summary }}</p>
@@ -21,9 +21,9 @@
     </div>
   }
   @default {
-    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-5 sidebar:grid-cols-3 sidebar:gap-6">
+    <div [rssCoverflow]="0" class="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-5 sidebar:grid-cols-3 sidebar:gap-6">
       @for (a of store.visible(); track a.id) {
-        <a rssReveal class="flex min-w-0 flex-col gap-2.5 border-b border-line pb-6" [routerLink]="['/article', a.id]" [class.opacity-60]="a.read">
+        <a rssReveal data-coverflow class="flex min-w-0 flex-col gap-2.5 border-b border-line pb-6" [routerLink]="['/article', a.id]" [class.opacity-60]="a.read">
           <h2 class="text-lg leading-tight font-bold sidebar:text-xl">{{ a.title }}</h2>
           @if (a.image) { <img class="aspect-[16/10] w-full rounded-xl bg-side object-cover" [rssProxyImg]="a.image" alt="" (error)="$any($event.target).remove()"> }
           <span class="text-xs text-accent">{{ a.read ? '' : '● ' }}{{ a.published | date: 'dd/MM/yyyy HH:mm' }} · {{ feedTitle(a.feedId) }}</span>

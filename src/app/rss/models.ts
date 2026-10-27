@@ -3,11 +3,15 @@ export interface Category {
   name: string;
 }
 
+export type FeedFormat = 'RSS 2.0' | 'Atom' | 'RSS 1.0 (RDF)' | 'JSON Feed';
+
 export interface Feed {
   id: string;
   url: string;
   title: string;
   siteUrl?: string;
+  description?: string;
+  format?: FeedFormat;
   categoryId: string | null;
   lastFetched?: number;
   error?: string;
@@ -29,5 +33,7 @@ export interface Article {
 export interface ParsedFeed {
   title: string;
   siteUrl?: string;
+  description?: string;
+  format?: FeedFormat;
   items: Omit<Article, 'feedId' | 'read' | 'favorite'>[];
 }

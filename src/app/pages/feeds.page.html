@@ -8,7 +8,7 @@
       <option [ngValue]="null">Sans catégorie</option>
       @for (c of store.categories(); track c.id) { <option [ngValue]="c.id">{{ c.name }}</option> }
     </select>
-    <button class="btn" type="submit" [disabled]="busy()">{{ busy() ? '…' : "S'abonner" }}</button>
+    <button class="icon-btn" type="submit" aria-label="S'abonner" [disabled]="busy()">{{ busy() ? '…' : ui.add }}</button>
   </form>
   @if (error()) { <p class="mt-2 text-red-400">{{ error() }}</p> }
 </section>
@@ -17,7 +17,7 @@
   <h2 class="mb-2.5 text-base font-bold">Rechercher des flux</h2>
   <form class="flex flex-wrap gap-2" (ngSubmit)="search()">
     <input class="field min-w-60 flex-1" name="query" type="search" placeholder="Sujet, site ou mot-clé" [(ngModel)]="query">
-    <button class="btn" type="submit" [disabled]="searching()">{{ searching() ? '…' : 'Rechercher' }}</button>
+    <button class="icon-btn" type="submit" aria-label="Rechercher" [disabled]="searching()">{{ searching() ? '…' : ui.search }}</button>
   </form>
   @if (searchError()) { <p class="mt-2 text-red-400">{{ searchError() }}</p> }
   <ul class="mt-2.5">
@@ -26,7 +26,8 @@
         <div class="min-w-0 flex-1"><strong>{{ h.title }}</strong>
           @if (h.description) { <small class="line-clamp-2 block text-muted">{{ h.description }}</small> }
           <small class="block truncate text-muted">{{ h.url }}@if (h.subscribers) { · {{ h.subscribers }} abonnés }</small></div>
-        <button class="btn" type="button" [disabled]="followed(h.url)" (click)="follow(h)">{{ followed(h.url) ? 'Suivi' : "S'abonner" }}</button>
+        <button class="icon-btn" type="button" aria-label="Détails du flux" (click)="showHitInfo(h)">{{ ui.info }}</button>
+        <button class="icon-btn" type="button" [attr.aria-label]="followed(h.url) ? 'Suivi' : 'S\'abonner'" [disabled]="followed(h.url)" (click)="follow(h)">{{ followed(h.url) ? ui.check : ui.add }}</button>
       </li>
     } @empty { @if (searched() && !searching()) { <li class="text-muted">Aucun résultat.</li> } }
   </ul>
@@ -53,11 +54,13 @@
     @for (f of store.feeds(); track f.id) {
       <li class="flex flex-wrap items-center gap-2.5 border-t border-line py-2">
         <div class="min-w-0 flex-1"><strong>{{ f.title }}</strong>
+          @if (f.description) { <small class="line-clamp-2 block text-muted">{{ f.description }}</small> }
           @if (f.error) { <small class="block text-red-400">{{ f.error }}</small> }</div>
         <select class="field" [ngModel]="f.categoryId" (ngModelChange)="store.setFeedCategory(f.id, $event)">
           <option [ngValue]="null">Sans catégorie</option>
           @for (c of store.categories(); track c.id) { <option [ngValue]="c.id">{{ c.name }}</option> }
         </select>
+        <button class="icon-btn" type="button" aria-label="Détails du flux" (click)="showFeedInfo(f)">{{ ui.info }}</button>
         <button class="icon-btn" type="button" aria-label="Se désabonner" (click)="store.removeFeed(f.id)">{{ ui.trash }}</button>
       </li>
     } @empty { <li>Aucun abonnement.</li> }

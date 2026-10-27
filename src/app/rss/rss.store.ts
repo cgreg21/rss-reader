@@ -190,7 +190,7 @@ export class RssStore {
     if (this.feeds().some((f) => f.url === url)) throw new Error('Flux déjà suivi');
     const id = `f${Date.now().toString(36)}`;
     const parsed = parseFeed(body, id);
-    const feed: Feed = { id, url, title: parsed.title || new URL(url).hostname, siteUrl: parsed.siteUrl, categoryId, lastFetched: Date.now() };
+    const feed: Feed = { id, url, title: parsed.title || new URL(url).hostname, siteUrl: parsed.siteUrl, description: parsed.description, format: parsed.format, categoryId, lastFetched: Date.now() };
     await db.put('feeds', feed);
     this.feeds.update((l) => [...l, feed]);
     await this.merge(feed.id, parsed.items);
@@ -296,7 +296,7 @@ export class RssStore {
     try {
       const parsed = parseFeed(await this.download(feed.url), feed.id);
       await this.merge(feed.id, parsed.items);
-      updated = { ...feed, lastFetched: Date.now(), error: undefined };
+      updated = { ...feed, siteUrl: feed.siteUrl ?? parsed.siteUrl, description: parsed.description ?? feed.description, format: parsed.format, lastFetched: Date.now(), error: undefined };
     } catch (error) {
       updated = { ...feed, error: error instanceof Error ? error.message : 'Erreur' };
     }
