@@ -24,7 +24,7 @@ import { UI_ICONS } from '../icons';
     }
     @if (open()) {
       <div class="pointer-events-auto fixed inset-0 z-[60] grid place-items-center bg-black/60 p-4" (click)="open.set(false)" animate.enter="anim-fade-in" animate.leave="anim-fade-out">
-        <div class="flex max-h-[80vh] w-full max-w-md flex-col rounded-2xl border border-line bg-side p-5 shadow-2xl" role="dialog" aria-modal="true"
+        <div class="flex max-h-[80vh] w-full min-w-0 max-w-[min(28rem,100%)] flex-col overflow-x-hidden rounded-2xl border border-line bg-side p-5 shadow-2xl" role="dialog" aria-modal="true"
           [attr.aria-label]="'downloads.title' | translate" animate.enter="anim-pop-in" (click)="$event.stopPropagation()">
           <div class="mb-3 flex items-center justify-between">
             <h2 class="text-lg font-semibold">{{ 'downloads.title' | translate }}</h2>
@@ -34,7 +34,7 @@ import { UI_ICONS } from '../icons';
             @for (it of media.queue(); track it.id) {
               <li class="flex items-center gap-2 border-t border-line py-2">
                 <div class="min-w-0 flex-1">
-                  <strong class="block truncate text-sm">{{ it.title }}</strong>
+                  <strong class="block break-all text-sm">{{ it.title }}</strong>
                   <small [class]="it.status === 'error' ? 'text-red-400' : 'text-muted'">
                     {{ (it.status === 'error' ? 'media.failed' : it.status === 'waiting' ? 'media.waiting' : 'media.downloading') | translate }}
                     @if (it.status === 'downloading' && it.progress >= 0) { {{ (it.progress * 100).toFixed(0) }}% }

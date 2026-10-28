@@ -1,7 +1,7 @@
 @if (dialog.opened()) {
   <div class="fixed inset-0 z-[60] grid place-items-center bg-black/60 p-4" (click)="dialog.close()"
        animate.enter="anim-fade-in" animate.leave="anim-fade-out" (keydown.escape)="dialog.close()">
-    <div class="flex max-h-[85vh] w-full max-w-md flex-col rounded-2xl border border-line bg-side p-5 shadow-2xl" role="dialog" aria-modal="true"
+    <div class="flex max-h-[85vh] w-full min-w-0 max-w-[min(28rem,100%)] flex-col overflow-x-hidden rounded-2xl border border-line bg-side p-5 shadow-2xl" role="dialog" aria-modal="true"
       animate.enter="anim-pop-in" [attr.aria-label]="'feeds.add' | translate" (click)="$event.stopPropagation()">
       <div class="mb-3 flex items-center justify-between">
         <h2 class="text-lg font-semibold">{{ 'feeds.add' | translate }}</h2>
@@ -19,9 +19,9 @@
             <span class="grid size-12 shrink-0 place-items-center overflow-hidden rounded-lg bg-bg font-mdi text-2xl text-muted">
               @if (h.image) { <img class="size-full object-cover" [rssProxyImg]="h.image" alt="" (error)="$any($event.target).remove()"> } @else { {{ ui.all }} }
             </span>
-            <div class="min-w-0 flex-1"><strong class="block truncate">{{ h.title }}</strong>
+            <div class="min-w-0 flex-1"><strong class="block break-words">{{ h.title }}</strong>
               @if (h.description) { <small class="line-clamp-2 block text-muted">{{ h.description }}</small> }
-              <small class="block truncate text-muted">{{ h.url }}</small></div>
+              <small class="block break-all text-muted">{{ h.url }}</small></div>
             <button class="icon-btn" type="button" [attr.aria-label]="(followed(h.url) ? 'feeds.following' : 'feeds.subscribe') | translate" [disabled]="followed(h.url)" (click)="follow(h)">{{ followed(h.url) ? ui.check : ui.add }}</button>
           </li>
         } @empty { @if (searched() && !busy()) { <li class="text-muted">{{ 'feeds.noResult' | translate }}</li> } }
