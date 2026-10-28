@@ -5,7 +5,7 @@ import { LANGUAGES, LANGUAGE_NAMES } from '../../../i18n/languages';
 import { TranslatePipe } from '../../../i18n/translate.pipe';
 import { SettingsStore } from '../../../rss/stores/settings.store';
 
-/** Options tab: theme, font size, muted words and read-article purge. */
+/** Options tab: theme, font size, muted words, video front-end and read-article purge. */
 @Component({
   selector: 'rss-reading-tab',
   host: { class: 'block' },

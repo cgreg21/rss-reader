@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ArticlesStore } from '../../rss/stores/articles.store';
 import { FeedsStore } from '../../rss/stores/feeds.store';
 import { Article } from '../../rss/models';
+import { SettingsStore } from '../../rss/stores/settings.store';
 import { ViewStore } from '../../rss/stores/view.store';
 import { ArticlePage } from './article.page';
 
@@ -82,6 +83,20 @@ describe('ArticlePage', () => {
     articles.set([art('b', { media: { kind, url: 'u' } as Article['media'] })]);
     const { el } = setup();
     expect(el.querySelector(tag)).not.toBeNull();
+  });
+
+  it('embeds YouTube through the configured Invidious/Piped instance', () => {
+    articles.set([art('b', { media: { kind: 'youtube', url: 'v1' } })]);
+    const settings = TestBed.inject(SettingsStore);
+    const { fixture, el } = setup();
+    expect(el.querySelector('iframe')!.src).toBe('https://www.youtube-nocookie.com/embed/v1');
+    settings.setVideoFrontend(' https://yewtu.be/feed ');
+    fixture.detectChanges();
+    expect(el.querySelector('iframe')!.src).toBe('https://yewtu.be/embed/v1');
+    settings.setVideoFrontend('not a url');
+    fixture.detectChanges();
+    expect(el.querySelector('iframe')!.src).toBe('https://www.youtube-nocookie.com/embed/v1');
+    settings.setVideoFrontend('');
   });
 
   it('swipes right to the next article', () => {

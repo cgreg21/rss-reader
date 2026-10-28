@@ -8,6 +8,7 @@ import { LocalDatePipe } from '../../i18n/local-date.pipe';
 import { TranslatePipe } from '../../i18n/translate.pipe';
 import { ArticlesStore } from '../../rss/stores/articles.store';
 import { FeedsStore } from '../../rss/stores/feeds.store';
+import { SettingsStore } from '../../rss/stores/settings.store';
 import { ViewStore } from '../../rss/stores/view.store';
 import { UI_ICONS } from '../../ui/icons';
 import { ProxyContentDirective } from '../../ui/directives/proxy-img.directive';
@@ -31,6 +32,7 @@ export class ArticlePage {
   protected readonly store = inject(ArticlesStore);
   private readonly feedsStore = inject(FeedsStore);
   private readonly view = inject(ViewStore);
+  private readonly settings = inject(SettingsStore);
   protected readonly i18n = inject(I18nService);
   protected readonly ui = UI_ICONS;
   protected readonly offline = inject(OfflineMediaService);
@@ -39,8 +41,10 @@ export class ArticlePage {
   private readonly router = inject(Router);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
+  /** Invidious and Piped both serve `/embed/<id>` like YouTube, and play without ads. */
   protected youtube(videoId: string): SafeResourceUrl {
-    return this.sanitizer.bypassSecurityTrustResourceUrl(`https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}`);
+    const origin = this.settings.activeVideoFrontend() || 'https://www.youtube-nocookie.com';
+    return this.sanitizer.bypassSecurityTrustResourceUrl(`${origin}/embed/${encodeURIComponent(videoId)}`);
   }
   /** Snapshot of the list order, so neighbours stay stable when reading an article hides it from the list. */
   private readonly order = signal<string[]>([]);

@@ -134,6 +134,8 @@
   "reading.fontSize": "Textgröße",
   "reading.muted": "Ausgeblendete Wörter",
   "reading.mutedHelp": "Ein Wort oder eine Wendung pro Zeile: Artikel, deren Titel oder Zusammenfassung sie enthalten, werden ausgeblendet (außer Favoriten und „Später lesen“).",
+  "reading.video": "YouTube-Videos ohne Werbung",
+  "reading.videoHelp": "Adresse einer Invidious- oder Piped-Instanz (z. B. https://yewtu.be), um YouTube-Videos ohne Werbung und Tracking abzuspielen. Diese öffentlichen Instanzen sind manchmal nicht erreichbar; leer läuft die Wiedergabe über YouTube.",
   "reading.purge": "Automatische Bereinigung",
   "reading.purgeLabel": "Bereinigung gelesener Artikel",
   "reading.never": "Nie",

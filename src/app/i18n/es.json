@@ -134,6 +134,8 @@
   "reading.fontSize": "Tamaño del texto",
   "reading.muted": "Palabras ocultas",
   "reading.mutedHelp": "Una palabra o expresión por línea: se ocultan los artículos cuyo título o resumen la contengan (salvo favoritos y «Leer más tarde»).",
+  "reading.video": "Vídeos de YouTube sin publicidad",
+  "reading.videoHelp": "Dirección de una instancia Invidious o Piped (p. ej. https://yewtu.be) para reproducir vídeos de YouTube sin publicidad ni rastreo. Estas instancias públicas a veces no están disponibles; vacío, la reproducción pasa por YouTube.",
   "reading.purge": "Purga automática",
   "reading.purgeLabel": "Purga de artículos leídos",
   "reading.never": "Nunca",

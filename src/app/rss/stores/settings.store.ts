@@ -33,6 +33,9 @@ export class SettingsStore {
   /** Saves new podcast episodes on the device in the background. */
   readonly autoDownloadPodcasts = persisted('rssreader:auto-download-podcasts', flag(false));
   readonly fontSize = persisted('rssreader:font-size', num(17));
+  /** Origin of an Invidious or Piped instance used to embed YouTube videos; '' plays through YouTube itself. */
+  readonly videoFrontend = persisted('rssreader:video-frontend', text());
+  readonly activeVideoFrontend = computed(() => proxyOrigin(this.videoFrontend()));
   readonly theme = persisted<Theme>('rssreader:theme', oneOf(['dark', 'light'], 'dark'));
   /** 'auto' follows the browser language. */
   readonly language = persisted<LangSetting>('rssreader:language', oneOf(LANG_SETTINGS, 'auto'));
@@ -46,6 +49,10 @@ export class SettingsStore {
 
   setProxy(value: string): void {
     this.proxy.set(value.trim());
+  }
+
+  setVideoFrontend(value: string): void {
+    this.videoFrontend.set(value.trim());
   }
 
   setMutedWords(words: string[]): void {

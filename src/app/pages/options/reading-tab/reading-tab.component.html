@@ -29,6 +29,12 @@
 </section>
 
 <section class="panel">
+  <h2 class="mb-2.5 text-base font-bold">{{ 'reading.video' | translate }}</h2>
+  <p class="mb-2 text-[13px] text-muted">{{ 'reading.videoHelp' | translate }}</p>
+  <input class="field w-full" name="videoFrontend" type="url" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="https://yewtu.be" [attr.aria-label]="'reading.video' | translate" [ngModel]="settings.videoFrontend()" (ngModelChange)="settings.setVideoFrontend($event)">
+</section>
+
+<section class="panel">
   <div class="flex items-center justify-between gap-3">
     <h2 class="text-base font-bold">{{ 'reading.purge' | translate }}</h2>
     <select class="field" name="retention" [attr.aria-label]="'reading.purgeLabel' | translate" [ngModel]="settings.retentionDays()" (ngModelChange)="settings.retentionDays.set(+$event)">

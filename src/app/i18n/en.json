@@ -134,6 +134,8 @@
   "reading.fontSize": "Text size",
   "reading.muted": "Muted words",
   "reading.mutedHelp": "One word or phrase per line: articles whose title or summary contains it are hidden (except favorites and “Read later”).",
+  "reading.video": "Ad-free YouTube videos",
+  "reading.videoHelp": "Address of an Invidious or Piped instance (e.g. https://yewtu.be) to play YouTube videos without ads or tracking. These public instances are sometimes unavailable; when empty, playback goes through YouTube.",
   "reading.purge": "Automatic purge",
   "reading.purgeLabel": "Purge of read articles",
   "reading.never": "Never",
