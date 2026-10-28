@@ -15,6 +15,8 @@ export interface DownloadItem {
   status: 'waiting' | 'downloading' | 'error';
   /** 0..1, or -1 when the size is unknown. */
   progress: number;
+  /** Failure cause shown next to the retry button. */
+  error?: string;
 }
 
 /** Podcast / video files saved on the device (Cache API): background download queue and offline playback. */
@@ -100,8 +102,9 @@ export class OfflineMediaService {
         try {
           await this.fetchToCache(next);
           this.queue.update((q) => q.filter((i) => i.id !== next.id));
-        } catch {
-          if (this.item(next.id)) this.patch(next.id, { status: 'error' });
+        } catch (e) {
+          const error = e instanceof DOMException && e.name === 'QuotaExceededError' ? 'storage full' : e instanceof Error ? e.message : '';
+          if (this.item(next.id)) this.patch(next.id, { status: 'error', error });
         }
       }
     } finally {
@@ -117,13 +120,30 @@ export class OfflineMediaService {
     this.queue.update((q) => q.map((i) => (i.id === id ? { ...i, ...changes } : i)));
   }
 
+  /** Tries the proxy first (when enabled) then a direct request, to cope with CORS and redirects. */
+  private async open(url: string): Promise<Response> {
+    const signal = this.controller?.signal;
+    const attempts = this.settings.activeProxy() ? [this.net.request, this.net.direct] : [this.net.direct];
+    let failure = new Error('network');
+    for (const attempt of attempts) {
+      try {
+        const response = await attempt.call(this.net, url, signal);
+        if (response.ok && response.body) return response;
+        failure = new Error(`HTTP ${response.status}`);
+      } catch (e) {
+        if (signal?.aborted) throw e;
+        failure = new Error('CORS / network');
+      }
+    }
+    throw failure;
+  }
+
   private async fetchToCache(item: DownloadItem): Promise<void> {
-    const response = await this.net.request(item.url, this.controller?.signal);
-    if (!response.ok || !response.body) throw new Error(`HTTP ${response.status}`);
+    const response = await this.open(item.url);
     const total = Number(response.headers.get('content-length')) || 0;
     const chunks: Uint8Array<ArrayBuffer>[] = [];
     let received = 0;
-    const reader = response.body.getReader();
+    const reader = response.body!.getReader();
     for (;;) {
       const { done, value } = await reader.read();
       if (done) break;

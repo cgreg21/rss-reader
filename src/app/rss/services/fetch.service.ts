@@ -16,9 +16,14 @@ export interface FeedHit {
 export class FetchService {
   private readonly settings = inject(SettingsStore);
 
+  /** Direct request, without the proxy (fallback when the proxy cannot reach a file). */
+  direct(url: string, signal?: AbortSignal): Promise<Response> {
+    return signal ? fetch(url, { signal }) : fetch(url);
+  }
+
   request(url: string, signal?: AbortSignal): Promise<Response> {
     const proxy = this.settings.activeProxy();
-    if (!proxy) return signal ? fetch(url, { signal }) : fetch(url);
+    if (!proxy) return this.direct(url, signal);
     // budget-caldav-proxy contract: same path and query on the proxy, target origin in X-Upstream.
     const target = new URL(url);
     return fetch(proxy + target.pathname + target.search, { credentials: 'omit', headers: { 'X-Upstream': target.origin }, ...(signal ? { signal } : {}) });

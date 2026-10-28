@@ -37,6 +37,7 @@ import { UI_ICONS } from '../icons';
                   <strong class="block break-all text-sm">{{ it.title }}</strong>
                   <small [class]="it.status === 'error' ? 'text-red-400' : 'text-muted'">
                     {{ (it.status === 'error' ? 'media.failed' : it.status === 'waiting' ? 'media.waiting' : 'media.downloading') | translate }}
+                    @if (it.status === 'error' && it.error) { ({{ it.error }}) }
                     @if (it.status === 'downloading' && it.progress >= 0) { {{ (it.progress * 100).toFixed(0) }}% }
                   </small>
                   @if (it.status === 'downloading') {
