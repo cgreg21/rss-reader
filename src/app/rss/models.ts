@@ -37,6 +37,8 @@ export interface Article {
   read: boolean;
   favorite: boolean;
   later?: boolean;
+  /** Time of the last favorite / later change, used to resolve sync conflicts (latest wins). */
+  stamp?: number;
   fullText?: boolean;
 }
 

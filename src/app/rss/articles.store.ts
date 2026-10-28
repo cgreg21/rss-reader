@@ -28,6 +28,10 @@ export const stateKey = (articleId: string): string => articleId.slice(articleId
 /** Bit flags: 1 read, 2 favorite, 4 later. */
 export const flagsOf = (a: Pick<Article, 'read' | 'favorite' | 'later'>): number => (a.read ? 1 : 0) | (a.favorite ? 2 : 0) | (a.later ? 4 : 0);
 const withFlags = (a: Article, flags: number): Article => ({ ...a, read: !!(flags & 1), favorite: !!(flags & 2), later: !!(flags & 4) });
+/** Synced state: flags in the 3 low bits, time of the last favorite / later change above (0 for legacy values). */
+export const encodeState = (a: Pick<Article, 'read' | 'favorite' | 'later' | 'stamp'>): number => (a.stamp ?? 0) * 8 + flagsOf(a);
+const stampOf = (state: number): number => Math.floor(state / 8);
+const flagsFrom = (state: number): number => state % 8;
 
 /** Articles of the local library (IndexedDB): state flags, retention and full-text extraction. */
 @Injectable({ providedIn: 'root' })
@@ -74,6 +78,7 @@ export class ArticlesStore {
     const article = this.article(id);
     if (!article) return;
     const updated = { ...article, ...changes };
+    if ('favorite' in changes || 'later' in changes) updated.stamp = Math.max(Date.now(), (article.stamp ?? 0) + 1);
     this.articles.update((l) => l.map((a) => (a.id === id ? updated : a)));
     await db.put('articles', updated);
   }
@@ -107,12 +112,29 @@ export class ArticlesStore {
 
   /** Merges (OR) state flags keyed by `stateKey` into current articles, and remembers them for articles not downloaded yet. */
   async applyFlags(states: Record<string, number>): Promise<void> {
-    this.knownFlags = { ...this.knownFlags, ...states };
+    for (const [key, state] of Object.entries(states)) {
+      const known = this.knownFlags[key];
+      if (known === undefined || stampOf(state) >= stampOf(known)) this.knownFlags[key] = state;
+    }
     const changed: Article[] = [];
     const next = this.articles().map((a) => {
-      const merged = flagsOf(a) | (states[stateKey(a.id)] ?? 0);
-      if (merged === flagsOf(a)) return a;
-      const updated = withFlags(a, merged);
+      const state = states[stateKey(a.id)];
+      if (state === undefined) return a;
+      const localStamp = a.stamp ?? 0;
+      const remoteStamp = stampOf(state);
+      const read = (flagsOf(a) | flagsFrom(state)) & 1;
+      let merged: number;
+      let stamp = localStamp;
+      if (remoteStamp > localStamp) {
+        merged = read | (flagsFrom(state) & 6);
+        stamp = remoteStamp;
+      } else if (remoteStamp === localStamp) {
+        merged = flagsOf(a) | flagsFrom(state);
+      } else {
+        merged = read | (flagsOf(a) & 6);
+      }
+      if (merged === flagsOf(a) && stamp === localStamp) return a;
+      const updated = { ...withFlags(a, merged), stamp };
       changed.push(updated);
       return updated;
     });
@@ -137,7 +159,11 @@ export class ArticlesStore {
     const existing = new Set(this.articles().map((a) => a.id));
     const fresh: Article[] = items
       .filter((i) => !existing.has(i.id))
-      .map((i) => withFlags({ ...i, feedId, read: false, favorite: false }, this.knownFlags[stateKey(i.id)] ?? 0));
+      .map((i) => {
+        const state = this.knownFlags[stateKey(i.id)] ?? 0;
+        const stamp = stampOf(state);
+        return { ...withFlags({ ...i, feedId, read: false, favorite: false }, flagsFrom(state)), ...(stamp ? { stamp } : {}) };
+      });
     if (!fresh.length) return;
     await db.putMany('articles', fresh);
     const all = [...this.articles(), ...fresh];

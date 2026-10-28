@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { MessageError } from '../../i18n/message-error';
 import { Category, Feed } from '../models';
 import { buildOpml, parseOpml } from '../opml';
-import { ArticlesStore, flagsOf, stateKey } from '../articles.store';
+import { ArticlesStore, encodeState, flagsOf, stateKey } from '../articles.store';
 import { FeedsStore } from '../feeds.store';
 import { newId } from '../ids';
 import { RefreshService } from './refresh.service';
@@ -79,7 +79,7 @@ export class LibraryService {
   buildSyncDoc(): SyncDoc {
     const categories = new Map(this.feedsStore.categories().map((c) => [c.id, c.name]));
     const states: Record<string, number> = {};
-    for (const a of this.articlesStore.articles()) if (flagsOf(a)) states[stateKey(a.id)] = flagsOf(a);
+    for (const a of this.articlesStore.articles()) if (flagsOf(a) || a.stamp) states[stateKey(a.id)] = encodeState(a);
     return {
       feeds: this.feedsStore.feeds().map((f) => ({ url: f.url, title: f.title, category: f.categoryId ? categories.get(f.categoryId) ?? null : null })),
       removed: this.feedsStore.removedFeeds(),
