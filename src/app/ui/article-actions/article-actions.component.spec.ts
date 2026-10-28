@@ -52,7 +52,7 @@ describe('ArticleActionsComponent', () => {
   });
 
   it('exposes the same actions in the radial menu', async () => {
-    const { fixture, root } = setup(true);
+    const { root } = setup(true);
     const settings = TestBed.inject(SettingsStore);
     const items = root.querySelectorAll<HTMLButtonElement>('.radial-item');
     expect(items).toHaveLength(4);

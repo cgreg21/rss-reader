@@ -67,8 +67,8 @@ export class FeedsStore {
 
   /** Saves a refreshed feed, ignoring it when it was unfollowed meanwhile. */
   async updateFeed(feed: Feed): Promise<void> {
-    await db.put('feeds', feed);
-    this.feeds.update((l) => l.map((f) => (f.id === feed.id ? feed : f)));
+    if (!this.feeds().some((f) => f.id === feed.id)) return;
+    await this.putFeed(feed);
   }
 
   async removeFeed(id: string): Promise<void> {

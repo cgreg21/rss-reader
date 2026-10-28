@@ -39,8 +39,6 @@ export class RootComponent {
   protected readonly layout = inject(LayoutService);
   protected readonly i18n = inject(I18nService);
   private readonly router = inject(Router);
-  private readonly pushSync = inject(PushService);
-  private readonly librarySync = inject(SyncService);
   protected readonly onArticles = signal(this.isArticles());
   protected readonly articleId = signal(this.currentArticleId());
   protected readonly onOptions = signal(this.isOptions());
@@ -72,6 +70,9 @@ export class RootComponent {
   }
 
   constructor() {
+    // Background services started with the app for their side effects only.
+    inject(PushService);
+    inject(SyncService);
     void this.refresher.load();
     effect(() => {
       const count = this.articlesStore.unreadTotal();

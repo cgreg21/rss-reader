@@ -50,7 +50,7 @@ describe('ArticlePage', () => {
     const el = fixture.nativeElement as HTMLElement;
     return { fixture, el, navigate };
   };
-  const swipe = (el: HTMLElement, from: [number, number], to: [number, number], end = 'touchend') => {
+  const swipe = (el: HTMLElement, from: [number, number], to: [number, number]) => {
     el.dispatchEvent(touch('touchstart', ...from));
     el.dispatchEvent(touch('touchmove', ...to));
   };

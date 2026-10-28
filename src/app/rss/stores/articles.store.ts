@@ -81,8 +81,7 @@ export class ArticlesStore {
     if (!article) return;
     const updated = { ...article, ...changes };
     if ('favorite' in changes || 'later' in changes) updated.stamp = Math.max(Date.now(), (article.stamp ?? 0) + 1);
-    this.articles.update((l) => l.map((a) => (a.id === id ? updated : a)));
-    await db.put('articles', updated);
+    await this.save(updated);
   }
 
   /** Flips one flag of the article and tells the user. */
@@ -104,9 +103,7 @@ export class ArticlesStore {
   async markRead(ids: string[]): Promise<void> {
     const wanted = new Set(ids);
     const changed = this.articles().filter((a) => wanted.has(a.id) && !a.read).map((a) => ({ ...a, read: true }));
-    const done = new Set(changed.map((a) => a.id));
-    this.articles.update((l) => l.map((a) => (done.has(a.id) ? { ...a, read: true } : a)));
-    await db.putMany('articles', changed);
+    await this.saveMany(changed);
   }
 
   async purge(): Promise<void> {
@@ -160,9 +157,7 @@ export class ArticlesStore {
     if (!article?.link) throw new MessageError('err.noOrigin');
     const content = extractReadable(await this.net.download(article.link), article.link);
     if (toPlainLength(content) < 200) throw new MessageError('err.noFullText');
-    const updated = { ...article, content, fullText: true };
-    this.articles.update((l) => l.map((a) => (a.id === id ? updated : a)));
-    await db.put('articles', updated);
+    await this.save({ ...article, content, fullText: true });
   }
 
   /** Adds the articles not already known and keeps the latest ones of the feed (plus its favorites). */
@@ -186,6 +181,18 @@ export class ArticlesStore {
     const dropped = new Set(stale.map((a) => a.id));
     this.articles.set(all.filter((a) => !dropped.has(a.id)));
     this.offline.autoEnqueue(fresh);
+  }
+
+  private async save(updated: Article): Promise<void> {
+    this.articles.update((l) => l.map((a) => (a.id === updated.id ? updated : a)));
+    await db.put('articles', updated);
+  }
+
+  private async saveMany(updated: Article[]): Promise<void> {
+    if (!updated.length) return;
+    const byId = new Map(updated.map((a) => [a.id, a]));
+    this.articles.update((l) => l.map((a) => byId.get(a.id) ?? a));
+    await db.putMany('articles', updated);
   }
 
   private async removeWhere(predicate: (a: Article) => boolean): Promise<void> {

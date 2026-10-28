@@ -1,7 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 
 import { FetchService } from './fetch.service';
-import { SettingsStore } from '../stores/settings.store';
 
 const CACHE_NAME = 'rss-images';
 const MAX_CACHED_IMAGES = 300;
@@ -9,7 +8,6 @@ const MAX_CACHED_IMAGES = 300;
 /** Images fetched through the proxy as blobs, persisted in the Cache API. */
 @Injectable({ providedIn: 'root' })
 export class ImageCache {
-  private readonly settings = inject(SettingsStore);
   private readonly net = inject(FetchService);
   private readonly images = new Map<string, Promise<string>>();
   readonly count = signal(0);
