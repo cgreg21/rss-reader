@@ -58,3 +58,11 @@
   <p class="mb-2 text-[13px] text-muted">{{ 'system.imageCacheHelp' | translate: { count: images.count() } }}</p>
   <button type="button" class="btn" [disabled]="images.count() === 0" (click)="clearImageCache()">{{ 'system.clearCache' | translate }}</button>
 </section>
+
+@if (media.supported) {
+  <section class="panel">
+    <h2 class="mb-2.5 text-base font-bold">{{ 'system.downloads' | translate }}</h2>
+    <p class="mb-2 text-[13px] text-muted">{{ 'system.downloadsHelp' | translate: { count: media.count() } }}</p>
+    <button type="button" class="btn" [disabled]="media.count() === 0" (click)="clearDownloads()">{{ 'system.clearDownloads' | translate }}</button>
+  </section>
+}

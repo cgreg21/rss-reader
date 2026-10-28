@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { describe, expect, it, vi } from 'vitest';
 
 import { ImageCache } from '../../../rss/services/image-cache.service';
+import { OfflineMediaService } from '../../../rss/services/offline-media.service';
 import { SettingsStore } from '../../../rss/stores/settings.store';
 import { PushService } from '../../../pwa/services/push.service';
 import { DialogService } from '../../../ui/dialog/dialog.service';
@@ -11,6 +12,7 @@ import { SystemTabComponent } from './system-tab.component';
 describe('SystemTabComponent', () => {
   const push = { supported: true, enabled: signal(false), busy: signal(false), error: signal(''), url: signal(''), enable: vi.fn(), disable: vi.fn(), setUrl: vi.fn() };
   const images = { count: signal(2), refreshCount: vi.fn(), clear: vi.fn() };
+  const media = { supported: true, count: signal(3), clear: vi.fn() };
   const dialog = { confirm: vi.fn() };
 
   const setup = (supported = true) => {
@@ -20,11 +22,13 @@ describe('SystemTabComponent', () => {
     push.enable.mockReset();
     push.disable.mockReset();
     images.clear.mockReset();
+    media.clear.mockReset();
     dialog.confirm.mockReset();
     TestBed.configureTestingModule({
       providers: [
         { provide: PushService, useValue: push },
         { provide: ImageCache, useValue: images },
+        { provide: OfflineMediaService, useValue: media },
         { provide: DialogService, useValue: dialog },
       ],
     });
@@ -88,5 +92,18 @@ describe('SystemTabComponent', () => {
     expect(images.clear).not.toHaveBeenCalled();
     button.click();
     await vi.waitFor(() => expect(images.clear).toHaveBeenCalled());
+  });
+
+  it('deletes the downloads after a danger confirmation', async () => {
+    const { root } = setup();
+    expect(root.textContent).toContain('3 sur l\'appareil');
+    const button = Array.from(root.querySelectorAll<HTMLButtonElement>('button')).find((b) => b.textContent?.includes('Supprimer les téléchargements'))!;
+    dialog.confirm.mockResolvedValueOnce(false).mockResolvedValueOnce(true);
+    button.click();
+    await vi.waitFor(() => expect(dialog.confirm).toHaveBeenCalledTimes(1));
+    expect(dialog.confirm).toHaveBeenCalledWith(expect.stringContaining('3 fichiers'), expect.objectContaining({ danger: true, confirmLabel: 'Supprimer' }));
+    expect(media.clear).not.toHaveBeenCalled();
+    button.click();
+    await vi.waitFor(() => expect(media.clear).toHaveBeenCalled());
   });
 });

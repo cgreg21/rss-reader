@@ -29,6 +29,8 @@ export class OfflineMediaService {
   private readonly urls = signal<Record<string, string>>({});
   /** Items waiting, downloading or failed; finished ones are removed. */
   readonly queue = signal<DownloadItem[]>([]);
+  /** Number of files saved on the device. */
+  readonly count = computed(() => Object.keys(this.urls()).length);
   /** Number of items not finished yet (waiting or downloading). */
   readonly pending = computed(() => this.queue().filter((i) => i.status !== 'error').length);
   /** Overall progress of the current download, for the progress bar. */
@@ -166,5 +168,13 @@ export class OfflineMediaService {
     const url = this.urls()[id];
     if (url) URL.revokeObjectURL(url);
     this.urls.update(({ [id]: _, ...rest }) => rest);
+  }
+
+  /** Deletes every saved file. */
+  async clear(): Promise<void> {
+    if (!this.supported) return;
+    await caches.delete(MEDIA_CACHE);
+    for (const url of Object.values(this.urls())) URL.revokeObjectURL(url);
+    this.urls.set({});
   }
 }
