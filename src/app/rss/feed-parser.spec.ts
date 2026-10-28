@@ -115,6 +115,16 @@ describe('extractReadable', () => {
     expect(out).not.toContain('pied');
   });
 
+  it('drops share bars, related lists and cookie banners inside the article', () => {
+    const body = 'Un long paragraphe. '.repeat(20);
+    const html = `<article><p>${body}</p><div class="share-buttons"><a href="/s">Partager</a></div><ul class="x"><li><a href="/1">Un</a></li><li><a href="/2">Deux</a></li><li><a href="/3">Trois</a></li></ul><div id="cookie-banner">cookies</div></article>`;
+    const out = extractReadable(html, 'https://example.com');
+    expect(out).toContain('long paragraphe');
+    expect(out).not.toContain('Partager');
+    expect(out).not.toContain('Trois');
+    expect(out).not.toContain('cookies');
+  });
+
   it('falls back to the densest container, then the body', () => {
     const html = '<div><p>court</p></div><section><p>un texte nettement plus long</p></section>';
     const out = extractReadable(html, 'https://example.com');

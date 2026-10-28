@@ -70,12 +70,26 @@ export function deduceFeedUrl(raw: string): string | null {
   return null;
 }
 
-/** Extracts the main readable block of a full web page (article, main, or the densest container). */
+const JUNK_SELECTORS = [
+  'nav,header,footer,aside,form,noscript,script,style,template,button,dialog,svg,canvas,object,embed',
+  '[role=navigation],[role=banner],[role=contentinfo],[role=complementary],[role=search],[aria-hidden=true],[hidden]',
+].join(',');
+const JUNK_TOKENS = /(^|[\s_-])(menu|navbar|nav|sidebar|widget|share|sharing|social|related|comments?|breadcrumbs?|cookie|consent|newsletter|subscribe|promo|advert|ads?|sponsor|popup|modal|toolbar|pagination|tags|author-box|byline-extra)($|[\s_-])/i;
+const CONTENT_SELECTORS = ['[itemprop=articleBody]', '.entry-content', '.post-content', '.article-content', '.article-body', '.post-body', '.story-body', '[role=main]', 'article', 'main'];
+
+const textLength = (el: Element): number => el.textContent?.trim().length ?? 0;
+
+/** Extracts the main readable block of a full web page, without menus, footers, share bars and other page chrome. */
 export function extractReadable(html: string, baseUrl: string): string {
   const doc = new DOMParser().parseFromString(html, 'text/html');
-  doc.querySelectorAll('nav,header,footer,aside,form,noscript').forEach((el) => el.remove());
-  let best: Element | null = doc.querySelector('article') ?? doc.querySelector('main');
-  if (!best) {
+  doc.querySelectorAll(JUNK_SELECTORS).forEach((el) => el.remove());
+  let best: Element | null = null;
+  for (const selector of CONTENT_SELECTORS) {
+    const found = Array.from(doc.querySelectorAll(selector)).sort((a, b) => textLength(b) - textLength(a))[0];
+    if (found && textLength(found) >= 200) { best = found; break; }
+    best ??= found ?? null;
+  }
+  if (!best || textLength(best) < 200) {
     let score = 0;
     doc.body?.querySelectorAll('div,section').forEach((el) => {
       const own = Array.from(el.querySelectorAll('p')).reduce((n, p) => n + (p.textContent?.length ?? 0), 0);
@@ -84,6 +98,18 @@ export function extractReadable(html: string, baseUrl: string): string {
   }
   const root = (best ?? doc.body) as Element | null;
   if (!root) return '';
+  root.querySelectorAll('*').forEach((el) => {
+    if (!el.isConnected || el === root) return;
+    const label = `${el.getAttribute('class') ?? ''} ${el.id}`;
+    if (JUNK_TOKENS.test(label)) { el.remove(); return; }
+    // Link-heavy blocks (related posts, tag clouds, inline menus) carry little article text.
+    if (/^(ul|ol|div|section|p)$/i.test(el.tagName)) {
+      const text = textLength(el);
+      const links = Array.from(el.querySelectorAll('a')).reduce((n, a) => n + textLength(a), 0);
+      if (text > 0 && links / text > 0.8 && text < 600 && el.querySelectorAll('a').length >= 3) el.remove();
+    }
+  });
+
   root.querySelectorAll('[src],[href]').forEach((el) => {
     for (const name of ['src', 'href']) {
       const value = el.getAttribute(name);
