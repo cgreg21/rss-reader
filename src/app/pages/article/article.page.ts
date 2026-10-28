@@ -11,11 +11,12 @@ import { FeedsStore } from '../../rss/feeds.store';
 import { ViewStore } from '../../rss/view.store';
 import { UI_ICONS } from '../../ui/icons';
 import { ProxyContentDirective } from '../../ui/directives/proxy-img.directive';
+import { MediaSessionDirective } from '../../ui/directives/media-session.directive';
 import { ArticlesPage } from '../articles/articles.page';
 
 @Component({
   selector: 'rss-article',
-  imports: [RouterLink, LocalDatePipe, TranslatePipe, NgTemplateOutlet, ArticlesPage, ProxyContentDirective],
+  imports: [RouterLink, LocalDatePipe, TranslatePipe, NgTemplateOutlet, ArticlesPage, ProxyContentDirective, MediaSessionDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './article.page.html',
   host: {

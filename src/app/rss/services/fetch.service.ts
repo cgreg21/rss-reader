@@ -29,8 +29,24 @@ export class FetchService {
     return response.text();
   }
 
-  /** Searches feeds online (Feedly public directory); also accepts a site URL. */
+  /** Searches feeds online (Feedly directory and Apple Podcasts); also accepts a site URL. */
   async searchFeeds(query: string): Promise<FeedHit[]> {
+    const [feedly, podcasts] = await Promise.allSettled([this.searchFeedly(query), this.searchPodcasts(query)]);
+    if (feedly.status === 'rejected' && podcasts.status === 'rejected') throw feedly.reason;
+    const hits = [...(podcasts.status === 'fulfilled' ? podcasts.value : []), ...(feedly.status === 'fulfilled' ? feedly.value : [])];
+    const seen = new Set<string>();
+    return hits.filter((h) => !seen.has(h.url) && !!seen.add(h.url));
+  }
+
+  private async searchPodcasts(query: string): Promise<FeedHit[]> {
+    const text = await this.download(`https://itunes.apple.com/search?media=podcast&limit=20&term=${encodeURIComponent(query.trim())}`);
+    const data = JSON.parse(text) as { results?: { feedUrl?: string; collectionName?: string; artistName?: string; collectionViewUrl?: string }[] };
+    return (data.results ?? [])
+      .filter((r) => r.feedUrl)
+      .map((r) => ({ url: r.feedUrl!, title: r.collectionName ?? r.feedUrl!, website: r.collectionViewUrl, description: r.artistName }));
+  }
+
+  private async searchFeedly(query: string): Promise<FeedHit[]> {
     const text = await this.download(`https://cloud.feedly.com/v3/search/feeds?count=20&query=${encodeURIComponent(query.trim())}`);
     const data = JSON.parse(text) as { results?: { feedId: string; title?: string; website?: string; description?: string; subscribers?: number }[] };
     return (data.results ?? [])

@@ -5,8 +5,8 @@
     @if (a.media; as m) {
       <div class="my-4" (pointerdown)="$event.stopPropagation()">
         @switch (m.kind) {
-          @case ('audio') { <audio class="w-full" controls preload="none" [src]="m.url"></audio> }
-          @case ('video') { <video class="w-full rounded-lg" controls preload="none" playsinline [src]="m.url"></video> }
+          @case ('audio') { <audio class="w-full" controls preload="none" [src]="m.url" [rssMediaSession]="{ title: a.title, artist: feedName(a.feedId), artwork: a.image }"></audio> }
+          @case ('video') { <video class="w-full rounded-lg" controls preload="none" playsinline [src]="m.url" [rssMediaSession]="{ title: a.title, artist: feedName(a.feedId), artwork: a.image }"></video> }
           @default { <iframe class="aspect-video w-full rounded-lg" allowfullscreen loading="lazy" [src]="youtube(m.url)" [attr.title]="'common.video' | translate"></iframe> }
         }
       </div>
