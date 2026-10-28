@@ -1,6 +1,7 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 
 import { I18nService } from '../../i18n/services/i18n.service';
+import { flag, oneOf, persisted } from '../storage/persisted';
 import { ArticlesStore, startOfToday } from './articles.store';
 import { FeedsStore } from './feeds.store';
 import { Article } from '../models';
@@ -25,9 +26,9 @@ export class ViewStore {
   private readonly articlesStore = inject(ArticlesStore);
 
   readonly scope = signal<Scope>({ type: 'all' });
-  readonly unreadOnly = signal(true);
+  readonly unreadOnly = persisted('rssreader:unread-only', flag(true));
   readonly search = signal('');
-  readonly mediaFilter = signal<MediaFilter>('all');
+  readonly mediaFilter = persisted<MediaFilter>('rssreader:media-filter', oneOf(['all', 'text', 'audio', 'video'], 'all'));
 
   readonly scopeTitle = computed(() => {
     const s = this.scope();

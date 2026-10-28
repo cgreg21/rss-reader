@@ -102,6 +102,20 @@ describe('ViewStore', () => {
     expect(articles.articles().filter((a) => !a.read)).toEqual([]);
   });
 
+  it('remembers the read-state and media filters across launches', () => {
+    store.unreadOnly.set(false);
+    store.mediaFilter.set('audio');
+    expect(localStorage.getItem('rssreader:unread-only')).toBe('0');
+    expect(localStorage.getItem('rssreader:media-filter')).toBe('audio');
+    TestBed.resetTestingModule();
+    const fresh = TestBed.inject(ViewStore);
+    expect(fresh.unreadOnly()).toBe(false);
+    expect(fresh.mediaFilter()).toBe('audio');
+    localStorage.setItem('rssreader:media-filter', 'bogus');
+    TestBed.resetTestingModule();
+    expect(TestBed.inject(ViewStore).mediaFilter()).toBe('all');
+  });
+
   it('resets the scope when its feed or category is removed', async () => {
     await feeds.putFeed(feed('f1'));
     store.scope.set({ type: 'feed', id: 'f1' });
