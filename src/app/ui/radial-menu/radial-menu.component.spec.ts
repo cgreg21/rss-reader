@@ -1,6 +1,5 @@
 ﻿import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
 import { describe, expect, it, vi } from 'vitest';
 
 import { RadialItem, RadialMenuComponent } from './radial-menu.component';
@@ -13,7 +12,7 @@ class HostComponent {
 describe('RadialMenuComponent', () => {
   const setup = (items: RadialItem[]) => {
     TestBed.resetTestingModule();
-    TestBed.configureTestingModule({ providers: [provideRouter([{ path: '**', children: [] }])] });
+    TestBed.configureTestingModule({});
     const fixture = TestBed.createComponent(HostComponent);
     fixture.componentInstance.items.set(items);
     fixture.detectChanges();
@@ -22,16 +21,15 @@ describe('RadialMenuComponent', () => {
     return { fixture, root, toggle };
   };
 
-  it('renders buttons, routes and links, and opens/closes', () => {
+  it('renders buttons and links, and opens/closes', () => {
     const run = vi.fn();
     const { fixture, root, toggle } = setup([
       { label: 'run', icon: 'a', run, pulse: true, activeClass: 'x' },
-      { label: 'route', icon: 'b', route: '/feeds' },
       { label: 'href', icon: 'c', href: 'https://a.com' },
       { label: 'noop', icon: 'd', disabled: true },
-      { label: 'five', icon: 'e' },
+      { label: 'four', icon: 'e' },
     ]);
-    expect(root.querySelectorAll('.radial-item')).toHaveLength(5);
+    expect(root.querySelectorAll('.radial-item')).toHaveLength(4);
     expect(toggle().getAttribute('aria-expanded')).toBe('false');
     toggle().click();
     fixture.detectChanges();
@@ -41,7 +39,9 @@ describe('RadialMenuComponent', () => {
     root.querySelector<HTMLButtonElement>('button[aria-label="run"]')!.click();
     expect(run).toHaveBeenCalled();
     root.querySelector<HTMLButtonElement>('button[aria-label="noop"]')!.click();
-    root.querySelector<HTMLAnchorElement>('a[aria-label="route"]')!.click();
+    fixture.detectChanges();
+    expect(toggle().getAttribute('aria-expanded')).toBe('true');
+    toggle().click();
     fixture.detectChanges();
     expect(toggle().getAttribute('aria-expanded')).toBe('false');
 

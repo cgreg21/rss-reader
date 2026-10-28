@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, ElementRef, effect, inject, input, signal, viewChild } from '@angular/core';
 
-import { RssStore } from '../../rss/rss.store';
+import { ArticlesStore } from '../../rss/articles.store';
+import { ViewStore } from '../../rss/view.store';
 import { RouterLink } from '@angular/router';
 import { ArticleDetailActionsComponent } from '../article-detail-actions/article-detail-actions.component';
 import { ArticleActionsComponent } from '../article-actions/article-actions.component';
@@ -16,14 +17,15 @@ import { UI_ICONS } from '../icons';
   templateUrl: './top-bar.component.html',
 })
 export class TopBarComponent {
-  protected readonly store = inject(RssStore);
+  protected readonly view = inject(ViewStore);
+  protected readonly articles = inject(ArticlesStore);
   protected readonly drawer = inject(DrawerService);
   protected readonly ui = UI_ICONS;
   readonly actions = input(false);
   readonly articleId = input<string | null>(null);
   /** Title of a secondary page (Options, À propos); empty on the reading pages. */
   readonly options = input('');
-  protected readonly searching = signal(this.store.search() !== '');
+  protected readonly searching = signal(this.view.search() !== '');
   private readonly field = viewChild<ElementRef<HTMLInputElement>>('field');
 
   constructor() {
@@ -31,7 +33,7 @@ export class TopBarComponent {
   }
 
   protected toggleSearch(): void {
-    if (this.searching()) this.store.search.set('');
+    if (this.searching()) this.view.search.set('');
     this.searching.update((open) => !open);
   }
 }

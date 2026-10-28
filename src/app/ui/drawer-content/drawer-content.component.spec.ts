@@ -4,7 +4,9 @@ import { Router, provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { SyncService } from '../../pwa/services/sync.service';
-import { RssStore, Scope } from '../../rss/rss.store';
+import { ArticlesStore } from '../../rss/articles.store';
+import { RefreshService } from '../../rss/services/refresh.service';
+import { Scope, ViewStore } from '../../rss/view.store';
 import { DrawerService } from '../services/drawer.service';
 import { DrawerContentComponent } from './drawer-content.component';
 
@@ -33,7 +35,7 @@ describe('DrawerContentComponent', () => {
     store.online.set(true);
     store.refreshAll.mockReset();
     sync.resume.mockReset();
-    TestBed.configureTestingModule({ providers: [provideRouter([{ path: '**', children: [] }]), { provide: RssStore, useValue: store }, { provide: SyncService, useValue: sync }] });
+    TestBed.configureTestingModule({ providers: [provideRouter([{ path: '**', children: [] }]), { provide: ViewStore, useValue: store }, { provide: ArticlesStore, useValue: store }, { provide: RefreshService, useValue: store }, { provide: SyncService, useValue: sync }] });
   });
 
   const setup = () => {

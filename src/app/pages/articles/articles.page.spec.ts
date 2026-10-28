@@ -1,12 +1,16 @@
-import { signal } from '@angular/core';
+﻿import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Article } from '../../rss/models';
-import { RssStore } from '../../rss/rss.store';
+import { ArticlesStore } from '../../rss/articles.store';
+import { FeedsStore } from '../../rss/feeds.store';
 import { SettingsStore } from '../../rss/settings.store';
-import { SnackbarService } from '../../ui/services/snackbar.service';
+import { ViewStore } from '../../rss/view.store';
+import { LongPressDirective } from '../../ui/directives/long-press.directive';
+import { SwipeActionsDirective } from '../../ui/directives/swipe-actions.directive';
 import { ArticlesPage } from './articles.page';
 
 const article = (over: Partial<Article> = {}): Article => ({
@@ -16,24 +20,23 @@ const article = (over: Partial<Article> = {}): Article => ({
 describe('ArticlesPage', () => {
   const visible = signal<Article[]>([]);
   const feeds = signal<{ id: string; title: string }[]>([]);
-  const store = { visible, feeds, patch: vi.fn() };
-  const snackbar = { show: vi.fn() };
+  const articles = { toggle: vi.fn() };
   const layout = signal<'card' | 'list' | 'other'>('list');
 
   beforeEach(() => {
     visible.set([]);
     feeds.set([]);
     layout.set('list');
-    store.patch.mockReset();
-    snackbar.show.mockReset();
+    articles.toggle.mockReset();
     vi.stubGlobal('IntersectionObserver', class { observe = vi.fn(); disconnect = vi.fn(); });
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
         provideRouter([]),
-        { provide: RssStore, useValue: store },
+        { provide: ViewStore, useValue: { visible } },
+        { provide: FeedsStore, useValue: { feeds } },
+        { provide: ArticlesStore, useValue: articles },
         { provide: SettingsStore, useValue: { layout, activeProxy: signal('') } },
-        { provide: SnackbarService, useValue: snackbar },
       ],
     });
   });
@@ -66,19 +69,14 @@ describe('ArticlesPage', () => {
     visible.set([article({ image: 'http://i/x.png', favorite: true, later: true }), article({ id: 'a2', feedId: 'zz', read: true })]);
     const { fixture, root } = setup();
     expect(root.textContent).toContain('Feed');
-    const page = fixture.componentInstance as unknown as { toggleRead(a: Article): void; toggleFavorite(a: Article): void; toggleLater(a: Article): void };
-    const [on, off] = visible();
-    page.toggleRead(on);
-    page.toggleRead(off);
-    page.toggleFavorite(on);
-    page.toggleFavorite(off);
-    page.toggleLater(on);
-    page.toggleLater(off);
-    expect(store.patch).toHaveBeenCalledWith('a1', { read: true });
-    expect(store.patch).toHaveBeenCalledWith('a2', { read: false });
-    expect(store.patch).toHaveBeenCalledWith('a1', { favorite: false });
-    expect(store.patch).toHaveBeenCalledWith('a2', { later: true });
-    expect(snackbar.show).toHaveBeenCalledTimes(6);
+    const [on] = visible();
+    expect(root.querySelectorAll('a[href^="/article/"]')).toHaveLength(2);
+    expect(root.querySelectorAll('h2 .text-yellow-300')).toHaveLength(1);
+    const first = fixture.debugElement.query(By.directive(SwipeActionsDirective));
+    first.injector.get(SwipeActionsDirective).swipeLeft.emit();
+    first.injector.get(SwipeActionsDirective).swipeRight.emit();
+    first.injector.get(LongPressDirective).rssLongPress.emit();
+    expect(articles.toggle.mock.calls).toEqual([[on, 'read'], [on, 'favorite'], [on, 'later']]);
     const img = root.querySelector('img');
     img?.dispatchEvent(new Event('error'));
   });

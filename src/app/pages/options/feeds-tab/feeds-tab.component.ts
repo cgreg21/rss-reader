@@ -6,7 +6,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FeedHit, FetchService } from '../../../rss/services/fetch.service';
 import { LibraryService } from '../../../rss/services/library.service';
 import { Feed } from '../../../rss/models';
-import { RssStore } from '../../../rss/rss.store';
+import { ArticlesStore } from '../../../rss/articles.store';
+import { FeedsStore } from '../../../rss/feeds.store';
 import { DialogService } from '../../../ui/services/dialog.service';
 import { UI_ICONS } from '../../../ui/icons';
 import { download, pickedText } from '../download';
@@ -20,7 +21,8 @@ import { download, pickedText } from '../download';
   templateUrl: './feeds-tab.component.html',
 })
 export class FeedsTabComponent {
-  protected readonly store = inject(RssStore);
+  protected readonly store = inject(FeedsStore);
+  private readonly articlesStore = inject(ArticlesStore);
   private readonly library = inject(LibraryService);
   private readonly net = inject(FetchService);
   private readonly dialog = inject(DialogService);
@@ -85,7 +87,7 @@ export class FeedsTabComponent {
   }
 
   protected showFeedInfo(feed: Feed): void {
-    const articles = this.store.articles().filter((a) => a.feedId === feed.id);
+    const articles = this.articlesStore.articles().filter((a) => a.feedId === feed.id);
     const latest = articles.reduce((max, a) => Math.max(max, a.published), 0);
     const date = (t: number) => new Date(t).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' });
     this.showInfo(feed.title, [

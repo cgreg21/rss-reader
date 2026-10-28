@@ -3,7 +3,7 @@ import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import { LibraryService } from '../../../rss/services/library.service';
-import { RssStore } from '../../../rss/rss.store';
+import { FeedsStore } from '../../../rss/feeds.store';
 import { SyncService } from '../../../pwa/services/sync.service';
 import { UI_ICONS } from '../../../ui/icons';
 import { download, pickedText } from '../download';
@@ -17,7 +17,7 @@ import { download, pickedText } from '../download';
   templateUrl: './sync-tab.component.html',
 })
 export class SyncTabComponent {
-  protected readonly store = inject(RssStore);
+  protected readonly store = inject(FeedsStore);
   protected readonly sync = inject(SyncService);
   private readonly library = inject(LibraryService);
   protected readonly ui = UI_ICONS;

@@ -1,7 +1,6 @@
 import { Directive, ElementRef, OnDestroy, inject, output } from '@angular/core';
 
-const DELAY_MS = 500;
-const MOVE_SLOP = 8;
+import { LongPressTimer, isPrimaryPress } from '../gestures/pointer-gestures';
 
 /** Emits after the pointer stays down on the element; the click that follows the release is swallowed. */
 @Directive({
@@ -19,16 +18,14 @@ const MOVE_SLOP = 8;
 export class LongPressDirective implements OnDestroy {
   readonly rssLongPress = output<void>();
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
-  private timer: ReturnType<typeof setTimeout> | undefined;
-  private origin = { x: 0, y: 0 };
-  private fired = false;
+  private readonly press = new LongPressTimer(() => this.rssLongPress.emit());
 
   constructor() {
     this.host.addEventListener(
       'click',
       (e) => {
-        if (!this.fired) return;
-        this.fired = false;
+        if (!this.press.fired) return;
+        this.press.fired = false;
         e.preventDefault();
         e.stopImmediatePropagation();
       },
@@ -37,25 +34,16 @@ export class LongPressDirective implements OnDestroy {
   }
 
   protected start(event: PointerEvent): void {
-    if (event.pointerType === 'mouse' && event.button !== 0) return;
-    this.fired = false;
-    this.origin = { x: event.clientX, y: event.clientY };
-    clearTimeout(this.timer);
-    this.timer = setTimeout(() => {
-      this.timer = undefined;
-      this.fired = true;
-      navigator.vibrate?.(30);
-      this.rssLongPress.emit();
-    }, DELAY_MS);
+    if (!isPrimaryPress(event)) return;
+    this.press.start(event);
   }
 
   protected move(event: PointerEvent): void {
-    if (this.timer && Math.hypot(event.clientX - this.origin.x, event.clientY - this.origin.y) > MOVE_SLOP) this.cancel();
+    this.press.move(event);
   }
 
   protected cancel(): void {
-    clearTimeout(this.timer);
-    this.timer = undefined;
+    this.press.cancel();
   }
 
   ngOnDestroy(): void {

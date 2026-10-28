@@ -6,7 +6,8 @@ import { filter } from 'rxjs';
 import { AppPromptComponent } from '../pwa/app-prompt/app-prompt.component';
 import { PushService } from '../pwa/services/push.service';
 import { SyncService } from '../pwa/services/sync.service';
-import { RssStore } from '../rss/rss.store';
+import { ArticlesStore } from '../rss/articles.store';
+import { RefreshService } from '../rss/services/refresh.service';
 import { DrawerContentComponent } from '../ui/drawer-content/drawer-content.component';
 import { DrawerService } from '../ui/services/drawer.service';
 import { LayoutService } from '../ui/services/layout.service';
@@ -17,9 +18,9 @@ import { DialogComponent } from '../ui/dialog/dialog.component';
 import { ArticleActionsComponent } from '../ui/article-actions/article-actions.component';
 import { ArticleDetailActionsComponent } from '../ui/article-detail-actions/article-detail-actions.component';
 import { UI_ICONS } from '../ui/icons';
+import { AxisGesture, isPrimaryPress } from '../ui/gestures/pointer-gestures';
 
 const DRAWER_WIDTH = 280;
-const SWIPE_SLOP = 10;
 /** Width of the screen-edge bands where the browser starts its back/forward swipe. */
 const EDGE_WIDTH = 24;
 
@@ -30,7 +31,8 @@ const EDGE_WIDTH = 24;
   templateUrl: './root.component.html',
 })
 export class RootComponent {
-  protected readonly store = inject(RssStore);
+  protected readonly refresher = inject(RefreshService);
+  private readonly articlesStore = inject(ArticlesStore);
   protected readonly drawer = inject(DrawerService);
   protected readonly layout = inject(LayoutService);
   private readonly router = inject(Router);
@@ -40,13 +42,14 @@ export class RootComponent {
   protected readonly articleId = signal(this.currentArticleId());
   protected readonly onOptions = signal(this.isOptions());
   protected readonly ui = UI_ICONS;
-  protected readonly refresh = (): Promise<void> => this.store.refreshAll();
+  protected readonly refresh = (): Promise<void> => this.refresher.refreshAll();
 
   private readonly shell = viewChild.required<ElementRef<HTMLElement>>('shell');
   private readonly edge = viewChild<ElementRef<HTMLElement>>('edge');
   /** Horizontal offset of the drawer while a swipe is in progress, in [-DRAWER_WIDTH, 0]. */
   private readonly dragX = signal<number | null>(null);
-  private drag: { x: number; y: number; origin: number; id: number; direction: 'horizontal' | 'vertical' | null } | null = null;
+  private readonly gesture = new AxisGesture();
+  private origin = 0;
   private swiped = false;
 
   protected readonly dragging = computed(() => this.dragX() !== null);
@@ -76,9 +79,9 @@ export class RootComponent {
   }
 
   constructor() {
-    void this.store.load();
+    void this.refresher.load();
     effect(() => {
-      const count = this.store.unreadTotal();
+      const count = this.articlesStore.unreadTotal();
       const nav = navigator as Navigator & { setAppBadge?: (n?: number) => Promise<void>; clearAppBadge?: () => Promise<void> };
       if (count > 0) void nav.setAppBadge?.(count).catch(() => undefined);
       else void nav.clearAppBadge?.().catch(() => undefined);
@@ -101,7 +104,7 @@ export class RootComponent {
       edgeTouch = onEdge ? { x: touch.clientX, y: touch.clientY } : null;
     }, { passive: true });
     document.addEventListener('touchmove', (event) => {
-      if (this.drag?.direction === 'horizontal') {
+      if (this.gesture.axis === 'horizontal') {
         event.preventDefault();
         return;
       }
@@ -127,37 +130,24 @@ export class RootComponent {
   }
 
   protected onDown(event: PointerEvent): void {
-    if (event.pointerType === 'mouse' && event.button !== 0) return;
+    if (!isPrimaryPress(event)) return;
     if (this.layout.sidebar()) return;
     if (!this.drawer.opened() && event.target !== this.edge()?.nativeElement) return;
-    this.drag = { x: event.clientX, y: event.clientY, origin: this.drawerX(), id: event.pointerId, direction: null };
+    this.gesture.start(event);
+    this.origin = this.drawerX();
     this.swiped = false;
   }
 
   protected onMove(event: PointerEvent): void {
-    const drag = this.drag;
-    if (!drag || event.pointerId !== drag.id) return;
-    const dx = event.clientX - drag.x;
-    const dy = event.clientY - drag.y;
-    if (drag.direction === null && Math.max(Math.abs(dx), Math.abs(dy)) >= SWIPE_SLOP) {
-      drag.direction = Math.abs(dx) > Math.abs(dy) ? 'horizontal' : 'vertical';
-      if (drag.direction === 'horizontal') {
-        this.shell().nativeElement.setPointerCapture(event.pointerId);
-      } else {
-        this.drag = null;
-        return;
-      }
-    }
-    if (drag.direction === 'horizontal') {
-      this.swiped = true;
-      this.dragX.set(Math.min(0, Math.max(-DRAWER_WIDTH, drag.origin + dx)));
-    }
+    const move = this.gesture.move(event);
+    if (move?.axis !== 'horizontal') return;
+    if (move.started) this.shell().nativeElement.setPointerCapture(event.pointerId);
+    this.swiped = true;
+    this.dragX.set(Math.min(0, Math.max(-DRAWER_WIDTH, this.origin + move.dx)));
   }
 
   protected onUp(event: PointerEvent): void {
-    const drag = this.drag;
-    this.drag = null;
-    if (!drag || event.pointerId !== drag.id || drag.direction !== 'horizontal') return;
+    if (this.gesture.end(event)?.axis !== 'horizontal') return;
     const open = this.drawerX() > -DRAWER_WIDTH / 2;
     this.shell().nativeElement.releasePointerCapture?.(event.pointerId);
     this.dragX.set(null);

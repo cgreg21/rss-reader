@@ -2,12 +2,14 @@ import 'fake-indexeddb/auto';
 import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { ArticlesStore } from '../articles.store';
 import { db } from '../db';
+import { FeedsStore } from '../feeds.store';
 import { Article } from '../models';
-import { RssStore } from '../rss.store';
 import { SettingsStore } from '../settings.store';
 import { FetchService } from './fetch.service';
 import { LibraryService, SyncDoc } from './library.service';
+import { RefreshService } from './refresh.service';
 
 const art = (id: string, over: Partial<Article> = {}): Article => ({
   id, feedId: 'f1', title: id, link: '', summary: '', content: '', published: 1, read: false, favorite: false, ...over,
@@ -15,7 +17,9 @@ const art = (id: string, over: Partial<Article> = {}): Article => ({
 
 describe('LibraryService', () => {
   let lib: LibraryService;
-  let store: RssStore;
+  let feeds: FeedsStore;
+  let articles: ArticlesStore;
+  let refresh: RefreshService;
 
   beforeEach(async () => {
     for (const name of ['feeds', 'categories', 'articles'] as const) {
@@ -25,55 +29,57 @@ describe('LibraryService', () => {
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({ providers: [{ provide: FetchService, useValue: { download: vi.fn().mockRejectedValue(new Error('x')) } }] });
     TestBed.inject(SettingsStore).autoRefresh.set(0);
-    store = TestBed.inject(RssStore);
+    feeds = TestBed.inject(FeedsStore);
+    articles = TestBed.inject(ArticlesStore);
+    refresh = TestBed.inject(RefreshService);
     lib = TestBed.inject(LibraryService);
-    vi.spyOn(store, 'refreshAll').mockResolvedValue();
+    vi.spyOn(refresh, 'refreshAll').mockResolvedValue();
   });
 
   it('imports OPML, skipping invalid and known urls', async () => {
-    await store.putFeed({ id: 'k', url: 'https://known.com/rss', title: 'k', categoryId: null });
-    store.removedFeeds.set(['https://new.com/rss']);
+    await feeds.putFeed({ id: 'k', url: 'https://known.com/rss', title: 'k', categoryId: null });
+    feeds.removedFeeds.set(['https://new.com/rss']);
     const xml = `<opml version="2.0"><body><outline text="Cat">
       <outline xmlUrl="https://new.com/rss" title="New"/><outline xmlUrl="https://known.com/rss" title="K"/><outline xmlUrl="::bad" title="Bad"/>
     </outline></body></opml>`;
     expect(await lib.importOpml(xml)).toEqual({ added: 1, skipped: 2 });
-    expect(store.feeds()).toHaveLength(2);
-    expect(store.categories()[0].name).toBe('Cat');
-    expect(store.removedFeeds()).toEqual([]);
-    expect(store.refreshAll).toHaveBeenCalled();
+    expect(feeds.feeds()).toHaveLength(2);
+    expect(feeds.categories()[0].name).toBe('Cat');
+    expect(feeds.removedFeeds()).toEqual([]);
+    expect(refresh.refreshAll).toHaveBeenCalled();
     expect(await lib.importOpml('<opml><body></body></opml>')).toEqual({ added: 0, skipped: 0 });
   });
 
   it('exports OPML', async () => {
-    await store.putFeed({ id: 'a', url: 'https://a.com/rss', title: 'A', categoryId: null });
+    await feeds.putFeed({ id: 'a', url: 'https://a.com/rss', title: 'A', categoryId: null });
     expect(lib.exportOpml()).toContain('xmlUrl="https://a.com/rss"');
   });
 
   it('round-trips a backup', async () => {
-    await store.putCategory({ id: 'c1', name: 'C' });
-    await store.putFeed({ id: 'a', url: 'https://a.com/rss', title: 'A', categoryId: 'c1', error: 'e', failures: 2 });
-    store.articles.set([art('a:1', { read: true, feedId: 'a' }), art('a:2', { feedId: 'a' })]);
+    await feeds.putCategory({ id: 'c1', name: 'C' });
+    await feeds.putFeed({ id: 'a', url: 'https://a.com/rss', title: 'A', categoryId: 'c1', error: 'e', failures: 2 });
+    articles.articles.set([art('a:1', { read: true, feedId: 'a' }), art('a:2', { feedId: 'a' })]);
     const backup = lib.exportBackup();
     const parsed = JSON.parse(backup);
     expect(parsed.feeds[0].error).toBeUndefined();
     expect(parsed.states).toHaveLength(1);
 
-    await store.dropFeed('a');
-    store.categories.set([]);
-    store.articles.set([art('a:1', { feedId: 'a' })]);
+    await feeds.dropFeed('a');
+    feeds.categories.set([]);
+    articles.articles.set([art('a:1', { feedId: 'a' })]);
     expect(await lib.importBackup(backup)).toEqual({ feeds: 1 });
-    expect(store.articles()[0].read).toBe(true);
+    expect(articles.articles()[0].read).toBe(true);
     expect(await lib.importBackup(backup)).toEqual({ feeds: 0 });
     expect(await lib.importBackup(JSON.stringify({ feeds: [] }))).toEqual({ feeds: 0 });
     await expect(lib.importBackup('{}')).rejects.toThrow();
   });
 
   it('builds a sync document', async () => {
-    await store.putCategory({ id: 'c1', name: 'C' });
-    await store.putFeed({ id: 'a', url: 'https://a.com/rss', title: 'A', categoryId: 'c1' });
-    await store.putFeed({ id: 'b', url: 'https://b.com/rss', title: 'B', categoryId: null });
-    store.articles.set([art('a:1', { read: true }), art('a:2')]);
-    store.removedFeeds.set(['https://gone.com']);
+    await feeds.putCategory({ id: 'c1', name: 'C' });
+    await feeds.putFeed({ id: 'a', url: 'https://a.com/rss', title: 'A', categoryId: 'c1' });
+    await feeds.putFeed({ id: 'b', url: 'https://b.com/rss', title: 'B', categoryId: null });
+    articles.articles.set([art('a:1', { read: true }), art('a:2')]);
+    feeds.removedFeeds.set(['https://gone.com']);
     expect(lib.buildSyncDoc()).toEqual({
       feeds: [{ url: 'https://a.com/rss', title: 'A', category: 'C' }, { url: 'https://b.com/rss', title: 'B', category: null }],
       removed: ['https://gone.com'],
@@ -82,20 +88,20 @@ describe('LibraryService', () => {
   });
 
   it('applies a remote sync document', async () => {
-    await store.putFeed({ id: 'a', url: 'https://a.com/rss', title: 'A', categoryId: null });
-    await store.putFeed({ id: 'x', url: 'https://x.com/rss', title: 'X', categoryId: null });
-    store.articles.set([art('a:1', { feedId: 'a' })]);
-    store.removedFeeds.set(['https://old.com']);
-    store.removedFeeds.set(['https://old.com', 'https://re.com']);
-    store.noteFollowed('https://re.com');
+    await feeds.putFeed({ id: 'a', url: 'https://a.com/rss', title: 'A', categoryId: null });
+    await feeds.putFeed({ id: 'x', url: 'https://x.com/rss', title: 'X', categoryId: null });
+    articles.articles.set([art('a:1', { feedId: 'a' })]);
+    feeds.removedFeeds.set(['https://old.com']);
+    feeds.removedFeeds.set(['https://old.com', 'https://re.com']);
+    feeds.noteFollowed('https://re.com');
     await lib.applySyncDoc({
       feeds: [{ url: 'https://a.com/rss', title: 'A', category: null }, { url: 'https://n.com/rss', title: 'N', category: 'Cat' }, { url: 'https://x.com/rss', title: 'X', category: null }],
       removed: ['https://x.com/rss', 'https://re.com'],
       states: { '1': 2 },
     });
-    expect(store.feeds().map((f) => f.url).sort()).toEqual(['https://a.com/rss', 'https://n.com/rss']);
-    expect(store.removedFeeds()).toContain('https://x.com/rss');
-    expect(store.article('a:1')?.favorite).toBe(true);
+    expect(feeds.feeds().map((f) => f.url).sort()).toEqual(['https://a.com/rss', 'https://n.com/rss']);
+    expect(feeds.removedFeeds()).toContain('https://x.com/rss');
+    expect(articles.article('a:1')?.favorite).toBe(true);
     await lib.applySyncDoc({} as SyncDoc);
   });
 });

@@ -1,7 +1,7 @@
 import { Injectable, effect, inject, signal } from '@angular/core';
 import { SwPush } from '@angular/service-worker';
 
-import { RssStore } from '../../rss/rss.store';
+import { FeedsStore } from '../../rss/feeds.store';
 
 const URL_KEY = 'rssreader:push-url';
 
@@ -9,7 +9,7 @@ const URL_KEY = 'rssreader:push-url';
 @Injectable({ providedIn: 'root' })
 export class PushService {
   private readonly swPush = inject(SwPush, { optional: true });
-  private readonly store = inject(RssStore);
+  private readonly store = inject(FeedsStore);
 
   readonly supported = !!this.swPush?.isEnabled && 'PushManager' in window && 'Notification' in window;
   readonly url = signal(localStorage.getItem(URL_KEY) ?? '');

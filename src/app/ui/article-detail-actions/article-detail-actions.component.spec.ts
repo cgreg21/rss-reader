@@ -4,7 +4,7 @@ import { provideRouter } from '@angular/router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Article } from '../../rss/models';
-import { RssStore } from '../../rss/rss.store';
+import { ArticlesStore } from '../../rss/articles.store';
 import { SnackbarService } from '../services/snackbar.service';
 import { ArticleDetailActionsComponent } from './article-detail-actions.component';
 
@@ -12,13 +12,14 @@ const base: Article = { id: 'a1', feedId: 'f', title: 'Title', link: 'https://a.
 
 describe('ArticleDetailActionsComponent', () => {
   const article = signal<Article | undefined>(base);
-  const store = { article: () => article(), patch: vi.fn(), fetchFullText: vi.fn() };
+  const store = { article: () => article(), patch: vi.fn(), toggle: vi.fn(), fetchFullText: vi.fn() };
   const snackbar = { show: vi.fn(), error: vi.fn() };
   let utterances: { onend?: () => void; onerror?: () => void; lang?: string; text: string }[] = [];
   const synth = { speak: vi.fn(), cancel: vi.fn() };
 
   beforeEach(() => {
     article.set(base);
+    store.toggle.mockReset();
     store.patch.mockReset();
     store.fetchFullText.mockReset().mockResolvedValue(undefined);
     snackbar.show.mockReset();
@@ -37,7 +38,7 @@ describe('ArticleDetailActionsComponent', () => {
     });
     Object.assign(navigator, { share: vi.fn().mockResolvedValue(undefined), clipboard: { writeText: vi.fn().mockResolvedValue(undefined) } });
     TestBed.configureTestingModule({
-      providers: [provideRouter([{ path: '**', children: [] }]), { provide: RssStore, useValue: store }, { provide: SnackbarService, useValue: snackbar }],
+      providers: [provideRouter([{ path: '**', children: [] }]), { provide: ArticlesStore, useValue: store }, { provide: SnackbarService, useValue: snackbar }],
     });
   });
   afterEach(() => {
@@ -58,18 +59,18 @@ describe('ArticleDetailActionsComponent', () => {
   it('toggles favorite, later and read', () => {
     const { btn } = setup();
     btn('Ajouter aux favoris').click();
-    expect(store.patch).toHaveBeenCalledWith('a1', { favorite: true });
+    expect(store.toggle).toHaveBeenCalledWith(base, 'favorite');
     btn('Lire plus tard').click();
-    expect(store.patch).toHaveBeenCalledWith('a1', { later: true });
+    expect(store.toggle).toHaveBeenCalledWith(base, 'later');
     btn('Basculer lu / non lu').click();
-    expect(store.patch).toHaveBeenCalledWith('a1', { read: true });
+    expect(store.toggle).toHaveBeenCalledWith(base, 'read');
   });
 
   it('shows the active state', () => {
     article.set({ ...base, favorite: true, later: true, read: true, fullText: true });
     const { btn, root } = setup();
     btn('Retirer des favoris').click();
-    expect(store.patch).toHaveBeenCalledWith('a1', { favorite: false });
+    expect(store.toggle).toHaveBeenCalledWith(expect.objectContaining({ favorite: true }), 'favorite');
     expect(root.querySelector('[aria-label="Charger le texte complet"]')).toBeNull();
   });
 
@@ -153,7 +154,7 @@ describe('ArticleDetailActionsComponent', () => {
     const items = root.querySelectorAll<HTMLButtonElement>('.radial-item');
     expect(items).toHaveLength(5);
     items.forEach((i) => i.click());
-    expect(store.patch).toHaveBeenCalledTimes(3);
+    expect(store.toggle).toHaveBeenCalledTimes(3);
     await vi.waitFor(() => expect(navigator.share).toHaveBeenCalled());
     await vi.waitFor(() => expect(navigator.clipboard.writeText).toHaveBeenCalled());
     article.set({ ...base, favorite: true, later: true, read: true, link: '' });

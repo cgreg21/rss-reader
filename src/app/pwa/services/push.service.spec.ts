@@ -4,7 +4,7 @@ import { SwPush } from '@angular/service-worker';
 import { BehaviorSubject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { RssStore } from '../../rss/rss.store';
+import { FeedsStore } from '../../rss/feeds.store';
 import { PushService } from './push.service';
 
 describe('PushService', () => {
@@ -21,7 +21,7 @@ describe('PushService', () => {
 
   const create = (push: unknown = swPush) => {
     TestBed.resetTestingModule();
-    TestBed.configureTestingModule({ providers: [{ provide: SwPush, useValue: push }, { provide: RssStore, useValue: { feeds } }] });
+    TestBed.configureTestingModule({ providers: [{ provide: SwPush, useValue: push }, { provide: FeedsStore, useValue: { feeds } }] });
     return TestBed.inject(PushService);
   };
 

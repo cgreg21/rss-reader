@@ -3,7 +3,8 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { RssStore } from '../../rss/rss.store';
+import { ArticlesStore } from '../../rss/articles.store';
+import { ViewStore } from '../../rss/view.store';
 import { DrawerService } from '../services/drawer.service';
 import { TopBarComponent } from './top-bar.component';
 
@@ -20,7 +21,7 @@ describe('TopBarComponent', () => {
     store.search.set('');
     store.unreadTotal.set(3);
     store.scopeTitle.set('Scope');
-    TestBed.configureTestingModule({ providers: [provideRouter([{ path: '**', children: [] }]), { provide: RssStore, useValue: store }] });
+    TestBed.configureTestingModule({ providers: [provideRouter([{ path: '**', children: [] }]), { provide: ViewStore, useValue: store }, { provide: ArticlesStore, useValue: store }] });
   });
 
   const setup = (inputs: Record<string, unknown> = {}) => {

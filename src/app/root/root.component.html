@@ -10,7 +10,7 @@
            [style.height.px]="pull.distance()" aria-live="polite">
         @if (pull.distance() > 0) { <span class="pb-2">{{ pull.label() }}</span> }
       </div>
-      @if (!store.online()) { <div class="banner">Hors ligne : les articles enregistrés restent lisibles.</div> }
+      @if (!refresher.online()) { <div class="banner">Hors ligne : les articles enregistrés restent lisibles.</div> }
       <router-outlet />
     </main>
     @if (onArticles()) { <rss-article-actions [radial]="true" /> }

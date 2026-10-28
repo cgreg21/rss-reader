@@ -1,22 +1,32 @@
-@if (!store.visible().length) {
+@if (!view.visible().length) {
   <p class="mt-16 text-center text-muted">
-    @if (!store.feeds().length) { Aucun flux. <a class="text-accent" routerLink="/feeds">Ajoutez votre premier abonnement.</a> }
+    @if (!feedsStore.feeds().length) { Aucun flux. <a class="text-accent" routerLink="/feeds">Ajoutez votre premier abonnement.</a> }
     @else { Aucun article à afficher. }
   </p>
 }
 
+<ng-template #swipeIcons let-a>
+  <span class="swipe-icon absolute top-1/2 -left-10 -translate-y-1/2 font-mdi text-2xl text-yellow-300">{{ a.favorite ? ui.favorite : ui.favoriteOn }}</span>
+  <span class="swipe-icon absolute top-1/2 -right-10 -translate-y-1/2 font-mdi text-2xl text-green-400">{{ a.read ? ui.unread : ui.read }}</span>
+</ng-template>
+<ng-template #title let-a let-size="size">
+  <h2 [class]="size">@if (a.favorite) { <span class="mr-1 font-mdi text-yellow-300">{{ ui.favoriteOn }}</span> }@if (a.later) { <span class="mr-1 font-mdi text-accent">{{ ui.laterOn }}</span> }{{ a.title }}</h2>
+</ng-template>
+<ng-template #date let-a>
+  <span class="text-xs text-accent">{{ a.read ? '' : '● ' }}{{ a.published | date: 'dd/MM/yyyy HH:mm' }} · {{ feedTitle(a.feedId) }}</span>
+</ng-template>
+
 @switch (settings.layout()) {
   @case ('card') {
-    <rss-card-list [articles]="store.visible()" />
+    <rss-card-list [articles]="view.visible()" />
   }
   @case ('list') {
     <div class="mx-auto flex max-w-3xl flex-col divide-y divide-line">
-      @for (a of store.visible(); track a.id) {
-        <a rssReveal rssSwipe (swipeLeft)="toggleRead(a)" (swipeRight)="toggleFavorite(a)" (rssLongPress)="toggleLater(a)" class="relative flex min-w-0 flex-col gap-1 py-3" [routerLink]="['/article', a.id]" [class.is-read]="a.read">
-          <span class="swipe-icon absolute top-1/2 -left-10 -translate-y-1/2 font-mdi text-2xl text-yellow-300">{{ a.favorite ? ui.favorite : ui.favoriteOn }}</span>
-          <span class="swipe-icon absolute top-1/2 -right-10 -translate-y-1/2 font-mdi text-2xl text-green-400">{{ a.read ? ui.unread : ui.read }}</span>
-          <h2 class="text-base font-bold">@if (a.favorite) { <span class="mr-1 font-mdi text-yellow-300">{{ ui.favoriteOn }}</span> }@if (a.later) { <span class="mr-1 font-mdi text-accent">{{ ui.laterOn }}</span> }{{ a.title }}</h2>
-          <span class="text-xs text-accent">{{ a.read ? '' : '● ' }}{{ a.published | date: 'dd/MM/yyyy HH:mm' }} · {{ feedTitle(a.feedId) }}</span>
+      @for (a of view.visible(); track a.id) {
+        <a rssReveal rssSwipe (swipeLeft)="articles.toggle(a, 'read')" (swipeRight)="articles.toggle(a, 'favorite')" (rssLongPress)="articles.toggle(a, 'later')" class="relative flex min-w-0 flex-col gap-1 py-3" [routerLink]="['/article', a.id]" [class.is-read]="a.read">
+          <ng-container *ngTemplateOutlet="swipeIcons; context: { $implicit: a }" />
+          <ng-container *ngTemplateOutlet="title; context: { $implicit: a, size: 'text-base font-bold' }" />
+          <ng-container *ngTemplateOutlet="date; context: { $implicit: a }" />
           <p class="line-clamp-2 text-sm text-slate-300">{{ a.summary }}</p>
         </a>
       }
@@ -24,13 +34,12 @@
   }
   @default {
     <div class="columns-1 gap-6 sm:columns-2 sm:gap-5 sidebar:columns-3 sidebar:gap-6">
-      @for (a of store.visible(); track a.id) {
-        <a rssReveal rssSwipe (swipeLeft)="toggleRead(a)" (swipeRight)="toggleFavorite(a)" (rssLongPress)="toggleLater(a)" class="relative mb-6 flex min-w-0 break-inside-avoid flex-col gap-2.5 border-b border-line pb-6" [routerLink]="['/article', a.id]" [class.is-read]="a.read">
-          <span class="swipe-icon absolute top-1/2 -left-10 -translate-y-1/2 font-mdi text-2xl text-yellow-300">{{ a.favorite ? ui.favorite : ui.favoriteOn }}</span>
-          <span class="swipe-icon absolute top-1/2 -right-10 -translate-y-1/2 font-mdi text-2xl text-green-400">{{ a.read ? ui.unread : ui.read }}</span>
-          <h2 class="text-lg leading-tight font-bold sidebar:text-xl">@if (a.favorite) { <span class="mr-1 font-mdi text-yellow-300">{{ ui.favoriteOn }}</span> }@if (a.later) { <span class="mr-1 font-mdi text-accent">{{ ui.laterOn }}</span> }{{ a.title }}</h2>
+      @for (a of view.visible(); track a.id) {
+        <a rssReveal rssSwipe (swipeLeft)="articles.toggle(a, 'read')" (swipeRight)="articles.toggle(a, 'favorite')" (rssLongPress)="articles.toggle(a, 'later')" class="relative mb-6 flex min-w-0 break-inside-avoid flex-col gap-2.5 border-b border-line pb-6" [routerLink]="['/article', a.id]" [class.is-read]="a.read">
+          <ng-container *ngTemplateOutlet="swipeIcons; context: { $implicit: a }" />
+          <ng-container *ngTemplateOutlet="title; context: { $implicit: a, size: 'text-lg leading-tight font-bold sidebar:text-xl' }" />
           @if (a.image) { <img class="aspect-[16/10] w-full rounded-xl bg-side object-cover" [rssProxyImg]="a.image" alt="" (error)="$any($event.target).remove()"> }
-          <span class="text-xs text-accent">{{ a.read ? '' : '● ' }}{{ a.published | date: 'dd/MM/yyyy HH:mm' }} · {{ feedTitle(a.feedId) }}</span>
+          <ng-container *ngTemplateOutlet="date; context: { $implicit: a }" />
           <p class="line-clamp-5 flex-1 text-sm text-slate-300">{{ a.summary }}</p>
         </a>
       }

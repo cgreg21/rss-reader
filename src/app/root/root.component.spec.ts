@@ -6,7 +6,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AppPromptComponent } from '../pwa/app-prompt/app-prompt.component';
 import { PushService } from '../pwa/services/push.service';
 import { SyncService } from '../pwa/services/sync.service';
-import { RssStore } from '../rss/rss.store';
+import { ArticlesStore } from '../rss/articles.store';
+import { RefreshService } from '../rss/services/refresh.service';
 import { ArticleActionsComponent } from '../ui/article-actions/article-actions.component';
 import { ArticleDetailActionsComponent } from '../ui/article-detail-actions/article-detail-actions.component';
 import { DialogComponent } from '../ui/dialog/dialog.component';
@@ -68,7 +69,8 @@ describe('RootComponent', () => {
     TestBed.configureTestingModule({
       providers: [
         provideRouter([{ path: '**', children: [] }]),
-        { provide: RssStore, useValue: store },
+        { provide: ArticlesStore, useValue: store },
+        { provide: RefreshService, useValue: store },
         { provide: PushService, useValue: {} },
         { provide: SyncService, useValue: {} },
         { provide: LayoutService, useValue: { sidebar } },

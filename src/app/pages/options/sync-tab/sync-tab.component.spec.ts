@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { SyncService } from '../../../pwa/services/sync.service';
-import { RssStore } from '../../../rss/rss.store';
+import { FeedsStore } from '../../../rss/feeds.store';
 import { LibraryService } from '../../../rss/services/library.service';
 import { SyncTabComponent } from './sync-tab.component';
 
@@ -24,7 +24,7 @@ describe('SyncTabComponent', () => {
     [sync.resume, sync.setCode, sync.generateCode].forEach((fn) => fn.mockReset());
     library.importBackup.mockReset();
     TestBed.configureTestingModule({
-      providers: [{ provide: SyncService, useValue: sync }, { provide: RssStore, useValue: store }, { provide: LibraryService, useValue: library }],
+      providers: [{ provide: SyncService, useValue: sync }, { provide: FeedsStore, useValue: store }, { provide: LibraryService, useValue: library }],
     });
   });
 

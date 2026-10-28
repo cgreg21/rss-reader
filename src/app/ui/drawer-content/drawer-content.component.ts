@@ -3,7 +3,9 @@ import { Router, RouterLink } from '@angular/router';
 
 import { APP_VERSION } from '../../pwa/app-info';
 import { SyncService } from '../../pwa/services/sync.service';
-import { RssStore, Scope } from '../../rss/rss.store';
+import { ArticlesStore } from '../../rss/articles.store';
+import { RefreshService } from '../../rss/services/refresh.service';
+import { Scope, ViewStore } from '../../rss/view.store';
 import { DrawerService } from '../services/drawer.service';
 import { UI_ICONS } from '../icons';
 
@@ -16,13 +18,15 @@ import { UI_ICONS } from '../icons';
   templateUrl: './drawer-content.component.html',
 })
 export class DrawerContentComponent {
-  protected readonly store = inject(RssStore);
+  protected readonly view = inject(ViewStore);
+  protected readonly articles = inject(ArticlesStore);
+  protected readonly refresher = inject(RefreshService);
   protected readonly drawer = inject(DrawerService);
   private readonly sync = inject(SyncService);
 
   /** Manual refresh: feeds, plus a sync retry (clears a failure stop). */
   protected refresh(): void {
-    void this.store.refreshAll();
+    void this.refresher.refreshAll();
     this.sync.resume();
   }
   protected readonly ui = UI_ICONS;
@@ -30,22 +34,22 @@ export class DrawerContentComponent {
   private readonly router = inject(Router);
 
   protected go(scope: Scope): void {
-    this.store.scope.set(scope);
+    this.view.scope.set(scope);
     this.drawer.close();
     void this.router.navigateByUrl('/');
   }
 
   protected is(type: Scope['type']): boolean {
-    return this.store.scope().type === type;
+    return this.view.scope().type === type;
   }
 
   protected isFeed(id: string): boolean {
-    const s = this.store.scope();
+    const s = this.view.scope();
     return s.type === 'feed' && s.id === id;
   }
 
   protected isCategory(id: string): boolean {
-    const s = this.store.scope();
+    const s = this.view.scope();
     return s.type === 'category' && s.id === id;
   }
 }

@@ -1,7 +1,6 @@
 import { Directive, ElementRef, inject, output } from '@angular/core';
 
-const SLOP = 10;
-const THRESHOLD = 100;
+import { AxisGesture, SWIPE_THRESHOLD, isPrimaryPress } from '../gestures/pointer-gestures';
 
 /** Horizontal swipe on a list item: left emits `swipeLeft`, right emits `swipeRight`, then the item snaps back. */
 @Directive({
@@ -19,8 +18,7 @@ export class SwipeActionsDirective {
   readonly swipeRight = output<void>();
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
-  private start: { x: number; y: number; id: number } | null = null;
-  private horizontal = false;
+  private readonly gesture = new AxisGesture();
   private swiped = false;
 
   constructor() {
@@ -37,46 +35,32 @@ export class SwipeActionsDirective {
   }
 
   protected down(e: PointerEvent): void {
-    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    if (!isPrimaryPress(e)) return;
     this.swiped = false;
-    this.horizontal = false;
-    this.start = { x: e.clientX, y: e.clientY, id: e.pointerId };
+    this.gesture.start(e);
   }
 
   protected move(e: PointerEvent): void {
-    const s = this.start;
-    if (!s || e.pointerId !== s.id) return;
-    const dx = e.clientX - s.x;
-    const dy = e.clientY - s.y;
-    if (!this.horizontal) {
-      if (Math.max(Math.abs(dx), Math.abs(dy)) < SLOP) return;
-      if (Math.abs(dy) >= Math.abs(dx)) {
-        this.start = null;
-        return;
-      }
-      this.horizontal = true;
+    const m = this.gesture.move(e);
+    if (m?.axis !== 'horizontal') return;
+    if (m.started) {
       this.host.setPointerCapture(e.pointerId);
       this.host.style.transition = 'none';
     }
-    this.host.style.transform = `translateX(${Math.sign(dx) * Math.pow(Math.abs(dx), 0.85)}px)`;
+    this.host.style.transform = `translateX(${Math.sign(m.dx) * Math.pow(Math.abs(m.dx), 0.85)}px)`;
   }
 
   protected up(e: PointerEvent): void {
-    const s = this.start;
-    if (!s || e.pointerId !== s.id || !this.horizontal) {
-      this.start = null;
-      return;
-    }
-    const dx = e.clientX - s.x;
+    const end = this.gesture.end(e);
+    if (end?.axis !== 'horizontal') return;
     this.swiped = true;
     this.reset();
-    if (dx <= -THRESHOLD) this.swipeLeft.emit();
-    else if (dx >= THRESHOLD) this.swipeRight.emit();
+    if (end.dx <= -SWIPE_THRESHOLD) this.swipeLeft.emit();
+    else if (end.dx >= SWIPE_THRESHOLD) this.swipeRight.emit();
   }
 
   protected reset(): void {
-    this.start = null;
-    this.horizontal = false;
+    this.gesture.cancel();
     this.host.style.transition = 'transform 500ms cubic-bezier(0.34, 1.8, 0.64, 1)';
     this.host.style.transform = '';
   }

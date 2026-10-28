@@ -1,7 +1,9 @@
 import { Injectable, effect, inject, signal } from '@angular/core';
 
 import { LibraryService, SyncDoc } from '../../rss/services/library.service';
-import { RssStore } from '../../rss/rss.store';
+import { ArticlesStore } from '../../rss/articles.store';
+import { FeedsStore } from '../../rss/feeds.store';
+import { RefreshService } from '../../rss/services/refresh.service';
 import { SettingsStore, proxyOrigin } from '../../rss/settings.store';
 import { SnackbarService } from '../../ui/services/snackbar.service';
 import { LiveChannel } from '../live-channel';
@@ -21,7 +23,9 @@ export async function tokenFor(pin: string): Promise<string> {
 /** Keeps feeds, categories and read / favourite / later states in step across devices through the server's /sync endpoint. */
 @Injectable({ providedIn: 'root' })
 export class SyncService {
-  private readonly store = inject(RssStore);
+  private readonly feedsStore = inject(FeedsStore);
+  private readonly articlesStore = inject(ArticlesStore);
+  private readonly refresh = inject(RefreshService);
   private readonly library = inject(LibraryService);
   private readonly settings = inject(SettingsStore);
   private readonly snackbar = inject(SnackbarService);
@@ -48,9 +52,9 @@ export class SyncService {
       });
     });
     effect(() => {
-      this.store.feeds();
-      this.store.articles();
-      this.store.removedFeeds();
+      this.feedsStore.feeds();
+      this.articlesStore.articles();
+      this.feedsStore.removedFeeds();
       if (!this.enabled()) return;
       this.dirty = true;
       this.timer ??= setTimeout(() => void this.sync(), SYNC_INTERVAL_MS);
@@ -96,8 +100,8 @@ export class SyncService {
     this.busy.set(true);
     this.error.set('');
     try {
-      await this.store.load();
-      const feedsBefore = this.store.feeds().length;
+      await this.refresh.load();
+      const feedsBefore = this.feedsStore.feeds().length;
       let rev: number | undefined;
       let remote = '';
       const got = await this.call('GET');
@@ -120,10 +124,10 @@ export class SyncService {
         remote = JSON.stringify(current.data);
         await this.library.applySyncDoc(current.data);
       }
-      this.store.markSynced();
+      this.feedsStore.markSynced();
       this.lastSync.set(Date.now());
       this.failures = 0;
-      if (this.store.feeds().length !== feedsBefore) void this.store.refreshAll();
+      if (this.feedsStore.feeds().length !== feedsBefore) void this.refresh.refreshAll();
     } catch (e) {
       this.error.set(e instanceof Error ? e.message : 'Synchronisation impossible');
       if (++this.failures >= MAX_FAILURES) {

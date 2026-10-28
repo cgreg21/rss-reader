@@ -1,9 +1,7 @@
 @if (open()) { <div class="pointer-events-auto fixed inset-0 -z-10" (click)="open.set(false)"></div> }
 <div class="pointer-events-auto relative size-14">
   @for (p of placed(); track p.item.label) {
-    @if (p.item.route) {
-      <a class="radial-item" [class]="p.item.activeClass ?? ''" [routerLink]="p.item.route" [attr.aria-label]="p.item.label" [style]="style(p)" (click)="open.set(false)">{{ p.item.icon }}</a>
-    } @else if (p.item.href) {
+    @if (p.item.href) {
       <a class="radial-item" [href]="p.item.href" target="_blank" rel="noopener noreferrer" [attr.aria-label]="p.item.label" [style]="style(p)" (click)="open.set(false)">{{ p.item.icon }}</a>
     } @else {
       <button class="radial-item" type="button" [class]="p.item.activeClass ?? ''" [class.animate-pulse]="p.item.pulse" [disabled]="p.item.disabled"

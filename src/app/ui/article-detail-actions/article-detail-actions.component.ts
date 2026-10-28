@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, computed, inject, input, signal } from '@angular/core';
 
-import { RssStore } from '../../rss/rss.store';
+import { ArticlesStore } from '../../rss/articles.store';
 import { UI_ICONS } from '../icons';
 import { RadialItem, RadialMenuComponent } from '../radial-menu/radial-menu.component';
 import { SnackbarService } from '../services/snackbar.service';
@@ -18,7 +18,7 @@ export class ArticleDetailActionsComponent implements OnDestroy {
   readonly radial = input(false);
   readonly overflow = input(false);
   protected readonly menuOpen = signal(false);
-  protected readonly store = inject(RssStore);
+  protected readonly store = inject(ArticlesStore);
   private readonly snackbar = inject(SnackbarService);
   protected readonly ui = UI_ICONS;
   protected readonly article = computed(() => this.store.article(this.id()));
@@ -31,11 +31,11 @@ export class ArticleDetailActionsComponent implements OnDestroy {
     if (!a) return [];
     return [
       { label: a.favorite ? 'Retirer des favoris' : 'Ajouter aux favoris', icon: a.favorite ? this.ui.favoriteOn : this.ui.favorite,
-        activeClass: a.favorite ? '!text-yellow-300' : undefined, run: () => this.store.patch(a.id, { favorite: !a.favorite }) },
+        activeClass: a.favorite ? '!text-yellow-300' : undefined, run: () => this.store.toggle(a, 'favorite') },
       { label: a.later ? 'Retirer de À lire plus tard' : 'Lire plus tard', icon: a.later ? this.ui.laterOn : this.ui.later,
-        activeClass: a.later ? '!text-accent' : undefined, run: () => this.store.patch(a.id, { later: !a.later }) },
+        activeClass: a.later ? '!text-accent' : undefined, run: () => this.store.toggle(a, 'later') },
       { label: 'Basculer lu / non lu', icon: a.read ? this.ui.read : this.ui.unread,
-        activeClass: a.read ? undefined : '!text-green-400', run: () => this.store.patch(a.id, { read: !a.read }) },
+        activeClass: a.read ? undefined : '!text-green-400', run: () => this.store.toggle(a, 'read') },
       ...(a.link ? this.shareItems(a.title, a.link) : []),
     ];
   });

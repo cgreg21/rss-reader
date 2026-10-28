@@ -21,11 +21,11 @@
   }
 } @else if (article(); as a) {
   <button class="icon-btn" type="button" [attr.aria-label]="a.favorite ? 'Retirer des favoris' : 'Ajouter aux favoris'"
-    [class.!text-yellow-300]="a.favorite" (click)="store.patch(a.id, { favorite: !a.favorite })">{{ a.favorite ? ui.favoriteOn : ui.favorite }}</button>
+    [class.!text-yellow-300]="a.favorite" (click)="store.toggle(a, 'favorite')">{{ a.favorite ? ui.favoriteOn : ui.favorite }}</button>
   <button class="icon-btn" type="button" [attr.aria-label]="a.later ? 'Retirer de À lire plus tard' : 'Lire plus tard'"
-    [class.!text-accent]="a.later" (click)="store.patch(a.id, { later: !a.later })">{{ a.later ? ui.laterOn : ui.later }}</button>
+    [class.!text-accent]="a.later" (click)="store.toggle(a, 'later')">{{ a.later ? ui.laterOn : ui.later }}</button>
   <button class="icon-btn" type="button" aria-label="Basculer lu / non lu"
-    [class.!text-green-400]="!a.read" (click)="store.patch(a.id, { read: !a.read })">{{ a.read ? ui.read : ui.unread }}</button>
+    [class.!text-green-400]="!a.read" (click)="store.toggle(a, 'read')">{{ a.read ? ui.read : ui.unread }}</button>
   @if (a.link && !a.fullText) {
     <button class="icon-btn" type="button" aria-label="Charger le texte complet" [class.animate-pulse]="loading()" [disabled]="loading()" (click)="fullText(a.id)">{{ ui.fullText }}</button>
   }

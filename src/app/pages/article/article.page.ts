@@ -3,7 +3,9 @@ import { DatePipe, NgTemplateOutlet } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
-import { RssStore } from '../../rss/rss.store';
+import { ArticlesStore } from '../../rss/articles.store';
+import { FeedsStore } from '../../rss/feeds.store';
+import { ViewStore } from '../../rss/view.store';
 import { UI_ICONS } from '../../ui/icons';
 import { ProxyContentDirective } from '../../ui/directives/proxy-img.directive';
 import { ArticlesPage } from '../articles/articles.page';
@@ -19,7 +21,9 @@ import { ArticlesPage } from '../articles/articles.page';
 })
 export class ArticlePage {
   readonly id = input.required<string>();
-  protected readonly store = inject(RssStore);
+  protected readonly store = inject(ArticlesStore);
+  private readonly feedsStore = inject(FeedsStore);
+  private readonly view = inject(ViewStore);
   protected readonly ui = UI_ICONS;
   protected readonly article = computed(() => this.store.article(this.id()));
   private readonly sanitizer = inject(DomSanitizer);
@@ -68,7 +72,7 @@ export class ArticlePage {
   protected readonly underOpacity = computed(() => 0.5 + 0.5 * (this.offsetY() > 0 ? this.offsetY() / this.height : Math.abs(this.offset()) / this.width));
 
   protected feedName(feedId: string): string {
-    return this.store.feeds().find((f) => f.id === feedId)?.title ?? '';
+    return this.feedsStore.feeds().find((f) => f.id === feedId)?.title ?? '';
   }
 
   /** Touch events (not pointer ones) so vertical scrolling stays native: the page only takes over horizontal
@@ -134,7 +138,7 @@ export class ArticlePage {
       const id = this.id();
       untracked(() => {
         if (!this.order().includes(id)) {
-          const ids = this.store.visible().map((a) => a.id);
+          const ids = this.view.visible().map((a) => a.id);
           this.order.set(ids.includes(id) ? ids : [id]);
         }
         this.offset.set(0);

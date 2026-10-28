@@ -4,8 +4,9 @@ import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { ArticlesStore } from '../../../rss/articles.store';
+import { FeedsStore } from '../../../rss/feeds.store';
 import { Article, Feed } from '../../../rss/models';
-import { RssStore } from '../../../rss/rss.store';
 import { FetchService } from '../../../rss/services/fetch.service';
 import { LibraryService } from '../../../rss/services/library.service';
 import { DialogService } from '../../../ui/services/dialog.service';
@@ -38,7 +39,8 @@ describe('FeedsTabComponent', () => {
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
-        { provide: RssStore, useValue: store },
+        { provide: FeedsStore, useValue: store },
+        { provide: ArticlesStore, useValue: store },
         { provide: FetchService, useValue: net },
         { provide: LibraryService, useValue: library },
         { provide: DialogService, useValue: dialog },

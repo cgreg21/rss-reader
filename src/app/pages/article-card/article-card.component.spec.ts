@@ -1,11 +1,11 @@
-import { signal } from '@angular/core';
+﻿import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Article } from '../../rss/models';
-import { RssStore } from '../../rss/rss.store';
-import { SnackbarService } from '../../ui/services/snackbar.service';
+import { ArticlesStore } from '../../rss/articles.store';
+import { FeedsStore } from '../../rss/feeds.store';
 import { ArticleCardComponent } from './article-card.component';
 
 const pointer = (type: string, x = 0, y = 0, extra: Record<string, unknown> = {}): Event => {
@@ -19,16 +19,15 @@ const article = (over: Partial<Article> = {}): Article => ({
 });
 
 describe('ArticleCardComponent', () => {
-  const store = { patch: vi.fn(), feeds: signal([{ id: 'f1', title: 'Feed' }]) };
-  const snackbar = { show: vi.fn() };
+  const store = { toggle: vi.fn() };
+  const feeds = { feeds: signal([{ id: 'f1', title: 'Feed' }]) };
 
   beforeEach(() => {
     vi.stubGlobal('IntersectionObserver', class { observe = vi.fn(); disconnect = vi.fn(); });
     vi.useFakeTimers();
-    store.patch.mockReset();
-    snackbar.show.mockReset();
+    store.toggle.mockReset();
     TestBed.configureTestingModule({
-      providers: [provideRouter([{ path: '**', children: [] }]), { provide: RssStore, useValue: store }, { provide: SnackbarService, useValue: snackbar }],
+      providers: [provideRouter([{ path: '**', children: [] }]), { provide: ArticlesStore, useValue: store }, { provide: FeedsStore, useValue: feeds }],
     });
   });
   afterEach(() => {
@@ -85,8 +84,7 @@ describe('ArticleCardComponent', () => {
     el.dispatchEvent(pointer('pointerdown'));
     vi.advanceTimersByTime(500);
     el.dispatchEvent(pointer('pointerup'));
-    expect(store.patch).toHaveBeenCalledWith('a1', { later: true });
-    expect(snackbar.show).toHaveBeenCalled();
+    expect(store.toggle).toHaveBeenCalledWith(expect.objectContaining({ id: 'a1' }), 'later');
     expect(navigate).not.toHaveBeenCalled();
     delete (navigator as unknown as Record<string, unknown>)['vibrate'];
   });
@@ -96,7 +94,7 @@ describe('ArticleCardComponent', () => {
     el.dispatchEvent(pointer('pointerdown'));
     el.dispatchEvent(pointer('pointermove', 8, 0));
     vi.advanceTimersByTime(600);
-    expect(store.patch).not.toHaveBeenCalled();
+    expect(store.toggle).not.toHaveBeenCalled();
   });
 
   it('abandons vertical gestures', () => {
@@ -105,13 +103,13 @@ describe('ArticleCardComponent', () => {
     el.dispatchEvent(pointer('pointermove', 0, 30));
     el.dispatchEvent(pointer('pointermove', 60, 30));
     el.dispatchEvent(pointer('pointerup', 60, 30));
-    expect(store.patch).not.toHaveBeenCalled();
+    expect(store.toggle).not.toHaveBeenCalled();
   });
 
   it.each([
-    [-150, 'LU', { read: true }, false],
-    [150, 'FAVORI', { favorite: true }, false],
-    [-150, 'NON LU', { read: false }, true],
+    [-150, 'LU', 'read', false],
+    [150, 'FAVORI', 'favorite', false],
+    [-150, 'NON LU', 'read', true],
   ])('flings the card at %i', (dx, label, patch, state) => {
     const { fixture, el, root } = setup(article(state ? { read: true } : {}));
     vi.stubGlobal('requestAnimationFrame', (cb: () => void) => cb());
@@ -124,7 +122,7 @@ describe('ArticleCardComponent', () => {
     expect(root.textContent).toContain(label);
     el.dispatchEvent(pointer('pointerup', dx, 0));
     vi.advanceTimersByTime(200);
-    expect(store.patch).toHaveBeenCalledWith('a1', patch);
+    expect(store.toggle).toHaveBeenCalledWith(expect.objectContaining({ id: 'a1' }), patch);
   });
 
   it('toggles favorite off and ignores re-entrant flings', () => {
@@ -136,8 +134,8 @@ describe('ArticleCardComponent', () => {
     el.dispatchEvent(pointer('pointerdown'));
     (fixture.componentInstance as unknown as { fling(d: 'left'): void }).fling('left');
     vi.advanceTimersByTime(200);
-    expect(store.patch).toHaveBeenCalledTimes(1);
-    expect(store.patch).toHaveBeenCalledWith('a1', { favorite: false });
+    expect(store.toggle).toHaveBeenCalledTimes(1);
+    expect(store.toggle).toHaveBeenCalledWith(expect.objectContaining({ id: 'a1' }), 'favorite');
   });
 
   it('snaps back below the threshold and on cancel', () => {
@@ -148,6 +146,6 @@ describe('ArticleCardComponent', () => {
     el.dispatchEvent(pointer('pointerdown'));
     el.dispatchEvent(pointer('pointermove', 40, 0));
     el.dispatchEvent(new Event('pointercancel'));
-    expect(store.patch).not.toHaveBeenCalled();
+    expect(store.toggle).not.toHaveBeenCalled();
   });
 });

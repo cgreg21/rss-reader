@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 
-import { RssStore } from '../../rss/rss.store';
+import { ViewStore } from '../../rss/view.store';
 import { ArticleLayout, SettingsStore } from '../../rss/settings.store';
 import { DialogService } from '../services/dialog.service';
 import { UI_ICONS } from '../icons';
@@ -16,7 +16,7 @@ import { RadialItem, RadialMenuComponent } from '../radial-menu/radial-menu.comp
 })
 export class ArticleActionsComponent {
   readonly radial = input(false);
-  protected readonly store = inject(RssStore);
+  protected readonly store = inject(ViewStore);
   protected readonly settings = inject(SettingsStore);
   private readonly dialog = inject(DialogService);
   protected readonly ui = UI_ICONS;

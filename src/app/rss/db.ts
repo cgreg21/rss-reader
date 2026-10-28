@@ -32,6 +32,16 @@ export const db = {
   all: <T>(store: StoreName) => run<T[]>(store, 'readonly', (s) => s.getAll()),
   put: (store: StoreName, value: object) => run(store, 'readwrite', (s) => s.put(value)),
   remove: (store: StoreName, id: string) => run(store, 'readwrite', (s) => s.delete(id)),
+  async removeMany(store: StoreName, ids: string[]): Promise<void> {
+    if (!ids.length) return;
+    const handle = await open();
+    return new Promise((resolve, reject) => {
+      const tx = handle.transaction(store, 'readwrite');
+      for (const id of ids) tx.objectStore(store).delete(id);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  },
   async putMany(store: StoreName, values: object[]): Promise<void> {
     const handle = await open();
     return new Promise((resolve, reject) => {

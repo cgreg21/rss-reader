@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
 
 import { UI_ICONS } from '../icons';
 
@@ -7,7 +6,6 @@ export interface RadialItem {
   label: string;
   icon: string;
   run?: () => void;
-  route?: string;
   href?: string;
   activeClass?: string;
   disabled?: boolean;
@@ -17,7 +15,6 @@ export interface RadialItem {
 /** Icon-only fan menu opened from a button at the bottom center of the screen. */
 @Component({
   selector: 'rss-radial-menu',
-  imports: [RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'pointer-events-none fixed inset-x-0 bottom-[calc(16px+env(safe-area-inset-bottom))] z-20 flex justify-center sidebar:hidden' },
   templateUrl: './radial-menu.component.html',

@@ -2,8 +2,8 @@
 import { provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { RssStore } from '../../rss/rss.store';
 import { SettingsStore } from '../../rss/settings.store';
+import { ViewStore } from '../../rss/view.store';
 import { DialogService } from '../services/dialog.service';
 import { ArticleActionsComponent } from './article-actions.component';
 
@@ -16,7 +16,7 @@ describe('ArticleActionsComponent', () => {
     store.markAllRead.mockReset();
     dialog.confirm.mockReset();
     TestBed.configureTestingModule({
-      providers: [provideRouter([{ path: '**', children: [] }]), { provide: RssStore, useValue: store }, { provide: DialogService, useValue: dialog }],
+      providers: [provideRouter([{ path: '**', children: [] }]), { provide: ViewStore, useValue: store }, { provide: DialogService, useValue: dialog }],
     });
   });
 

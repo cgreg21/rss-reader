@@ -14,6 +14,9 @@ describe('db', () => {
     expect((await db.all<{ id: string }>('feeds')).map((f) => f.id).sort()).toEqual(['a', 'b', 'c']);
     await db.remove('feeds', 'a');
     expect(await db.all('feeds')).toHaveLength(2);
+    await db.removeMany('feeds', []);
+    await db.removeMany('feeds', ['b', 'c']);
+    expect(await db.all('feeds')).toHaveLength(0);
   });
 
   it('rejects when a transaction fails', async () => {
