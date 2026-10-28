@@ -33,13 +33,13 @@ export class RadialMenuComponent {
     const radius = items.length > 4 ? 40 + items.length * 10 : 72;
     return items.map((item, i) => {
       const angle = items.length === 1 ? Math.PI / 2 : Math.PI - (i * Math.PI) / (items.length - 1);
-      return { item, x: Math.round(Math.cos(angle) * radius) * sign || 0, y: Math.round(Math.sin(angle) * radius) };
+      return { item, i, x: Math.round(Math.cos(angle) * radius) * sign || 0, y: Math.round(Math.sin(angle) * radius) };
     });
   });
 
-  protected style(p: { x: number; y: number }): string {
+  protected style(p: { x: number; y: number; i: number }): string {
     return this.open()
-      ? `transform: translate(${p.x}px, ${-p.y}px); opacity: 1;`
+      ? `transform: translate(${p.x}px, ${-p.y}px); opacity: 1; transition-delay: ${p.i * 25}ms;`
       : 'transform: translate(0, 0) scale(0.4); opacity: 0; pointer-events: none;';
   }
 }

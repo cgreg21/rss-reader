@@ -9,5 +9,7 @@
     }
   }
   <button class="absolute inset-0 grid cursor-pointer place-items-center rounded-full bg-accent font-mdi text-[28px] text-white shadow-lg transition-transform active:scale-90"
-    type="button" [attr.aria-expanded]="open()" [attr.aria-label]="'radial.actions' | translate" (click)="open.set(!open())">{{ open() ? ui.close : ui.grid }}</button>
+    type="button" [attr.aria-expanded]="open()" [attr.aria-label]="'radial.actions' | translate" (click)="open.set(!open())">
+    <span class="inline-block transition-transform duration-200 ease-out" [class.rotate-90]="open()">{{ open() ? ui.close : ui.grid }}</span>
+  </button>
 </div>

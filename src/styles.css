@@ -39,6 +39,11 @@
   --color-accent: #1fb5b0;
   --font-sans: "DM Sans", system-ui, sans-serif;
   --font-mdi: "Material Design Icons";
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-fast: 120ms;
+  --dur-base: 180ms;
+  --dur-slow: 250ms;
 }
 
 @layer base {
@@ -61,18 +66,38 @@
   button { @apply cursor-pointer; }
   button:disabled { @apply cursor-default opacity-40; }
   input:focus, select:focus { @apply outline-2 outline-accent; }
+  input, select { transition: outline-color var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out), background-color var(--dur-base) var(--ease-out); outline-offset: 0; }
+  input:not(:focus), select:not(:focus) { outline: 2px solid transparent; }
+  button, a { transition-property: color, background-color, border-color, opacity, transform, box-shadow; transition-duration: var(--dur-fast); transition-timing-function: var(--ease-out); }
+  button:focus-visible, a:focus-visible { @apply outline-2 outline-offset-2 outline-accent; }
+  a { text-underline-offset: 3px; }
+  @keyframes anim-view-out { to { opacity: 0; } }
+  @keyframes anim-view-in { from { opacity: 0; transform: translateX(calc(12px * var(--dir-sign, 1))); } }
+  :root[dir='rtl'] { --dir-sign: -1; }
+  ::view-transition-old(root) { animation: anim-view-out var(--dur-fast) ease-in both; }
+  ::view-transition-new(root) { animation: anim-view-in var(--dur-slow) var(--ease-out) both; }
 }
 
 @layer components {
-  .icon-btn { @apply inline-grid size-11 min-w-11 cursor-pointer place-items-center rounded-full font-mdi text-[22px] text-muted transition-transform hover:bg-white/5 hover:text-slate-100 active:scale-90; }
-  .btn { @apply rounded-xl bg-accent px-4 py-2 font-semibold text-[#04201f] disabled:opacity-60; }
-  .btn-ghost { @apply rounded-xl border border-line px-4 py-2 text-muted hover:text-slate-100; }
+  .icon-btn { @apply inline-grid size-11 min-w-11 cursor-pointer place-items-center rounded-full font-mdi text-[22px] text-muted hover:scale-110 hover:bg-white/5 hover:text-slate-100 active:scale-90; }
+  .btn { @apply rounded-xl bg-accent px-4 py-2 font-semibold text-[#04201f] hover:brightness-110 active:scale-95 disabled:opacity-60; }
+  .btn-ghost { @apply rounded-xl border border-line px-4 py-2 text-muted hover:border-muted hover:text-slate-100 active:scale-95; }
+  .press { @apply active:scale-95; }
+  .lift { transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out); }
+  @media (hover: hover) { .lift:hover { transform: translateY(-2px); } }
+  .link-underline { background: linear-gradient(currentColor, currentColor) no-repeat 0 100% / 0 1px; transition: background-size var(--dur-base) var(--ease-out); }
+  .link-underline:hover { background-size: 100% 1px; }
+  [dir='rtl'] .link-underline { background-position: 100% 100%; }
+  .skeleton { animation: anim-skeleton 1.4s ease-in-out infinite; }
+  .img-fade { animation: anim-fade-in var(--dur-slow) ease-out; }
   .field { @apply min-w-0 rounded-xl border border-transparent bg-side px-3.5 py-2; }
   .panel { @apply mb-4 max-w-3xl rounded-2xl bg-side p-4; }
   .radial-item { @apply absolute top-1 start-1 grid size-12 cursor-pointer place-items-center rounded-full bg-side font-mdi text-[24px] text-slate-100 shadow-lg transition-[transform,opacity] duration-200 ease-out disabled:opacity-50; }
   .banner { @apply mb-4 flex flex-wrap items-center gap-2 rounded-xl bg-[#243350] px-3.5 py-2 text-sm; }
   .banner button { @apply rounded-lg border border-accent px-2.5 text-accent; }
-  .nav-item { @apply flex w-full items-center justify-between gap-2.5 rounded-xl px-3 py-2 text-start hover:bg-white/5; }
+  .nav-item { @apply flex w-full items-center justify-between gap-2.5 rounded-xl px-3 py-2 text-start hover:bg-white/5 active:scale-[0.98]; }
+  .tab-btn { @apply transition-colors duration-150; }
+  .pop { display: inline-block; animation: anim-toggle-pop var(--dur-slow) var(--ease-spring); }
   .nav-item.active { @apply bg-active; }
   .nav-count { @apply text-[13px] not-italic text-muted; }
 }
@@ -93,6 +118,9 @@
 @keyframes anim-up-out { to { opacity: 0; transform: translateY(16px); } }
 @keyframes anim-down-in { from { opacity: 0; transform: translateY(-8px); } }
 @keyframes anim-down-out { to { opacity: 0; transform: translateY(-8px); } }
+@keyframes anim-toggle-pop { 40% { transform: scale(1.35); } }
+@keyframes anim-skeleton { 50% { opacity: 0.5; } }
+@keyframes anim-stagger-in { from { opacity: 0; transform: translateY(8px); } }
 .anim-fade-in { animation: anim-fade-in 180ms ease-out; }
 .anim-fade-out { animation: anim-fade-out 150ms ease-in forwards; }
 .anim-pop-in { animation: anim-pop-in 180ms ease-out; }
@@ -103,7 +131,9 @@
 .anim-down-out { animation: anim-down-out 140ms ease-in forwards; }
 @media (prefers-reduced-motion: reduce) {
   .reveal { opacity: 1; transform: none; transition: none; }
-  [class*='anim-'] { animation-duration: 1ms !important; }
+  [class*='anim-'], .pop, .img-fade, .skeleton, .animate-spin, .animate-pulse { animation-duration: 1ms !important; animation-iteration-count: 1 !important; }
+  *, ::before, ::after { transition-duration: 1ms !important; transition-delay: 0ms !important; scroll-behavior: auto !important; }
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
 }
 .reveal { opacity: 0; transform: translateY(var(--reveal-y, 24px)) scale(0.92); transition: opacity 300ms ease-out, transform 300ms ease-out; }
 .reveal-in { opacity: 1; transform: none; }

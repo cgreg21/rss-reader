@@ -6,7 +6,7 @@
       <button class="icon-btn" type="button" [attr.aria-label]="'detail.more' | translate" aria-haspopup="menu" [attr.aria-expanded]="menuOpen()" (click)="menuOpen.set(!menuOpen())">{{ ui.more }}</button>
       @if (menuOpen()) {
         <div class="fixed inset-0 z-30" (click)="menuOpen.set(false)"></div>
-        <div class="absolute end-0 top-full z-40 mt-1 flex flex-col gap-1 rounded-2xl bg-bg p-1 shadow-xl" role="menu">
+        <div class="absolute end-0 top-full z-40 mt-1 flex flex-col gap-1 rounded-2xl bg-bg p-1 shadow-xl" role="menu" animate.enter="anim-down-in" animate.leave="anim-down-out">
           @for (item of overflowItems(); track item.label) {
             @if (item.href) {
               <a class="icon-btn" role="menuitem" [href]="item.href" target="_blank" rel="noopener noreferrer" [attr.aria-label]="item.label" (click)="menuOpen.set(false)">{{ item.icon }}</a>
@@ -21,11 +21,11 @@
   }
 } @else if (article(); as a) {
   <button class="icon-btn" type="button" [attr.aria-label]="(a.favorite ? 'detail.removeFavorite' : 'detail.addFavorite') | translate"
-    [class.!text-yellow-300]="a.favorite" (click)="store.toggle(a, 'favorite')">{{ a.favorite ? ui.favoriteOn : ui.favorite }}</button>
+    [class.!text-yellow-300]="a.favorite" (click)="store.toggle(a, 'favorite')">@if (a.favorite) { <span animate.enter="pop">{{ ui.favoriteOn }}</span> } @else { <span>{{ ui.favorite }}</span> }</button>
   <button class="icon-btn" type="button" [attr.aria-label]="(a.later ? 'detail.removeLater' : 'detail.later') | translate"
-    [class.!text-accent]="a.later" (click)="store.toggle(a, 'later')">{{ a.later ? ui.laterOn : ui.later }}</button>
+    [class.!text-accent]="a.later" (click)="store.toggle(a, 'later')">@if (a.later) { <span animate.enter="pop">{{ ui.laterOn }}</span> } @else { <span>{{ ui.later }}</span> }</button>
   <button class="icon-btn" type="button" [attr.aria-label]="'detail.toggleRead' | translate"
-    [class.!text-green-400]="!a.read" (click)="store.toggle(a, 'read')">{{ a.read ? ui.read : ui.unread }}</button>
+    [class.!text-green-400]="!a.read" (click)="store.toggle(a, 'read')">@if (a.read) { <span animate.enter="pop">{{ ui.read }}</span> } @else { <span animate.enter="pop">{{ ui.unread }}</span> }</button>
   @if (a.link && !a.fullText) {
     <button class="icon-btn" type="button" [attr.aria-label]="'detail.fullText' | translate" [class.animate-pulse]="loading()" [disabled]="loading()" (click)="fullText(a.id)">{{ ui.fullText }}</button>
   }

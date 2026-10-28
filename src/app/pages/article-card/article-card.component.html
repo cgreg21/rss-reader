@@ -5,7 +5,7 @@
   <div class="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-bg">
     <div class="absolute inset-0 grid place-items-center bg-gradient-to-br from-accent/40 to-bg font-mdi text-7xl text-white/70">{{ ui.all }}</div>
     @if (article().image; as image) {
-      <img class="absolute inset-0 size-full object-cover" draggable="false" [rssProxyImg]="image" alt="" (error)="$any($event.target).remove()">
+      <img class="img-fade absolute inset-0 size-full object-cover" draggable="false" [rssProxyImg]="image" alt="" (error)="$any($event.target).remove()">
     }
     <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-3 pt-12">
       <h2 class="text-start text-lg leading-tight font-bold text-white">{{ article().title }}</h2>
@@ -18,10 +18,10 @@
         {{ (article().read ? 'card.unread' : 'card.read') | translate }}</div>
     }
     @if (article().later) {
-      <span class="absolute start-2 top-2 font-mdi text-2xl text-accent drop-shadow" [class.hidden]="offset() > 0">{{ ui.laterOn }}</span>
+      <span animate.enter="pop" class="absolute start-2 top-2 font-mdi text-2xl text-accent drop-shadow" [class.hidden]="offset() > 0">{{ ui.laterOn }}</span>
     }
     @if (article().favorite) {
-      <span class="absolute end-2 top-2 font-mdi text-2xl text-yellow-300" [class.hidden]="offset() < 0">{{ ui.favoriteOn }}</span>
+      <span animate.enter="pop" class="absolute end-2 top-2 font-mdi text-2xl text-yellow-300" [class.hidden]="offset() < 0">{{ ui.favoriteOn }}</span>
     }
   </div>
   <div class="mt-2 flex justify-between gap-2 text-xs text-accent">
