@@ -1,6 +1,6 @@
 {
   "name": "rssreader",
-  "version": "1.0.64",
+  "version": "1.0.65",
   "description": "Installable RSS reader with offline reading.",
   "private": true,
   "scripts": {
