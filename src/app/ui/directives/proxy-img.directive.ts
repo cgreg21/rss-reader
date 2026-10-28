@@ -1,6 +1,6 @@
 import { Directive, ElementRef, OnDestroy, effect, inject, input } from '@angular/core';
 
-import { sanitizeHtml } from '../../rss/parsing/feed-parser';
+import { sanitizeHtml } from '../../rss/parsing/html';
 import { ImageCache } from '../../rss/services/image-cache.service';
 import { SettingsStore } from '../../rss/stores/settings.store';
 

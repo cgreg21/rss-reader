@@ -5,7 +5,7 @@ import { MessageError } from '../../i18n/message-error';
 import { MessageKey } from '../../i18n/messages';
 import { SnackbarService } from '../../ui/snackbar/snackbar.service';
 import { db } from '../storage/db';
-import { extractReadable } from '../parsing/feed-parser';
+import { extractReadable } from '../parsing/html';
 import { Article, ParsedFeed } from '../models';
 import { FetchService } from '../services/fetch.service';
 import { OfflineMediaService } from '../services/offline-media.service';
