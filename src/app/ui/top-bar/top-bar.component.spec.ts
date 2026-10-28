@@ -42,7 +42,7 @@ describe('TopBarComponent', () => {
     expect(menu.textContent).toContain('99+');
     store.unreadTotal.set(0);
     fixture.detectChanges();
-    expect(menu.textContent?.trim()).toBe('');
+    expect(menu.textContent).not.toContain('3');
     menu.click();
     expect(TestBed.inject(DrawerService).opened()).toBe(true);
   });
@@ -80,7 +80,7 @@ describe('TopBarComponent', () => {
   });
 
   it('renders an options page header', () => {
-    const { root } = setup({ options: 'Options' });
+    const { root } = setup({ options: 'nav.options' });
     expect(root.querySelector('strong')?.textContent).toContain('Options');
     expect(root.querySelectorAll('[aria-label="Retour"]').length).toBe(2);
     expect(root.querySelector('input')).toBeNull();

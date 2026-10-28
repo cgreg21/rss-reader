@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 
+import { MessageError } from '../../i18n/message-error';
 import { Category, Feed } from '../models';
 import { buildOpml, parseOpml } from '../opml';
 import { ArticlesStore, flagsOf, stateKey } from '../articles.store';
@@ -59,7 +60,7 @@ export class LibraryService {
 
   async importBackup(json: string): Promise<{ feeds: number }> {
     const data = JSON.parse(json) as { categories?: Category[]; feeds?: Feed[]; states?: { id: string; read: boolean; favorite: boolean; later: boolean }[] };
-    if (!Array.isArray(data.feeds)) throw new Error('Sauvegarde invalide');
+    if (!Array.isArray(data.feeds)) throw new MessageError('err.invalidBackup');
     for (const c of data.categories ?? []) await this.feedsStore.putCategory(c);
     const known = new Set(this.feedsStore.feeds().map((f) => f.url));
     let feeds = 0;

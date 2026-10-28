@@ -1,33 +1,40 @@
 <section class="panel">
-  <h2 class="mb-2.5 text-base font-bold">Lecture</h2>
+  <h2 class="mb-2.5 text-base font-bold">{{ 'reading.title' | translate }}</h2>
   <div class="flex items-center justify-between gap-3 py-1">
-    <span>Thème</span>
+    <span>{{ 'lang.label' | translate }}</span>
+    <select class="field" name="language" [attr.aria-label]="'lang.label' | translate" [ngModel]="settings.language()" (ngModelChange)="settings.language.set($event)">
+      <option value="auto">{{ 'lang.auto' | translate }}</option>
+      @for (l of languages; track l.id) { <option [value]="l.id" [attr.lang]="l.id">{{ l.name }}</option> }
+    </select>
+  </div>
+  <div class="flex items-center justify-between gap-3 py-1">
+    <span>{{ 'reading.theme' | translate }}</span>
     <div class="flex rounded-full bg-bg p-0.5" role="group">
-      <button type="button" class="rounded-full px-3 py-1 text-[13px]" [class]="settings.theme() === 'dark' ? 'bg-accent text-white' : 'text-muted'" (click)="settings.theme.set('dark')">Sombre</button>
-      <button type="button" class="rounded-full px-3 py-1 text-[13px]" [class]="settings.theme() === 'light' ? 'bg-accent text-white' : 'text-muted'" (click)="settings.theme.set('light')">Clair</button>
+      <button type="button" class="rounded-full px-3 py-1 text-[13px]" [class]="settings.theme() === 'dark' ? 'bg-accent text-white' : 'text-muted'" (click)="settings.theme.set('dark')">{{ 'reading.dark' | translate }}</button>
+      <button type="button" class="rounded-full px-3 py-1 text-[13px]" [class]="settings.theme() === 'light' ? 'bg-accent text-white' : 'text-muted'" (click)="settings.theme.set('light')">{{ 'reading.light' | translate }}</button>
     </div>
   </div>
   <div class="flex items-center justify-between gap-3 py-1">
-    <span>Taille du texte</span>
-    <select class="field" name="fontSize" aria-label="Taille du texte" [ngModel]="settings.fontSize()" (ngModelChange)="settings.fontSize.set(+$event)">
+    <span>{{ 'reading.fontSize' | translate }}</span>
+    <select class="field" name="fontSize" [attr.aria-label]="'reading.fontSize' | translate" [ngModel]="settings.fontSize()" (ngModelChange)="settings.fontSize.set(+$event)">
       @for (s of fontSizes; track s) { <option [ngValue]="s">{{ s }} px</option> }
     </select>
   </div>
 </section>
 
 <section class="panel">
-  <h2 class="mb-2.5 text-base font-bold">Mots masqués</h2>
-  <p class="mb-2 text-[13px] text-muted">Un mot ou une expression par ligne : les articles dont le titre ou le résumé le contient sont masqués (sauf favoris et « à lire plus tard »).</p>
+  <h2 class="mb-2.5 text-base font-bold">{{ 'reading.muted' | translate }}</h2>
+  <p class="mb-2 text-[13px] text-muted">{{ 'reading.mutedHelp' | translate }}</p>
   <textarea class="field w-full" rows="3" name="muted" [ngModel]="mutedText()" (ngModelChange)="setMuted($event)"></textarea>
 </section>
 
 <section class="panel">
   <div class="flex items-center justify-between gap-3">
-    <h2 class="text-base font-bold">Purge automatique</h2>
-    <select class="field" name="retention" aria-label="Purge des articles lus" [ngModel]="settings.retentionDays()" (ngModelChange)="settings.retentionDays.set(+$event)">
-      <option [ngValue]="0">Jamais</option>
-      @for (d of retentionOptions; track d) { <option [ngValue]="d">Lus depuis plus de {{ d }} j</option> }
+    <h2 class="text-base font-bold">{{ 'reading.purge' | translate }}</h2>
+    <select class="field" name="retention" [attr.aria-label]="'reading.purgeLabel' | translate" [ngModel]="settings.retentionDays()" (ngModelChange)="settings.retentionDays.set(+$event)">
+      <option [ngValue]="0">{{ 'reading.never' | translate }}</option>
+      @for (d of retentionOptions; track d) { <option [ngValue]="d">{{ 'reading.readSince' | translate: { d } }}</option> }
     </select>
   </div>
-  <p class="mt-2 text-[13px] text-muted">Les articles lus de plus de N jours sont supprimés, sauf favoris et « à lire plus tard ».</p>
+  <p class="mt-2 text-[13px] text-muted">{{ 'reading.purgeHelp' | translate }}</p>
 </section>

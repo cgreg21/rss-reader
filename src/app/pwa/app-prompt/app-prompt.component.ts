@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, effect, inject } from '@angular/core';
 
+import { I18nService } from '../../i18n/services/i18n.service';
 import { SnackbarService } from '../../ui/services/snackbar.service';
 import { InstallService } from '../services/install.service';
 import { UpdateService } from '../services/update.service';
@@ -12,6 +13,7 @@ import { UpdateService } from '../services/update.service';
 })
 export class AppPromptComponent {
   private readonly snackbar = inject(SnackbarService);
+  private readonly i18n = inject(I18nService);
   private readonly install = inject(InstallService);
   private readonly updates = inject(UpdateService);
   private shown: { kind: 'update' | 'install' | null; id: number } = { kind: null, id: 0 };
@@ -27,20 +29,21 @@ export class AppPromptComponent {
 
   private present(kind: 'update' | 'install'): number {
     const image = 'icons/icon-192.png';
+    const t = this.i18n.t.bind(this.i18n);
     if (kind === 'update') {
-      return this.snackbar.show('Une nouvelle version de RSS Reader est prête.', {
-        kind: 'info', title: 'Mise à jour disponible', image, duration: 0,
+      return this.snackbar.show(t('prompt.updateText'), {
+        kind: 'info', title: t('prompt.updateTitle'), image, duration: 0,
         actions: [
-          { label: 'Recharger', primary: true, run: () => this.updates.apply() },
-          { label: 'Plus tard', run: () => this.updates.dismiss() },
+          { label: t('prompt.reload'), primary: true, run: () => this.updates.apply() },
+          { label: t('prompt.later'), run: () => this.updates.dismiss() },
         ],
       });
     }
-    return this.snackbar.show('Accès rapide et lecture hors ligne.', {
-      kind: 'info', title: "Installer l'application", image, duration: 0,
+    return this.snackbar.show(t('prompt.installText'), {
+      kind: 'info', title: t('prompt.installTitle'), image, duration: 0,
       actions: [
-        { label: 'Installer', primary: true, run: () => void this.install.install() },
-        { label: 'Non merci', run: () => this.install.dismiss() },
+        { label: t('prompt.install'), primary: true, run: () => void this.install.install() },
+        { label: t('prompt.no'), run: () => this.install.dismiss() },
       ],
     });
   }

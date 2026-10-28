@@ -1,5 +1,8 @@
 import { Injectable, computed, effect, inject, signal, untracked } from '@angular/core';
 
+import { I18nService } from '../i18n/services/i18n.service';
+import { MessageError } from '../i18n/message-error';
+import { MessageKey } from '../i18n/messages';
 import { SnackbarService } from '../ui/services/snackbar.service';
 import { db } from './db';
 import { extractReadable } from './feed-parser';
@@ -11,10 +14,10 @@ export type ArticleFlag = 'read' | 'favorite' | 'later';
 
 const MAX_ARTICLES_PER_FEED = 100;
 
-const MESSAGES: Record<ArticleFlag, { on: string; off: string }> = {
-  read: { on: 'Marqué comme lu', off: 'Marqué comme non lu' },
-  favorite: { on: 'Ajouté aux favoris', off: 'Retiré des favoris' },
-  later: { on: 'Ajouté à À lire plus tard', off: 'Retiré de À lire plus tard' },
+const MESSAGES: Record<ArticleFlag, { on: MessageKey; off: MessageKey }> = {
+  read: { on: 'flag.readOn', off: 'flag.readOff' },
+  favorite: { on: 'flag.favoriteOn', off: 'flag.favoriteOff' },
+  later: { on: 'flag.laterOn', off: 'flag.laterOff' },
 };
 
 const toPlainLength = (html: string): number => html.replace(/<[^>]*>/g, '').trim().length;
@@ -32,6 +35,7 @@ export class ArticlesStore {
   private readonly settings = inject(SettingsStore);
   private readonly net = inject(FetchService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly i18n = inject(I18nService);
 
   readonly articles = signal<Article[]>([]);
 
@@ -78,7 +82,7 @@ export class ArticlesStore {
   toggle(article: Pick<Article, 'id' | ArticleFlag>, flag: ArticleFlag): void {
     const on = !article[flag];
     void this.patch(article.id, { [flag]: on });
-    this.snackbar.show(MESSAGES[flag][on ? 'on' : 'off']);
+    this.snackbar.show(this.i18n.t(MESSAGES[flag][on ? 'on' : 'off']));
   }
 
   async markRead(ids: string[]): Promise<void> {
@@ -120,9 +124,9 @@ export class ArticlesStore {
   /** Downloads the article's web page and replaces its content with the extracted full text. */
   async fetchFullText(id: string): Promise<void> {
     const article = this.article(id);
-    if (!article?.link) throw new Error("Pas d'adresse d'origine");
+    if (!article?.link) throw new MessageError('err.noOrigin');
     const content = extractReadable(await this.net.download(article.link), article.link);
-    if (toPlainLength(content) < 200) throw new Error('Texte complet introuvable');
+    if (toPlainLength(content) < 200) throw new MessageError('err.noFullText');
     const updated = { ...article, content, fullText: true };
     this.articles.update((l) => l.map((a) => (a.id === id ? updated : a)));
     await db.put('articles', updated);

@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component, ElementRef, effect, inject, input, signal, viewChild } from '@angular/core';
 
+import { MessageKey } from '../../i18n/messages';
+import { TranslatePipe } from '../../i18n/translate.pipe';
 import { ArticlesStore } from '../../rss/articles.store';
 import { ViewStore } from '../../rss/view.store';
 import { RouterLink } from '@angular/router';
@@ -11,7 +13,7 @@ import { UI_ICONS } from '../icons';
 /** Mobile/portrait header: drawer button, current scope title and refresh. */
 @Component({
   selector: 'rss-top-bar',
-  imports: [ArticleActionsComponent, ArticleDetailActionsComponent, RouterLink],
+  imports: [ArticleActionsComponent, ArticleDetailActionsComponent, RouterLink, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'contents' },
   templateUrl: './top-bar.component.html',
@@ -23,8 +25,8 @@ export class TopBarComponent {
   protected readonly ui = UI_ICONS;
   readonly actions = input(false);
   readonly articleId = input<string | null>(null);
-  /** Title of a secondary page (Options, À propos); empty on the reading pages. */
-  readonly options = input('');
+  /** Message key of a secondary page title (Options, About); empty on the reading pages. */
+  readonly options = input<MessageKey | ''>('');
   protected readonly searching = signal(this.view.search() !== '');
   private readonly field = viewChild<ElementRef<HTMLInputElement>>('field');
 

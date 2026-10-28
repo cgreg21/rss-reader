@@ -1,5 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 
+import { I18nService } from '../i18n/services/i18n.service';
 import { ArticlesStore, startOfToday } from './articles.store';
 import { FeedsStore } from './feeds.store';
 import { Article } from './models';
@@ -17,6 +18,7 @@ export type Scope =
 @Injectable({ providedIn: 'root' })
 export class ViewStore {
   private readonly settings = inject(SettingsStore);
+  private readonly i18n = inject(I18nService);
   private readonly feedsStore = inject(FeedsStore);
   private readonly articlesStore = inject(ArticlesStore);
 
@@ -28,7 +30,8 @@ export class ViewStore {
     const s = this.scope();
     if (s.type === 'feed') return this.feedsStore.feeds().find((f) => f.id === s.id)?.title ?? '';
     if (s.type === 'category') return this.feedsStore.categories().find((c) => c.id === s.id)?.name ?? '';
-    return { all: 'Tous les flux', today: "Aujourd'hui", favorites: 'Favoris', later: 'À lire plus tard' }[s.type];
+    const t = this.i18n.t.bind(this.i18n);
+    return { all: t('scope.all'), today: t('scope.today'), favorites: t('scope.favorites'), later: t('scope.later') }[s.type];
   });
 
   readonly visible = computed(() => {
@@ -69,7 +72,7 @@ export class ViewStore {
     };
     const known = this.feedsStore.categories().slice().sort((a, b) => a.name.localeCompare(b.name)).map((c) => group(c.id, c.name))
       .filter((g) => !unreadOnly || g.feeds.length);
-    const other = group(null, 'Autres');
+    const other = group(null, this.i18n.t('scope.other'));
     return other.feeds.length ? [...known, other] : known;
   });
 

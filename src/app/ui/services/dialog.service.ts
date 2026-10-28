@@ -1,4 +1,6 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
+
+import { I18nService } from '../../i18n/services/i18n.service';
 
 export interface DialogButton<T = unknown> {
   label: string;
@@ -27,6 +29,7 @@ export interface OpenDialog extends DialogConfig {
 @Injectable({ providedIn: 'root' })
 export class DialogService {
   readonly current = signal<OpenDialog | null>(null);
+  private readonly i18n = inject(I18nService);
   private nextId = 0;
   private resolver: ((result: { value: unknown; text: string }) => void) | null = null;
 
@@ -48,8 +51,8 @@ export class DialogService {
       title: opts.title,
       message,
       buttons: [
-        { label: opts.cancelLabel ?? 'Annuler', value: false, kind: 'ghost' },
-        { label: opts.confirmLabel ?? 'Confirmer', value: true, kind: opts.danger ? 'danger' : 'primary' },
+        { label: opts.cancelLabel ?? this.i18n.t('common.cancel'), value: false, kind: 'ghost' },
+        { label: opts.confirmLabel ?? this.i18n.t('common.confirm'), value: true, kind: opts.danger ? 'danger' : 'primary' },
       ],
       dismissValue: false,
       submitValue: true,
@@ -63,7 +66,7 @@ export class DialogService {
       message,
       input: { value: opts.value, placeholder: opts.placeholder, type: opts.type },
       buttons: [
-        { label: 'Annuler', value: false, kind: 'ghost' },
+        { label: this.i18n.t('common.cancel'), value: false, kind: 'ghost' },
         { label: opts.confirmLabel ?? 'OK', value: true, kind: 'primary' },
       ],
       dismissValue: false,

@@ -1,8 +1,11 @@
 import { ChangeDetectionStrategy, Component, ElementRef, computed, effect, inject, input, signal, untracked } from '@angular/core';
-import { DatePipe, NgTemplateOutlet } from '@angular/common';
+import { NgTemplateOutlet } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
+import { I18nService } from '../../i18n/services/i18n.service';
+import { LocalDatePipe } from '../../i18n/local-date.pipe';
+import { TranslatePipe } from '../../i18n/translate.pipe';
 import { ArticlesStore } from '../../rss/articles.store';
 import { FeedsStore } from '../../rss/feeds.store';
 import { ViewStore } from '../../rss/view.store';
@@ -12,7 +15,7 @@ import { ArticlesPage } from '../articles/articles.page';
 
 @Component({
   selector: 'rss-article',
-  imports: [RouterLink, DatePipe, NgTemplateOutlet, ArticlesPage, ProxyContentDirective],
+  imports: [RouterLink, LocalDatePipe, TranslatePipe, NgTemplateOutlet, ArticlesPage, ProxyContentDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './article.page.html',
   host: {
@@ -24,6 +27,7 @@ export class ArticlePage {
   protected readonly store = inject(ArticlesStore);
   private readonly feedsStore = inject(FeedsStore);
   private readonly view = inject(ViewStore);
+  protected readonly i18n = inject(I18nService);
   protected readonly ui = UI_ICONS;
   protected readonly article = computed(() => this.store.article(this.id()));
   private readonly sanitizer = inject(DomSanitizer);
@@ -59,14 +63,14 @@ export class ArticlePage {
 
   protected readonly moving = computed(() => this.offset() !== 0 || this.offsetY() > 0);
   protected readonly currentTransform = computed(() =>
-    this.offsetY() > 0 ? `translateY(${this.offsetY()}px)` : this.offset() ? `translateX(${this.offset()}px)` : null);
+    this.offsetY() > 0 ? `translateY(${this.offsetY()}px)` : this.offset() ? `translateX(${this.offset() * this.i18n.sign()}px)` : null);
   protected readonly currentShadow = computed(() =>
-    this.offsetY() > 0 ? '0 -12px 24px rgba(0,0,0,.45)' : this.offset() ? `${this.offset() > 0 ? '-12px' : '12px'} 0 24px rgba(0,0,0,.45)` : null);
+    this.offsetY() > 0 ? '0 -12px 24px rgba(0,0,0,.45)' : this.offset() ? `${(this.offset() > 0 ? -12 : 12) * this.i18n.sign()}px 0 24px rgba(0,0,0,.45)` : null);
   protected readonly underTransform = computed(() => {
     const y = this.offsetY();
     const progress = y > 0 ? y / this.height : Math.abs(this.offset()) / this.width;
     const shift = (1 - progress) * 80;
-    const move = y > 0 ? `translateY(${-shift}px)` : `translateX(${this.offset() > 0 ? -shift : shift}px)`;
+    const move = y > 0 ? `translateY(${-shift}px)` : `translateX(${(this.offset() > 0 ? -shift : shift) * this.i18n.sign()}px)`;
     return `${move} scale(${0.94 + 0.06 * progress})`;
   });
   protected readonly underOpacity = computed(() => 0.5 + 0.5 * (this.offsetY() > 0 ? this.offsetY() / this.height : Math.abs(this.offset()) / this.width));
@@ -99,7 +103,7 @@ export class ArticlePage {
     }
     if (!swipe.axis) return;
     if (event.cancelable) event.preventDefault();
-    if (swipe.axis === 'x') this.offset.set(dx);
+    if (swipe.axis === 'x') this.offset.set(dx * this.i18n.sign());
     else this.offsetY.set(Math.max(0, dy));
   }
 

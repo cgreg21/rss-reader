@@ -1,7 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
 
+import { I18nService } from '../../i18n/services/i18n.service';
+import { LocalDatePipe } from '../../i18n/local-date.pipe';
+import { TranslatePipe } from '../../i18n/translate.pipe';
 import { ArticlesStore } from '../../rss/articles.store';
 import { FeedsStore } from '../../rss/feeds.store';
 import { Article } from '../../rss/models';
@@ -17,7 +19,7 @@ type Direction = 'left' | 'right';
 /** Card with a Tinder-style swipe: left toggles read/unread, right toggles favorite. */
 @Component({
   selector: 'rss-article-card',
-  imports: [DatePipe, ProxyImgDirective],
+  imports: [LocalDatePipe, TranslatePipe, ProxyImgDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './article-card.component.html',
 })
@@ -27,6 +29,7 @@ export class ArticleCardComponent {
   private readonly feeds = inject(FeedsStore);
   private readonly articles = inject(ArticlesStore);
   private readonly router = inject(Router);
+  protected readonly i18n = inject(I18nService);
   private readonly gesture = new AxisGesture();
   private readonly longPress = new LongPressTimer(() => this.articles.toggle(this.article(), 'later'), TAP_SLOP);
 
@@ -60,7 +63,7 @@ export class ArticleCardComponent {
       (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
       this.dragging.set(true);
     }
-    if (move.axis === 'horizontal') this.dragX.set(move.dx);
+    if (move.axis === 'horizontal') this.dragX.set(move.dx * this.i18n.sign());
   }
 
   protected onUp(event: PointerEvent): void {
@@ -69,7 +72,8 @@ export class ArticleCardComponent {
     if (!end) return;
     if (end.axis === 'horizontal') {
       this.dragging.set(false);
-      if (Math.abs(end.dx) >= SWIPE_THRESHOLD) this.fling(end.dx < 0 ? 'left' : 'right');
+      const dx = end.dx * this.i18n.sign();
+      if (Math.abs(dx) >= SWIPE_THRESHOLD) this.fling(dx < 0 ? 'left' : 'right');
       else this.dragX.set(0);
     } else if (end.axis === null && Math.hypot(end.dx, end.dy) < TAP_SLOP && !this.longPress.fired) {
       void this.router.navigate(['/article', this.article().id]);

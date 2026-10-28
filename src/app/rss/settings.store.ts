@@ -1,5 +1,6 @@
 import { Injectable, computed, effect } from '@angular/core';
 
+import { LANG_SETTINGS, LangSetting } from '../i18n/languages';
 import { flag, json, num, oneOf, persisted, text } from './persisted';
 
 export type Theme = 'dark' | 'light';
@@ -31,6 +32,8 @@ export class SettingsStore {
   readonly retentionDays = persisted('rssreader:retention-days', num(0));
   readonly fontSize = persisted('rssreader:font-size', num(17));
   readonly theme = persisted<Theme>('rssreader:theme', oneOf(['dark', 'light'], 'dark'));
+  /** 'auto' follows the browser language. */
+  readonly language = persisted<LangSetting>('rssreader:language', oneOf(LANG_SETTINGS, 'auto'));
 
   constructor() {
     effect(() => {

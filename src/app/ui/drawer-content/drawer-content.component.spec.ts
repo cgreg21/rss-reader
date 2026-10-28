@@ -51,7 +51,9 @@ describe('DrawerContentComponent', () => {
     expect(store.unreadOnly()).toBe(false);
     toggles[0].click();
     expect(store.unreadOnly()).toBe(true);
-    root.querySelector<HTMLButtonElement>('[aria-label="Actualiser"]')!.click();
+    const btn = root.querySelector<HTMLButtonElement>('button.icon-btn');
+    expect(btn?.getAttribute('aria-label')).toBe('Actualiser');
+    btn!.click();
     expect(store.refreshAll).toHaveBeenCalled();
     expect(sync.resume).toHaveBeenCalled();
   });

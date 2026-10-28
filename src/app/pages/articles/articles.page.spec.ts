@@ -36,7 +36,7 @@ describe('ArticlesPage', () => {
         { provide: ViewStore, useValue: { visible } },
         { provide: FeedsStore, useValue: { feeds } },
         { provide: ArticlesStore, useValue: articles },
-        { provide: SettingsStore, useValue: { layout, activeProxy: signal('') } },
+        { provide: SettingsStore, useValue: { layout, activeProxy: signal(''), language: signal('fr') } },
       ],
     });
   });

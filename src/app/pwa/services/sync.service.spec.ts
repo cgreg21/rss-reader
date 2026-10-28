@@ -45,7 +45,7 @@ describe('SyncService', () => {
         { provide: ArticlesStore, useValue: store },
         { provide: RefreshService, useValue: store },
         { provide: LibraryService, useValue: library },
-        { provide: SettingsStore, useValue: { proxy } },
+        { provide: SettingsStore, useValue: { proxy, language: signal('fr') } },
         { provide: SnackbarService, useValue: snackbar },
       ],
     });

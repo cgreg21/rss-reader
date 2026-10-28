@@ -1,6 +1,6 @@
 <article class="touch-pan-y select-none rounded-2xl bg-side p-3 shadow-2xl"
          [class]="dragging() ? '' : 'transition-transform duration-200'" [class.opacity-60]="article().read"
-         [style.transform]="'translateX(' + offset() + 'px) rotate(' + offset() / 20 + 'deg)'"
+         [style.transform]="'translateX(' + offset() * i18n.sign() + 'px) rotate(' + offset() * i18n.sign() / 20 + 'deg)'"
          (pointerdown)="onDown($event)" (pointermove)="onMove($event)" (pointerup)="onUp($event)" (pointercancel)="onCancel()">
   <div class="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-bg">
     <div class="absolute inset-0 grid place-items-center bg-gradient-to-br from-accent/40 to-bg font-mdi text-7xl text-white/70">{{ ui.all }}</div>
@@ -8,24 +8,24 @@
       <img class="absolute inset-0 size-full object-cover" draggable="false" [rssProxyImg]="image" alt="" (error)="$any($event.target).remove()">
     }
     <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-3 pt-12">
-      <h2 class="text-left text-lg leading-tight font-bold text-white">{{ article().title }}</h2>
+      <h2 class="text-start text-lg leading-tight font-bold text-white">{{ article().title }}</h2>
     </div>
     @if (offset() > 0) {
-      <div class="absolute left-3 top-3 rounded-lg border-2 border-yellow-300 px-2 py-1 text-sm font-bold text-yellow-300" [style.opacity]="progress()">
-        {{ article().favorite ? 'RETIRER' : 'FAVORI' }}</div>
+      <div class="absolute start-3 top-3 rounded-lg border-2 border-yellow-300 px-2 py-1 text-sm font-bold text-yellow-300" [style.opacity]="progress()">
+        {{ (article().favorite ? 'card.unfavorite' : 'card.favorite') | translate }}</div>
     } @else if (offset() < 0) {
-      <div class="absolute right-3 top-3 rounded-lg border-2 border-green-400 px-2 py-1 text-sm font-bold text-green-400" [style.opacity]="progress()">
-        {{ article().read ? 'NON LU' : 'LU' }}</div>
+      <div class="absolute end-3 top-3 rounded-lg border-2 border-green-400 px-2 py-1 text-sm font-bold text-green-400" [style.opacity]="progress()">
+        {{ (article().read ? 'card.unread' : 'card.read') | translate }}</div>
     }
     @if (article().later) {
-      <span class="absolute left-2 top-2 font-mdi text-2xl text-accent drop-shadow" [class.hidden]="offset() > 0">{{ ui.laterOn }}</span>
+      <span class="absolute start-2 top-2 font-mdi text-2xl text-accent drop-shadow" [class.hidden]="offset() > 0">{{ ui.laterOn }}</span>
     }
     @if (article().favorite) {
-      <span class="absolute right-2 top-2 font-mdi text-2xl text-yellow-300" [class.hidden]="offset() < 0">{{ ui.favoriteOn }}</span>
+      <span class="absolute end-2 top-2 font-mdi text-2xl text-yellow-300" [class.hidden]="offset() < 0">{{ ui.favoriteOn }}</span>
     }
   </div>
   <div class="mt-2 flex justify-between gap-2 text-xs text-accent">
-    <span>{{ article().read ? '' : '● ' }}{{ article().published | date: 'dd/MM/yyyy HH:mm' }}</span>
+    <span>{{ article().read ? '' : '● ' }}{{ article().published | localDate }}</span>
     <span class="truncate">{{ feedTitle(article().feedId) }}</span>
   </div>
   <p class="mt-2 line-clamp-5 text-sm text-slate-300">{{ article().summary }}</p>

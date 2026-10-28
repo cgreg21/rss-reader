@@ -1,10 +1,13 @@
+import { TestBed } from '@angular/core/testing';
 import { describe, expect, it } from 'vitest';
 
 import { DialogService } from './dialog.service';
 
+const make = () => TestBed.runInInjectionContext(() => new DialogService());
+
 describe('DialogService', () => {
   it('resolves alert with the OK button', async () => {
-    const d = new DialogService();
+    const d = make();
     const p = d.alert('msg', 'title');
     expect(d.current()).toMatchObject({ title: 'title', message: 'msg' });
     d.close(undefined);
@@ -13,7 +16,7 @@ describe('DialogService', () => {
   });
 
   it('confirms, cancels and dismisses', async () => {
-    const d = new DialogService();
+    const d = make();
     let p = d.confirm('ok?', { danger: true, confirmLabel: 'Yes', cancelLabel: 'No' });
     expect(d.current()?.buttons.map((b) => [b.label, b.kind])).toEqual([['No', 'ghost'], ['Yes', 'danger']]);
     d.close(true);
@@ -26,7 +29,7 @@ describe('DialogService', () => {
   });
 
   it('prompts for text', async () => {
-    const d = new DialogService();
+    const d = make();
     let p = d.prompt('name?', { value: 'init', confirmLabel: 'Go' });
     expect(d.current()?.text).toBe('init');
     d.setText('typed');
@@ -40,7 +43,7 @@ describe('DialogService', () => {
   });
 
   it('closing without a dialog is a no-op, and opening replaces the previous one', async () => {
-    const d = new DialogService();
+    const d = make();
     d.close(1);
     const first = d.confirm('a');
     const second = d.confirm('b');

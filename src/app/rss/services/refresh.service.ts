@@ -1,5 +1,6 @@
 import { Injectable, effect, inject, signal } from '@angular/core';
 
+import { I18nService } from '../../i18n/services/i18n.service';
 import { ArticlesStore } from '../articles.store';
 import { FeedsStore } from '../feeds.store';
 import { parseFeed } from '../feed-parser';
@@ -11,6 +12,7 @@ import { FetchService } from './fetch.service';
 @Injectable({ providedIn: 'root' })
 export class RefreshService {
   private readonly settings = inject(SettingsStore);
+  private readonly i18n = inject(I18nService);
   private readonly net = inject(FetchService);
   private readonly feedsStore = inject(FeedsStore);
   private readonly articlesStore = inject(ArticlesStore);
@@ -69,7 +71,7 @@ export class RefreshService {
       await this.articlesStore.merge(feed.id, parsed.items);
       updated = { ...feed, siteUrl: feed.siteUrl ?? parsed.siteUrl, description: parsed.description ?? feed.description, format: parsed.format, lastFetched: Date.now(), error: undefined, failures: 0 };
     } catch (error) {
-      updated = { ...feed, error: error instanceof Error ? error.message : 'Erreur', failures: (feed.failures ?? 0) + 1 };
+      updated = { ...feed, error: this.i18n.errorText(error), failures: (feed.failures ?? 0) + 1 };
     }
     await this.feedsStore.updateFeed(updated);
   }

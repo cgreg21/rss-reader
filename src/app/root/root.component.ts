@@ -3,6 +3,9 @@ import { RouterOutlet } from '@angular/router';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
 
+import { I18nService } from '../i18n/services/i18n.service';
+import { MessageKey } from '../i18n/messages';
+import { TranslatePipe } from '../i18n/translate.pipe';
 import { AppPromptComponent } from '../pwa/app-prompt/app-prompt.component';
 import { PushService } from '../pwa/services/push.service';
 import { SyncService } from '../pwa/services/sync.service';
@@ -26,7 +29,7 @@ const EDGE_WIDTH = 24;
 
 @Component({
   selector: 'rss-root',
-  imports: [RouterOutlet, TopBarComponent, DrawerContentComponent, AppPromptComponent, SnackbarComponent, DialogComponent, ArticleActionsComponent, ArticleDetailActionsComponent, PullRefreshDirective],
+  imports: [RouterOutlet, TopBarComponent, DrawerContentComponent, AppPromptComponent, SnackbarComponent, DialogComponent, ArticleActionsComponent, ArticleDetailActionsComponent, PullRefreshDirective, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './root.component.html',
 })
@@ -35,6 +38,7 @@ export class RootComponent {
   private readonly articlesStore = inject(ArticlesStore);
   protected readonly drawer = inject(DrawerService);
   protected readonly layout = inject(LayoutService);
+  protected readonly i18n = inject(I18nService);
   private readonly router = inject(Router);
   private readonly pushSync = inject(PushService);
   private readonly librarySync = inject(SyncService);
@@ -61,7 +65,7 @@ export class RootComponent {
   protected tooltip(event: MouseEvent): void {
     const el = (event.target as Element).closest<HTMLElement>('.icon-btn[aria-label], button[aria-label]:not([role="switch"])');
     const label = el?.getAttribute('aria-label');
-    if (el && label && el.title !== label && !el.textContent?.trim().match(/^[A-Za-z0-9À-ÿ]/)) el.title = label;
+    if (el && label && el.title !== label && !el.textContent?.trim().match(/^[\p{L}\p{N}]/u)) el.title = label;
   }
 
   private currentArticleId(): string | null {
@@ -73,9 +77,9 @@ export class RootComponent {
     return this.router.url.split(/[?#]/)[0] === '/';
   }
 
-  private isOptions(): string {
+  private isOptions(): MessageKey | '' {
     const path = this.router.url.split(/[?#]/)[0];
-    return path === '/feeds' ? 'Options' : path === '/about' ? 'À propos' : '';
+    return path === '/feeds' ? 'nav.options' : path === '/about' ? 'nav.about' : '';
   }
 
   constructor() {
@@ -143,7 +147,7 @@ export class RootComponent {
     if (move?.axis !== 'horizontal') return;
     if (move.started) this.shell().nativeElement.setPointerCapture(event.pointerId);
     this.swiped = true;
-    this.dragX.set(Math.min(0, Math.max(-DRAWER_WIDTH, this.origin + move.dx)));
+    this.dragX.set(Math.min(0, Math.max(-DRAWER_WIDTH, this.origin + move.dx * this.i18n.sign())));
   }
 
   protected onUp(event: PointerEvent): void {

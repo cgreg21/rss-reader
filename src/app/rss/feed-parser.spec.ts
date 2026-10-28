@@ -126,8 +126,8 @@ describe('extractReadable', () => {
 
 describe('error paths', () => {
   it('rejects malformed JSON feeds', () => {
-    expect(() => parseFeed('{"items": [', 'f')).toThrow('Flux invalide');
-    expect(() => parseFeed('{"version":"https://jsonfeed.org/version/1.1"}', 'f')).toThrow('Flux invalide');
+    expect(() => parseFeed('{"items": [', 'f')).toThrow('err.invalidFeed');
+    expect(() => parseFeed('{"version":"https://jsonfeed.org/version/1.1"}', 'f')).toThrow('err.invalidFeed');
   });
 
   it('skips advertised links with an unusable href', () => {

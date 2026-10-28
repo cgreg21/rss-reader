@@ -1,6 +1,8 @@
 import { Injectable, effect, inject, signal } from '@angular/core';
 import { SwPush } from '@angular/service-worker';
 
+import { I18nService } from '../../i18n/services/i18n.service';
+import { MessageError } from '../../i18n/message-error';
 import { FeedsStore } from '../../rss/feeds.store';
 
 const URL_KEY = 'rssreader:push-url';
@@ -10,6 +12,7 @@ const URL_KEY = 'rssreader:push-url';
 export class PushService {
   private readonly swPush = inject(SwPush, { optional: true });
   private readonly store = inject(FeedsStore);
+  private readonly i18n = inject(I18nService);
 
   readonly supported = !!this.swPush?.isEnabled && 'PushManager' in window && 'Notification' in window;
   readonly url = signal(localStorage.getItem(URL_KEY) ?? '');
@@ -38,19 +41,19 @@ export class PushService {
     this.error.set('');
     const base = this.endpoint();
     if (!this.supported || !base) {
-      this.error.set("Saisissez l'adresse du worker de notifications.");
+      this.error.set(this.i18n.t('push.enterUrl'));
       return;
     }
     this.busy.set(true);
     try {
       const response = await fetch(`${base}/vapid-key`);
-      if (!response.ok) throw new Error(`Worker injoignable (${response.status})`);
+      if (!response.ok) throw new MessageError('push.unreachable', { status: response.status });
       const { publicKey } = (await response.json()) as { publicKey: string };
       const subscription = await this.swPush!.requestSubscription({ serverPublicKey: publicKey });
       await this.post('/subscribe', { subscription: subscription.toJSON(), feeds: this.store.feeds().map((f) => f.url) });
       this.enabled.set(true);
     } catch (e) {
-      this.error.set(e instanceof Error ? e.message : 'Activation impossible.');
+      this.error.set(this.i18n.errorText(e, 'push.enableFailed'));
       await this.swPush!.unsubscribe().catch(() => undefined);
       this.enabled.set(false);
     } finally {
@@ -89,6 +92,6 @@ export class PushService {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
-    if (!response.ok) throw new Error(`Worker : erreur ${response.status}`);
+    if (!response.ok) throw new MessageError('push.error', { status: response.status });
   }
 }

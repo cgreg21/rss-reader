@@ -1,21 +1,21 @@
 <section class="panel">
-  <h2 class="mb-2.5 text-base font-bold">Ajouter un flux</h2>
+  <h2 class="mb-2.5 text-base font-bold">{{ 'feeds.add' | translate }}</h2>
   <form class="flex flex-wrap gap-2" (ngSubmit)="add()">
-    <input class="field min-w-60 flex-1" name="url" type="url" required placeholder="https://exemple.fr/rss.xml" [(ngModel)]="url">
+    <input class="field min-w-60 flex-1" name="url" type="url" required [placeholder]="'feeds.urlPlaceholder' | translate" [(ngModel)]="url">
     <select class="field" name="cat" [(ngModel)]="categoryId">
-      <option [ngValue]="null">Sans catégorie</option>
+      <option [ngValue]="null">{{ 'feeds.noCategory' | translate }}</option>
       @for (c of store.categories(); track c.id) { <option [ngValue]="c.id">{{ c.name }}</option> }
     </select>
-    <button class="icon-btn" type="submit" aria-label="S'abonner" [disabled]="busy()">{{ busy() ? '…' : ui.add }}</button>
+    <button class="icon-btn" type="submit" [attr.aria-label]="'feeds.subscribe' | translate" [disabled]="busy()">{{ busy() ? '…' : ui.add }}</button>
   </form>
   @if (error()) { <p class="mt-2 text-red-400">{{ error() }}</p> }
 </section>
 
 <section class="panel">
-  <h2 class="mb-2.5 text-base font-bold">Rechercher des flux</h2>
+  <h2 class="mb-2.5 text-base font-bold">{{ 'feeds.search' | translate }}</h2>
   <form class="flex flex-wrap gap-2" (ngSubmit)="search()">
-    <input class="field min-w-60 flex-1" name="query" type="search" placeholder="Sujet, site ou mot-clé" [(ngModel)]="query">
-    <button class="icon-btn" type="submit" aria-label="Rechercher" [disabled]="searching()">{{ searching() ? '…' : ui.search }}</button>
+    <input class="field min-w-60 flex-1" name="query" type="search" [placeholder]="'feeds.queryPlaceholder' | translate" [(ngModel)]="query">
+    <button class="icon-btn" type="submit" [attr.aria-label]="'common.search' | translate" [disabled]="searching()">{{ searching() ? '…' : ui.search }}</button>
   </form>
   @if (searchError()) { <p class="mt-2 text-red-400">{{ searchError() }}</p> }
   <ul class="mt-2.5">
@@ -23,24 +23,24 @@
       <li class="flex flex-wrap items-center gap-2.5 border-t border-line py-2">
         <div class="min-w-0 flex-1"><strong>{{ h.title }}</strong>
           @if (h.description) { <small class="line-clamp-2 block text-muted">{{ h.description }}</small> }
-          <small class="block truncate text-muted">{{ h.url }}@if (h.subscribers) { · {{ h.subscribers }} abonnés }</small></div>
-        <button class="icon-btn" type="button" aria-label="Détails du flux" (click)="showHitInfo(h)">{{ ui.info }}</button>
-        <button class="icon-btn" type="button" [attr.aria-label]="followed(h.url) ? 'Suivi' : 'S\'abonner'" [disabled]="followed(h.url)" (click)="follow(h)">{{ followed(h.url) ? ui.check : ui.add }}</button>
+          <small class="block truncate text-muted">{{ h.url }}@if (h.subscribers) { · {{ 'feeds.subscribers' | translate: { n: h.subscribers } }} }</small></div>
+        <button class="icon-btn" type="button" [attr.aria-label]="'feeds.details' | translate" (click)="showHitInfo(h)">{{ ui.info }}</button>
+        <button class="icon-btn" type="button" [attr.aria-label]="(followed(h.url) ? 'feeds.following' : 'feeds.subscribe') | translate" [disabled]="followed(h.url)" (click)="follow(h)">{{ followed(h.url) ? ui.check : ui.add }}</button>
       </li>
-    } @empty { @if (searched() && !searching()) { <li class="text-muted">Aucun résultat.</li> } }
+    } @empty { @if (searched() && !searching()) { <li class="text-muted">{{ 'feeds.noResult' | translate }}</li> } }
   </ul>
 </section>
 
 <section class="panel">
-  <h2 class="mb-2.5 text-base font-bold">Catégories</h2>
+  <h2 class="mb-2.5 text-base font-bold">{{ 'feeds.categories' | translate }}</h2>
   <form class="flex flex-wrap gap-2" (ngSubmit)="addCategory()">
-    <input class="field min-w-60 flex-1" name="name" placeholder="Nouvelle catégorie" [(ngModel)]="newCategory">
-    <button class="icon-btn" type="submit" aria-label="Créer la catégorie" title="Créer">{{ ui.add }}</button>
+    <input class="field min-w-60 flex-1" name="name" [placeholder]="'feeds.newCategory' | translate" [(ngModel)]="newCategory">
+    <button class="icon-btn" type="submit" [attr.aria-label]="'feeds.createCategory' | translate" [attr.title]="'feeds.create' | translate">{{ ui.add }}</button>
   </form>
   <ul class="mt-2.5">
     @for (c of store.categories(); track c.id) {
       <li class="flex flex-wrap items-center gap-2.5 border-t border-line py-2">
-        <span class="min-w-0 flex-1">{{ c.name }}</span><button class="icon-btn !text-red-400 hover:!bg-red-500/10" type="button" aria-label="Supprimer" (click)="store.removeCategory(c.id)">{{ ui.trash }}</button>
+        <span class="min-w-0 flex-1">{{ c.name }}</span><button class="icon-btn !text-red-400 hover:!bg-red-500/10" type="button" [attr.aria-label]="'common.delete' | translate" (click)="store.removeCategory(c.id)">{{ ui.trash }}</button>
       </li>
     }
   </ul>
@@ -48,12 +48,12 @@
 
 <section class="panel">
   <div class="mb-2.5 flex items-center justify-between gap-3">
-    <h2 class="text-base font-bold">Flux suivis</h2>
+    <h2 class="text-base font-bold">{{ 'feeds.followed' | translate }}</h2>
     <div class="flex gap-1">
-      <label class="icon-btn cursor-pointer" title="Importer un OPML" aria-label="Importer un OPML">{{ ui.upload }}
+      <label class="icon-btn cursor-pointer" [attr.title]="'feeds.importOpml' | translate" [attr.aria-label]="'feeds.importOpml' | translate">{{ ui.upload }}
         <input class="hidden" type="file" accept=".opml,.xml,text/xml,application/xml" (change)="importFile($event)">
       </label>
-      <button class="icon-btn" type="button" title="Exporter en OPML" aria-label="Exporter en OPML" [disabled]="!store.feeds().length" (click)="exportFile()">{{ ui.download }}</button>
+      <button class="icon-btn" type="button" [attr.title]="'feeds.exportOpml' | translate" [attr.aria-label]="'feeds.exportOpml' | translate" [disabled]="!store.feeds().length" (click)="exportFile()">{{ ui.download }}</button>
     </div>
   </div>
   @if (opmlMessage()) { <p class="mb-2 text-sm text-muted">{{ opmlMessage() }}</p> }
@@ -61,16 +61,16 @@
     @for (f of store.feeds(); track f.id) {
       <li class="flex flex-col gap-2 border-t border-line py-2">
         <div class="min-w-0"><strong>{{ f.title }}</strong>
-          @if (f.error) { <small class="block text-red-400">{{ f.error }}@if ((f.failures ?? 0) >= 5) { · inactif depuis {{ f.failures }} actualisations, à supprimer ? }</small> }</div>
+          @if (f.error) { <small class="block text-red-400">{{ f.error }}@if ((f.failures ?? 0) >= 5) { · {{ 'feeds.inactive' | translate: { n: f.failures ?? 0 } }} }</small> }</div>
         <div class="flex items-center gap-2.5">
           <select class="field min-w-0 flex-1" [ngModel]="f.categoryId" (ngModelChange)="store.setFeedCategory(f.id, $event)">
-            <option [ngValue]="null">Sans catégorie</option>
+            <option [ngValue]="null">{{ 'feeds.noCategory' | translate }}</option>
             @for (c of store.categories(); track c.id) { <option [ngValue]="c.id">{{ c.name }}</option> }
           </select>
-          <button class="icon-btn" type="button" aria-label="Détails du flux" (click)="showFeedInfo(f)">{{ ui.info }}</button>
-          <button class="icon-btn !text-red-400 hover:!bg-red-500/10" type="button" aria-label="Se désabonner" (click)="store.removeFeed(f.id)">{{ ui.trash }}</button>
+          <button class="icon-btn" type="button" [attr.aria-label]="'feeds.details' | translate" (click)="showFeedInfo(f)">{{ ui.info }}</button>
+          <button class="icon-btn !text-red-400 hover:!bg-red-500/10" type="button" [attr.aria-label]="'feeds.unsubscribe' | translate" (click)="store.removeFeed(f.id)">{{ ui.trash }}</button>
         </div>
       </li>
-    } @empty { <li>Aucun abonnement.</li> }
+    } @empty { <li>{{ 'feeds.none' | translate }}</li> }
   </ul>
 </section>

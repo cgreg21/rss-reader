@@ -3,6 +3,9 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
+import { MessageKey } from '../../../i18n/messages';
+import { I18nService } from '../../../i18n/services/i18n.service';
+import { TranslatePipe } from '../../../i18n/translate.pipe';
 import { FeedHit, FetchService } from '../../../rss/services/fetch.service';
 import { LibraryService } from '../../../rss/services/library.service';
 import { Feed } from '../../../rss/models';
@@ -16,7 +19,7 @@ import { download, pickedText } from '../download';
 @Component({
   selector: 'rss-feeds-tab',
   host: { class: 'block' },
-  imports: [FormsModule],
+  imports: [FormsModule, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './feeds-tab.component.html',
 })
@@ -27,6 +30,7 @@ export class FeedsTabComponent {
   private readonly net = inject(FetchService);
   private readonly dialog = inject(DialogService);
   private readonly router = inject(Router);
+  private readonly i18n = inject(I18nService);
   protected readonly ui = UI_ICONS;
 
   protected url = '';
@@ -62,7 +66,7 @@ export class FeedsTabComponent {
       this.searched.set(true);
     } catch {
       this.hits.set([]);
-      this.searchError.set(navigator.onLine ? 'Recherche impossible (essayez d’activer le proxy).' : 'Hors ligne.');
+      this.searchError.set(this.i18n.t(navigator.onLine ? 'feeds.searchFailed' : 'common.offline'));
     } finally {
       this.searching.set(false);
     }
@@ -72,34 +76,34 @@ export class FeedsTabComponent {
     return this.store.feeds().some((f) => f.url === url);
   }
 
-  private showInfo(title: string, rows: [string, string | undefined][]): void {
-    const message = rows.filter(([, v]) => v).map(([k, v]) => `${k} : ${v}`).join('\n');
-    void this.dialog.open<void>({ title, message, buttons: [{ label: 'Fermer', value: undefined, kind: 'primary' }], dismissValue: undefined });
+  private showInfo(title: string, rows: [MessageKey, string | undefined][]): void {
+    const message = rows.filter(([, v]) => v).map(([k, v]) => this.i18n.t('feeds.row', { label: this.i18n.t(k), value: v ?? '' })).join('\n');
+    void this.dialog.open<void>({ title, message, buttons: [{ label: this.i18n.t('common.close'), value: undefined, kind: 'primary' }], dismissValue: undefined });
   }
 
   protected showHitInfo(hit: FeedHit): void {
     this.showInfo(hit.title, [
-      ['Site web', hit.website],
-      ['Adresse du flux', hit.url],
-      ['Description', hit.description],
-      ['Abonnés', hit.subscribers?.toString()],
+      ['feeds.info.website', hit.website],
+      ['feeds.info.url', hit.url],
+      ['feeds.info.description', hit.description],
+      ['feeds.info.subscribers', hit.subscribers?.toString()],
     ]);
   }
 
   protected showFeedInfo(feed: Feed): void {
     const articles = this.articlesStore.articles().filter((a) => a.feedId === feed.id);
     const latest = articles.reduce((max, a) => Math.max(max, a.published), 0);
-    const date = (t: number) => new Date(t).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' });
+    const date = (t: number) => this.i18n.date(t);
     this.showInfo(feed.title, [
-      ['Site web', feed.siteUrl],
-      ['Adresse du flux', feed.url],
-      ['Type', feed.format],
-      ['Description', feed.description],
-      ['Catégorie', this.store.categories().find((c) => c.id === feed.categoryId)?.name],
-      ['Articles', articles.length.toString()],
-      ['Dernier article', latest ? date(latest) : undefined],
-      ['Dernière actualisation', feed.lastFetched ? date(feed.lastFetched) : undefined],
-      ['Erreur', feed.error],
+      ['feeds.info.website', feed.siteUrl],
+      ['feeds.info.url', feed.url],
+      ['feeds.info.type', feed.format],
+      ['feeds.info.description', feed.description],
+      ['feeds.info.category', this.store.categories().find((c) => c.id === feed.categoryId)?.name],
+      ['feeds.info.articles', articles.length.toString()],
+      ['feeds.info.latest', latest ? date(latest) : undefined],
+      ['feeds.info.lastFetched', feed.lastFetched ? date(feed.lastFetched) : undefined],
+      ['err.generic', feed.error],
     ]);
   }
 
@@ -108,7 +112,7 @@ export class FeedsTabComponent {
     try {
       await this.store.addFeed(hit.url, this.categoryId);
     } catch (e) {
-      this.searchError.set(e instanceof Error ? e.message : 'Impossible de lire ce flux');
+      this.searchError.set(this.i18n.errorText(e, 'feeds.cannotRead'));
     }
   }
 
@@ -117,9 +121,9 @@ export class FeedsTabComponent {
     if (text === null) return;
     try {
       const { added, skipped } = await this.library.importOpml(text);
-      this.opmlMessage.set(`${added} flux importé(s), ${skipped} ignoré(s).`);
+      this.opmlMessage.set(this.i18n.t('feeds.opmlResult', { added, skipped }));
     } catch (e) {
-      this.opmlMessage.set(e instanceof Error ? e.message : 'Import impossible');
+      this.opmlMessage.set(this.i18n.errorText(e, 'common.importFailed'));
     }
   }
 
@@ -134,7 +138,7 @@ export class FeedsTabComponent {
       await this.store.addFeed(this.url, this.categoryId);
       this.url = '';
     } catch (e) {
-      this.error.set(e instanceof Error ? e.message : 'Impossible de lire ce flux');
+      this.error.set(this.i18n.errorText(e, 'feeds.cannotRead'));
     } finally {
       this.busy.set(false);
     }

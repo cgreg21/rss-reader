@@ -1,3 +1,4 @@
+import { MessageError } from '../i18n/message-error';
 import { FeedFormat, Media, ParsedFeed } from './models';
 
 const BLOCKED = 'script,iframe,object,embed,style,link,form,meta';
@@ -129,9 +130,9 @@ function parseJsonFeed(json: string, feedId: string): ParsedFeed {
   try {
     data = JSON.parse(json);
   } catch {
-    throw new Error('Flux invalide');
+    throw new MessageError('err.invalidFeed');
   }
-  if (!data || !Array.isArray(data.items)) throw new Error('Flux invalide');
+  if (!data || !Array.isArray(data.items)) throw new MessageError('err.invalidFeed');
   const items = data.items.map((item) => {
     const link = item.url ?? item.external_url ?? '';
     const escaped = (item.content_text ?? '').replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c] ?? c);
@@ -156,12 +157,12 @@ function parseJsonFeed(json: string, feedId: string): ParsedFeed {
 export function parseFeed(xml: string, feedId: string): ParsedFeed {
   if (xml.trimStart().startsWith('{')) return parseJsonFeed(xml, feedId);
   const doc = new DOMParser().parseFromString(xml, 'application/xml');
-  if (doc.querySelector('parsererror') || !doc.documentElement) throw new Error('Flux invalide');
+  if (doc.querySelector('parsererror') || !doc.documentElement) throw new MessageError('err.invalidFeed');
   const root = doc.documentElement;
   const isAtom = root.localName === 'feed';
   const isRdf = root.localName === 'RDF';
   const channel = isAtom ? root : first(root, 'channel');
-  if (!channel) throw new Error('Flux invalide');
+  if (!channel) throw new MessageError('err.invalidFeed');
 
   // RSS 1.0 (RDF) lists its items next to the channel instead of inside it.
   const entries = Array.from(isAtom || isRdf ? root.children : channel.children).filter((c) => c.localName === (isAtom ? 'entry' : 'item'));

@@ -3,10 +3,10 @@
 } @else if (overflow()) {
   @if (overflowItems().length) {
     <div class="relative">
-      <button class="icon-btn" type="button" aria-label="Plus d'actions" aria-haspopup="menu" [attr.aria-expanded]="menuOpen()" (click)="menuOpen.set(!menuOpen())">{{ ui.more }}</button>
+      <button class="icon-btn" type="button" [attr.aria-label]="'detail.more' | translate" aria-haspopup="menu" [attr.aria-expanded]="menuOpen()" (click)="menuOpen.set(!menuOpen())">{{ ui.more }}</button>
       @if (menuOpen()) {
         <div class="fixed inset-0 z-30" (click)="menuOpen.set(false)"></div>
-        <div class="absolute right-0 top-full z-40 mt-1 flex flex-col gap-1 rounded-2xl bg-bg p-1 shadow-xl" role="menu">
+        <div class="absolute end-0 top-full z-40 mt-1 flex flex-col gap-1 rounded-2xl bg-bg p-1 shadow-xl" role="menu">
           @for (item of overflowItems(); track item.label) {
             @if (item.href) {
               <a class="icon-btn" role="menuitem" [href]="item.href" target="_blank" rel="noopener noreferrer" [attr.aria-label]="item.label" (click)="menuOpen.set(false)">{{ item.icon }}</a>
@@ -20,23 +20,23 @@
     </div>
   }
 } @else if (article(); as a) {
-  <button class="icon-btn" type="button" [attr.aria-label]="a.favorite ? 'Retirer des favoris' : 'Ajouter aux favoris'"
+  <button class="icon-btn" type="button" [attr.aria-label]="(a.favorite ? 'detail.removeFavorite' : 'detail.addFavorite') | translate"
     [class.!text-yellow-300]="a.favorite" (click)="store.toggle(a, 'favorite')">{{ a.favorite ? ui.favoriteOn : ui.favorite }}</button>
-  <button class="icon-btn" type="button" [attr.aria-label]="a.later ? 'Retirer de À lire plus tard' : 'Lire plus tard'"
+  <button class="icon-btn" type="button" [attr.aria-label]="(a.later ? 'detail.removeLater' : 'detail.later') | translate"
     [class.!text-accent]="a.later" (click)="store.toggle(a, 'later')">{{ a.later ? ui.laterOn : ui.later }}</button>
-  <button class="icon-btn" type="button" aria-label="Basculer lu / non lu"
+  <button class="icon-btn" type="button" [attr.aria-label]="'detail.toggleRead' | translate"
     [class.!text-green-400]="!a.read" (click)="store.toggle(a, 'read')">{{ a.read ? ui.read : ui.unread }}</button>
   @if (a.link && !a.fullText) {
-    <button class="icon-btn" type="button" aria-label="Charger le texte complet" [class.animate-pulse]="loading()" [disabled]="loading()" (click)="fullText(a.id)">{{ ui.fullText }}</button>
+    <button class="icon-btn" type="button" [attr.aria-label]="'detail.fullText' | translate" [class.animate-pulse]="loading()" [disabled]="loading()" (click)="fullText(a.id)">{{ ui.fullText }}</button>
   }
   @if (speechSupported) {
-    <button class="icon-btn" type="button" [attr.aria-label]="speaking() ? 'Arrêter la lecture' : 'Lire à voix haute'" [class.!text-accent]="speaking()"
+    <button class="icon-btn" type="button" [attr.aria-label]="(speaking() ? 'detail.stopSpeech' : 'detail.speak') | translate" [class.!text-accent]="speaking()"
       (click)="toggleSpeech(a.title, a.content || a.summary)">{{ speaking() ? ui.stop : ui.speak }}</button>
   }
   @if (a.link) {
-    <a class="icon-btn" [href]="'https://wallhop.io/' + a.link" target="_blank" rel="noopener noreferrer" aria-label="Lire via wallhop.io">{{ ui.reader }}</a>
-    <a class="icon-btn" [href]="a.link" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'original">{{ ui.external }}</a>
-    @if (canShare) { <button class="icon-btn" type="button" aria-label="Partager" (click)="share(a.title, a.link)">{{ ui.share }}</button> }
-    <button class="icon-btn" type="button" aria-label="Copier le lien" (click)="copyLink(a.link)">{{ ui.copyLink }}</button>
+    <a class="icon-btn" [href]="'https://wallhop.io/' + a.link" target="_blank" rel="noopener noreferrer" [attr.aria-label]="'detail.wallhop' | translate">{{ ui.reader }}</a>
+    <a class="icon-btn" [href]="a.link" target="_blank" rel="noopener noreferrer" [attr.aria-label]="'detail.openOriginal' | translate">{{ ui.external }}</a>
+    @if (canShare) { <button class="icon-btn" type="button" [attr.aria-label]="'detail.share' | translate" (click)="share(a.title, a.link)">{{ ui.share }}</button> }
+    <button class="icon-btn" type="button" [attr.aria-label]="'detail.copyLink' | translate" (click)="copyLink(a.link)">{{ ui.copyLink }}</button>
   }
 }

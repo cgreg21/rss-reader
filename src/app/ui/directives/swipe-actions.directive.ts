@@ -1,5 +1,6 @@
 import { Directive, ElementRef, inject, output } from '@angular/core';
 
+import { I18nService } from '../../i18n/services/i18n.service';
 import { AxisGesture, SWIPE_THRESHOLD, isPrimaryPress } from '../gestures/pointer-gestures';
 
 /** Horizontal swipe on a list item: left emits `swipeLeft`, right emits `swipeRight`, then the item snaps back. */
@@ -18,6 +19,7 @@ export class SwipeActionsDirective {
   readonly swipeRight = output<void>();
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  private readonly i18n = inject(I18nService);
   private readonly gesture = new AxisGesture();
   private swiped = false;
 
@@ -55,8 +57,9 @@ export class SwipeActionsDirective {
     if (end?.axis !== 'horizontal') return;
     this.swiped = true;
     this.reset();
-    if (end.dx <= -SWIPE_THRESHOLD) this.swipeLeft.emit();
-    else if (end.dx >= SWIPE_THRESHOLD) this.swipeRight.emit();
+    const dx = end.dx * this.i18n.sign();
+    if (dx <= -SWIPE_THRESHOLD) this.swipeLeft.emit();
+    else if (dx >= SWIPE_THRESHOLD) this.swipeRight.emit();
   }
 
   protected reset(): void {

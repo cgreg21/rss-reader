@@ -1,10 +1,10 @@
 @if (radial()) {
   <rss-radial-menu [items]="radialItems()" />
 } @else {
-  <button class="icon-btn" type="button" aria-label="Tout marquer comme lu" (click)="markAllRead()">{{ ui.markAllRead }}</button>
-  <div class="flex rounded-full bg-side p-0.5 sidebar:bg-bg" role="group" aria-label="Mise en page">
+  <button class="icon-btn" type="button"   [attr.aria-label]="'actions.markAllRead' | translate" (click)="markAllRead()">{{ ui.markAllRead }}</button>
+    <div class="flex rounded-full bg-side p-0.5 sidebar:bg-bg" role="group" [attr.aria-label]="'actions.layout' | translate">
     @for (l of layouts; track l.id) {
-      <button class="icon-btn !size-9 !min-w-9" type="button" [attr.aria-label]="l.label" [attr.aria-pressed]="settings.layout() === l.id"
+      <button class="icon-btn !size-9 !min-w-9" type="button" [attr.aria-label]="l.label | translate" [attr.aria-pressed]="settings.layout() === l.id"
         [class]="settings.layout() === l.id ? 'bg-accent !text-white' : ''" (click)="settings.layout.set(l.id)">{{ l.icon }}</button>
     }
   </div>

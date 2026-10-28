@@ -1,7 +1,9 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { DatePipe, NgTemplateOutlet } from '@angular/common';
+import { NgTemplateOutlet } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
+import { LocalDatePipe } from '../../i18n/local-date.pipe';
+import { TranslatePipe } from '../../i18n/translate.pipe';
 import { ArticlesStore } from '../../rss/articles.store';
 import { FeedsStore } from '../../rss/feeds.store';
 import { SettingsStore } from '../../rss/settings.store';
@@ -16,7 +18,7 @@ import { UI_ICONS } from '../../ui/icons';
 @Component({
   selector: 'rss-articles',
   host: { class: 'block anim-fade-in' },
-  imports: [RouterLink, DatePipe, NgTemplateOutlet, CardListComponent, RevealDirective, ProxyImgDirective, LongPressDirective, SwipeActionsDirective],
+  imports: [RouterLink, LocalDatePipe, TranslatePipe, NgTemplateOutlet, CardListComponent, RevealDirective, ProxyImgDirective, LongPressDirective, SwipeActionsDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './articles.page.html',
 })

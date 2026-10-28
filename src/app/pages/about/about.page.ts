@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 
+import { I18nService } from '../../i18n/services/i18n.service';
+import { TranslatePipe } from '../../i18n/translate.pipe';
 import { APP_VERSION } from '../../pwa/app-info';
 import credits from '../../pwa/credits.json';
 import { UpdateService } from '../../pwa/services/update.service';
@@ -19,10 +21,12 @@ const CREDITS: Credit[] = credits;
   selector: 'rss-about',
   host: { class: 'block anim-fade-in' },
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [TranslatePipe],
   templateUrl: './about.page.html',
 })
 export class AboutPage {
   protected readonly updates = inject(UpdateService);
+  private readonly i18n = inject(I18nService);
   protected readonly version = APP_VERSION;
   protected readonly credits = CREDITS;
   protected readonly ui = UI_ICONS;
@@ -34,9 +38,9 @@ export class AboutPage {
     this.status.set('');
     try {
       const result = await this.updates.check();
-      this.status.set(result === 'ready' ? 'Nouvelle version prête.' : result === 'none' ? 'Application à jour.' : 'Mises à jour indisponibles (mode développement ou navigateur non compatible).');
+      this.status.set(this.i18n.t(result === 'ready' ? 'about.ready' : result === 'none' ? 'about.upToDate' : 'about.unavailable'));
     } catch {
-      this.status.set(navigator.onLine ? 'Vérification impossible.' : 'Hors ligne.');
+      this.status.set(this.i18n.t(navigator.onLine ? 'about.checkFailed' : 'common.offline'));
     } finally {
       this.checking.set(false);
     }

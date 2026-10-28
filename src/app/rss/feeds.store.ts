@@ -1,5 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 
+import { MessageError } from '../i18n/message-error';
 import { ArticlesStore } from './articles.store';
 import { db } from './db';
 import { deduceFeedUrl, discoverFeedUrl, looksLikeHtml, parseFeed } from './feed-parser';
@@ -44,11 +45,11 @@ export class FeedsStore {
     let body = await this.net.download(url);
     if (looksLikeHtml(body)) {
       const discovered = discoverFeedUrl(body, url);
-      if (!discovered) throw new Error('Aucun flux trouvé sur cette page');
+      if (!discovered) throw new MessageError('err.noFeedFound');
       url = discovered;
       body = await this.net.download(url);
     }
-    if (this.feeds().some((f) => f.url === url)) throw new Error('Flux déjà suivi');
+    if (this.feeds().some((f) => f.url === url)) throw new MessageError('err.alreadyFollowed');
     this.noteFollowed(url);
     const id = newId('f');
     const parsed = parseFeed(body, id);

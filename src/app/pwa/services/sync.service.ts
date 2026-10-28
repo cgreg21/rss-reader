@@ -1,5 +1,7 @@
 import { Injectable, effect, inject, signal } from '@angular/core';
 
+import { I18nService } from '../../i18n/services/i18n.service';
+import { MessageError } from '../../i18n/message-error';
 import { LibraryService, SyncDoc } from '../../rss/services/library.service';
 import { ArticlesStore } from '../../rss/articles.store';
 import { FeedsStore } from '../../rss/feeds.store';
@@ -29,6 +31,7 @@ export class SyncService {
   private readonly library = inject(LibraryService);
   private readonly settings = inject(SettingsStore);
   private readonly snackbar = inject(SnackbarService);
+  private readonly i18n = inject(I18nService);
   private readonly live = new LiveChannel(() => void this.sync());
 
   readonly code = signal(localStorage.getItem(CODE_KEY) ?? '');
@@ -111,14 +114,14 @@ export class SyncService {
         remote = JSON.stringify(doc.data);
         await this.library.applySyncDoc(doc.data);
       } else if (got.status !== 404) {
-        throw new Error(`Synchronisation : erreur ${got.status}`);
+        throw new MessageError('sync.httpError', { status: got.status });
       }
       for (let attempt = 0; attempt < 2; attempt++) {
         const local = JSON.stringify(this.library.buildSyncDoc());
         if (rev !== undefined && local === remote) break;
         const put = await this.call('PUT', { rev, data: JSON.parse(local) });
         if (put.ok) break;
-        if (put.status !== 409) throw new Error(`Synchronisation : erreur ${put.status}`);
+        if (put.status !== 409) throw new MessageError('sync.httpError', { status: put.status });
         const current = (await put.json()) as { rev: number; data: SyncDoc };
         rev = current.rev;
         remote = JSON.stringify(current.data);
@@ -129,10 +132,10 @@ export class SyncService {
       this.failures = 0;
       if (this.feedsStore.feeds().length !== feedsBefore) void this.refresh.refreshAll();
     } catch (e) {
-      this.error.set(e instanceof Error ? e.message : 'Synchronisation impossible');
+      this.error.set(this.i18n.errorText(e, 'sync.failed'));
       if (++this.failures >= MAX_FAILURES) {
         this.stopped.set(true);
-        this.snackbar.error('Synchronisation arrêtée après 5 échecs. Relancez-la depuis les options.');
+        this.snackbar.error(this.i18n.t('sync.stopped'));
       }
     } finally {
       this.busy.set(false);

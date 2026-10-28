@@ -113,7 +113,7 @@ describe('ArticlesStore', () => {
     await expect(store.fetchFullText('missing')).rejects.toThrow();
     await expect(store.fetchFullText('f1:nolink')).rejects.toThrow();
     download.mockResolvedValueOnce('<html><body><article><p>short</p></article></body></html>');
-    await expect(store.fetchFullText('f1:a')).rejects.toThrow('Texte complet introuvable');
+    await expect(store.fetchFullText('f1:a')).rejects.toThrow('err.noFullText');
     download.mockResolvedValueOnce(`<html><body><article><p>${'word '.repeat(80)}</p></article></body></html>`);
     await store.fetchFullText('f1:a');
     expect(store.article('f1:a')?.fullText).toBe(true);

@@ -2,7 +2,7 @@
      (mouseover)="tooltip($event)" (pointerdown)="onDown($event)" (pointermove)="onMove($event)" (pointerup)="onUp($event)" (pointercancel)="onUp($event)">
   <div class="flex min-h-0 min-w-0 flex-1 flex-col sidebar:order-last"
        [class]="dragging() ? '' : 'transition-transform duration-200 ease-out'"
-       [style.transform]="layout.sidebar() ? null : 'translateX(' + (1 + drawerX() / 280) * 48 + 'px)'">
+       [style.transform]="layout.sidebar() ? null : 'translateX(' + (1 + drawerX() / 280) * 48 * i18n.sign() + 'px)'">
     <rss-top-bar [actions]="onArticles()" [articleId]="articleId()" [options]="onOptions()" />
 
     <main [rssPullRefresh]="refresh" [rssPullRefreshEnabled]="onArticles()" #pull="pullRefresh" class="min-h-0 flex-1 overflow-x-clip overscroll-contain overflow-y-auto p-3.5 pb-[calc(88px+env(safe-area-inset-bottom))] sm:p-5 sm:pb-[calc(88px+env(safe-area-inset-bottom))] sidebar:p-8">
@@ -10,7 +10,7 @@
            [style.height.px]="pull.distance()" aria-live="polite">
         @if (pull.distance() > 0) { <span class="pb-2">{{ pull.label() }}</span> }
       </div>
-      @if (!refresher.online()) { <div class="banner">Hors ligne : les articles enregistrés restent lisibles.</div> }
+      @if (!refresher.online()) { <div class="banner">{{ 'root.offline' | translate }}</div> }
       <router-outlet />
     </main>
     @if (onArticles()) { <rss-article-actions [radial]="true" /> }
@@ -21,7 +21,7 @@
   <rss-snackbar />
   <rss-dialog />
   @if (!drawerActive()) {
-    <div #edge class="absolute inset-y-0 left-0 z-20 w-6 touch-none" aria-hidden="true"></div>
+    <div #edge class="absolute inset-y-0 start-0 z-20 w-6 touch-none" aria-hidden="true"></div>
   }
   <div class="absolute inset-0 z-30 bg-black/55 sidebar:hidden"
        [class]="dragging() ? '' : 'transition-opacity duration-200'"
@@ -29,9 +29,9 @@
        [style.opacity]="backdropOpacity()"
        (click)="onBackdropClick()"></div>
 
-  <aside class="absolute inset-y-0 left-0 z-30 flex w-[280px] shrink-0 touch-pan-y flex-col overflow-hidden bg-side p-3 pt-[calc(20px+env(safe-area-inset-top))] shadow-2xl ease-out sidebar:static sidebar:order-first sidebar:pt-4 sidebar:shadow-none"
+  <aside class="absolute inset-y-0 start-0 z-30 flex w-[280px] shrink-0 touch-pan-y flex-col overflow-hidden bg-side p-3 pt-[calc(20px+env(safe-area-inset-top))] shadow-2xl ease-out sidebar:static sidebar:order-first sidebar:pt-4 sidebar:shadow-none"
          [class]="dragging() ? '' : 'transition-transform duration-200'"
-         [style.transform]="layout.sidebar() ? null : 'translateX(' + drawerX() + 'px)'"
+         [style.transform]="layout.sidebar() ? null : 'translateX(' + drawerX() * i18n.sign() + 'px)'"
          [attr.inert]="drawerActive() ? null : ''">
     <rss-drawer-content />
   </aside>

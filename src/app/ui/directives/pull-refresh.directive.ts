@@ -1,5 +1,7 @@
 import { Directive, ElementRef, inject, input, signal } from '@angular/core';
 
+import { I18nService } from '../../i18n/services/i18n.service';
+
 const THRESHOLD = 64;
 const MAX_PULL = 110;
 const RESISTANCE = 0.5;
@@ -19,6 +21,7 @@ export class PullRefreshDirective {
   readonly pulling = signal(false);
   readonly refreshing = signal(false);
 
+  private readonly i18n = inject(I18nService);
   private start: { x: number; y: number } | null = null;
   private active = false;
 
@@ -54,8 +57,8 @@ export class PullRefreshDirective {
   }
 
   label(): string {
-    if (this.refreshing()) return 'Actualisation…';
-    return this.distance() >= THRESHOLD ? 'Relâcher pour actualiser' : 'Tirer pour actualiser';
+    if (this.refreshing()) return this.i18n.t('pull.refreshing');
+    return this.i18n.t(this.distance() >= THRESHOLD ? 'pull.release' : 'pull.pull');
   }
 
   private async release(): Promise<void> {

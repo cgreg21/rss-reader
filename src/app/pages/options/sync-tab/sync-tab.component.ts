@@ -1,7 +1,9 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
+import { I18nService } from '../../../i18n/services/i18n.service';
+import { LocalDatePipe } from '../../../i18n/local-date.pipe';
+import { TranslatePipe } from '../../../i18n/translate.pipe';
 import { LibraryService } from '../../../rss/services/library.service';
 import { FeedsStore } from '../../../rss/feeds.store';
 import { SyncService } from '../../../pwa/services/sync.service';
@@ -12,7 +14,7 @@ import { download, pickedText } from '../download';
 @Component({
   selector: 'rss-sync-tab',
   host: { class: 'block' },
-  imports: [FormsModule, DatePipe],
+  imports: [FormsModule, LocalDatePipe, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './sync-tab.component.html',
 })
@@ -20,6 +22,7 @@ export class SyncTabComponent {
   protected readonly store = inject(FeedsStore);
   protected readonly sync = inject(SyncService);
   private readonly library = inject(LibraryService);
+  private readonly i18n = inject(I18nService);
   protected readonly ui = UI_ICONS;
   protected readonly message = signal('');
 
@@ -28,9 +31,9 @@ export class SyncTabComponent {
     if (text === null) return;
     try {
       const { feeds } = await this.library.importBackup(text);
-      this.message.set(`Sauvegarde restaurée : ${feeds} flux ajouté(s).`);
+      this.message.set(this.i18n.t('sync.restored', { feeds }));
     } catch (e) {
-      this.message.set(e instanceof Error ? e.message : 'Import impossible');
+      this.message.set(this.i18n.errorText(e, 'common.importFailed'));
     }
   }
 

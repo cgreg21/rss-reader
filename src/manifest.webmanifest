@@ -1,7 +1,8 @@
 {
   "name": "RSS Reader",
   "short_name": "RSS",
-  "description": "Lisez, suivez et classez vos flux RSS, même hors ligne.",
+  "description": "Read, follow and organize your RSS feeds, even offline.",
+  "lang": "en",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
@@ -14,8 +15,8 @@
   },
   "shortcuts": [
     {
-      "name": "Ajouter un flux",
-      "short_name": "Flux",
+      "name": "Add a feed",
+            "short_name": "Feeds",
       "url": "./feeds",
       "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
     }

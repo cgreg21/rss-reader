@@ -1,3 +1,4 @@
+import { MessageError } from '../i18n/message-error';
 import { Category, Feed } from './models';
 
 export interface OpmlEntry {
@@ -28,7 +29,7 @@ export function buildOpml(categories: Category[], feeds: Feed[]): string {
 export function parseOpml(xml: string): OpmlEntry[] {
   const doc = new DOMParser().parseFromString(xml, 'application/xml');
   const body = doc.querySelector('opml > body');
-  if (doc.querySelector('parsererror') || !body) throw new Error('Fichier OPML invalide');
+  if (doc.querySelector('parsererror') || !body) throw new MessageError('err.invalidOpml');
   const entries: OpmlEntry[] = [];
   const walk = (node: Element, category: string | null): void => {
     for (const child of Array.from(node.children).filter((c) => c.localName === 'outline')) {

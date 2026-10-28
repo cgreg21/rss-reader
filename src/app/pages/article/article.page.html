@@ -1,13 +1,13 @@
 <ng-template #body let-a>
   <article class="mx-auto max-w-3xl">
     <h1 class="text-2xl leading-snug font-bold sidebar:text-3xl">{{ a.title }}</h1>
-    <p class="mt-2 mb-6 text-muted">{{ feedName(a.feedId) }} · {{ a.published | date: 'dd/MM/yyyy HH:mm' }}</p>
+    <p class="mt-2 mb-6 text-muted">{{ feedName(a.feedId) }} · {{ a.published | localDate }}</p>
     @if (a.media; as m) {
       <div class="my-4" (pointerdown)="$event.stopPropagation()">
         @switch (m.kind) {
           @case ('audio') { <audio class="w-full" controls preload="none" [src]="m.url"></audio> }
           @case ('video') { <video class="w-full rounded-lg" controls preload="none" playsinline [src]="m.url"></video> }
-          @default { <iframe class="aspect-video w-full rounded-lg" allowfullscreen loading="lazy" [src]="youtube(m.url)" title="Vidéo"></iframe> }
+          @default { <iframe class="aspect-video w-full rounded-lg" allowfullscreen loading="lazy" [src]="youtube(m.url)" [attr.title]="'common.video' | translate"></iframe> }
         }
       </div>
     }
@@ -33,5 +33,5 @@
     <ng-container [ngTemplateOutlet]="body" [ngTemplateOutletContext]="{ $implicit: a }" />
   </div>
 } @else {
-  <p class="mt-16 text-center text-accent"><a routerLink="/">Article introuvable.</a></p>
+  <p class="mt-16 text-center text-accent"><a routerLink="/">{{ 'article.notFound' | translate }}</a></p>
 }

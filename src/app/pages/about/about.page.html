@@ -1,23 +1,23 @@
 <section class="panel">
   <h2 class="mb-1 text-base font-bold">RSS Reader</h2>
-  <p class="text-sm text-muted">Version {{ version }}</p>
+  <p class="text-sm text-muted">{{ 'about.version' | translate: { version } }}</p>
   <div class="mt-3 flex flex-wrap items-center gap-3">
     @if (updates.available()) {
-      <button class="btn" type="button" (click)="updates.apply()">Installer la mise à jour</button>
+      <button class="btn" type="button" (click)="updates.apply()">{{ 'about.install' | translate }}</button>
     } @else {
-      <button class="btn" type="button" [disabled]="checking()" (click)="check()">{{ checking() ? 'Recherche…' : 'Rechercher une mise à jour' }}</button>
+      <button class="btn" type="button" [disabled]="checking()" (click)="check()">{{ (checking() ? 'about.checking' : 'about.check') | translate }}</button>
     }
     @if (status()) { <span class="text-sm text-muted">{{ status() }}</span> }
   </div>
 </section>
 
 <section class="panel">
-  <h2 class="mb-2.5 text-base font-bold">Dépendances</h2>
+  <h2 class="mb-2.5 text-base font-bold">{{ 'about.dependencies' | translate }}</h2>
   <ul>
     @for (c of credits; track c.name) {
       <li class="flex items-center gap-2.5 border-t border-line py-2">
         <div class="min-w-0 flex-1"><strong>{{ c.name }}</strong><small class="block text-muted">@if (c.version) { {{ c.version }} · }{{ c.license }}</small></div>
-        <a class="icon-btn" [href]="c.url" target="_blank" rel="noopener" [attr.aria-label]="'Site web de ' + c.name">{{ ui.external }}</a>
+        <a class="icon-btn" [href]="c.url" target="_blank" rel="noopener" [attr.aria-label]="'about.website' | translate: { name: c.name }">{{ ui.external }}</a>
       </li>
     }
   </ul>
