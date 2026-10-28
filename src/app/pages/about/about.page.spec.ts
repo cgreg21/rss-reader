@@ -3,6 +3,8 @@ import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { UpdateService } from '../../pwa/services/update.service';
+import { ImageCache } from '../../rss/services/image-cache.service';
+import { OfflineMediaService } from '../../rss/services/offline-media.service';
 import { StorageUsageService } from '../../rss/services/storage-usage.service';
 import { OnboardingService } from '../../ui/onboarding/onboarding.service';
 import { AboutPage } from './about.page';
@@ -11,13 +13,20 @@ describe('AboutPage', () => {
   const available = signal(false);
   const updates = { available, apply: vi.fn(), check: vi.fn() };
   const usage = { measure: vi.fn() };
+  const images = { count: signal(0), refreshCount: vi.fn().mockResolvedValue(undefined) };
+  const media = { count: signal(0) };
 
   beforeEach(() => {
     available.set(false);
+    images.count.set(0);
+    media.count.set(0);
     updates.apply.mockReset();
     updates.check.mockReset();
     usage.measure.mockReset().mockResolvedValue({ entries: [{ key: 'storage.articles', bytes: 2_500_000 }], used: 4_000_000, quota: 16_000_000 });
-    TestBed.configureTestingModule({ providers: [{ provide: UpdateService, useValue: updates }, { provide: StorageUsageService, useValue: usage }] });
+    TestBed.configureTestingModule({ providers: [
+      { provide: UpdateService, useValue: updates }, { provide: StorageUsageService, useValue: usage },
+      { provide: ImageCache, useValue: images }, { provide: OfflineMediaService, useValue: media },
+    ] });
   });
 
   const setup = () => {
@@ -36,6 +45,26 @@ describe('AboutPage', () => {
     expect(root.textContent).toMatch(/4\sMo/);
     expect(root.textContent).toMatch(/16\sMo/);
     expect(root.querySelector('[role="progressbar"]')?.getAttribute('aria-valuenow')).toBe('25');
+  });
+
+  it('measures again when the caches change, ignoring a slower older measure', async () => {
+    const { fixture, root } = setup();
+    await vi.waitFor(() => expect(usage.measure).toHaveBeenCalledTimes(1));
+    let resolveSlow!: (v: unknown) => void;
+    usage.measure.mockReturnValueOnce(new Promise((r) => { resolveSlow = r; }));
+    images.count.set(3);
+    fixture.detectChanges();
+    await vi.waitFor(() => expect(usage.measure).toHaveBeenCalledTimes(2));
+    usage.measure.mockResolvedValueOnce({ entries: [], used: 1_000_000, quota: 16_000_000 });
+    media.count.set(1);
+    fixture.detectChanges();
+    await vi.waitFor(() => expect(usage.measure).toHaveBeenCalledTimes(3));
+    await vi.waitFor(() => { fixture.detectChanges(); expect(root.textContent).toMatch(/1\sMo/); });
+    resolveSlow({ entries: [], used: 9_000_000, quota: 16_000_000 });
+    await Promise.resolve();
+    fixture.detectChanges();
+    expect(root.textContent).toMatch(/1\sMo/);
+    expect(root.textContent).not.toMatch(/9\sMo/);
   });
 
   it('lists the credits and the version', () => {

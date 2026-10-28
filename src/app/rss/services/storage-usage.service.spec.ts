@@ -15,7 +15,7 @@ describe('StorageUsageService', () => {
   });
   afterEach(() => vi.unstubAllGlobals());
 
-  it('sizes the database, settings and caches, with the browser estimate', async () => {
+  it('sizes the database, settings and caches, with the browser quota', async () => {
     await db.put('articles', { id: 'a', title: 'é' });
     localStorage.setItem('rssreader:x', '12');
     localStorage.setItem('other', 'ignored');
@@ -31,7 +31,7 @@ describe('StorageUsageService', () => {
     expect(bytes['storage.images']).toBe(44);
     expect(bytes['storage.media']).toBe(0);
     expect(bytes['storage.settings']).toBe('"rssreader:x"'.length + '"12"'.length);
-    expect(usage.used).toBe(5000);
+    expect(usage.used).toBe(usage.entries.reduce((n, e) => n + e.bytes, 0));
     expect(usage.quota).toBe(10_000);
   });
 

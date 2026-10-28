@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, signal, untracked } from '@angular/core';
 
 import { BytesPipe } from '../../i18n/bytes.pipe';
 import { I18nService } from '../../i18n/services/i18n.service';
@@ -6,6 +6,8 @@ import { TranslatePipe } from '../../i18n/translate.pipe';
 import { APP_VERSION } from '../../pwa/app-info';
 import credits from '../../pwa/credits.json';
 import { UpdateService } from '../../pwa/services/update.service';
+import { ImageCache } from '../../rss/services/image-cache.service';
+import { OfflineMediaService } from '../../rss/services/offline-media.service';
 import { StorageUsage, StorageUsageService } from '../../rss/services/storage-usage.service';
 import { UI_ICONS } from '../../ui/icons';
 import { OnboardingService } from '../../ui/onboarding/onboarding.service';
@@ -39,7 +41,18 @@ export class AboutPage {
   protected readonly storage = signal<StorageUsage | null>(null);
 
   constructor() {
-    void inject(StorageUsageService).measure().then((usage) => this.storage.set(usage));
+    const usage = inject(StorageUsageService);
+    const images = inject(ImageCache);
+    const media = inject(OfflineMediaService);
+    void images.refreshCount();
+    let run = 0;
+    // Re-measure whenever the image cache or the offline downloads shrink or grow; a slower, older measure must not win.
+    effect(() => {
+      images.count();
+      media.count();
+      const id = ++run;
+      void untracked(() => usage.measure()).then((result) => id === run && this.storage.set(result));
+    });
   }
 
   /** Share of the quota in use, 0..100. */

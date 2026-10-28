@@ -12,7 +12,7 @@ export interface StorageEntry {
 
 export interface StorageUsage {
   entries: StorageEntry[];
-  /** Everything the origin uses as reported by the browser (includes the app shell), or the sum of the entries. */
+  /** Sum of the entries. The browser's own usage figure is not used: it lags behind deletions and counts the app shell. */
   used: number;
   /** 0 when the browser does not report it. */
   quota: number;
@@ -56,8 +56,7 @@ export class StorageUsageService {
       { key: 'storage.media', bytes: media },
       { key: 'storage.settings', bytes: settingsBytes() },
     ];
-    const sum = entries.reduce((n, e) => n + e.bytes, 0);
     const estimate = await navigator.storage?.estimate?.().catch(() => undefined);
-    return { entries, used: Math.max(sum, estimate?.usage ?? 0), quota: estimate?.quota ?? 0 };
+    return { entries, used: entries.reduce((n, e) => n + e.bytes, 0), quota: estimate?.quota ?? 0 };
   }
 }
