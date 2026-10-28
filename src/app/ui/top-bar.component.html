@@ -14,7 +14,7 @@
   } @else if (articleId(); as id) {
     <span class="hidden flex-1 sidebar:block"></span>
     <div class="hidden sidebar:block"><rss-article-detail-actions [id]="id" /></div>
-    <span class="size-11 sidebar:hidden"></span>
+    <div class="sidebar:hidden"><rss-article-detail-actions [id]="id" [overflow]="true" /></div>
   } @else {
     <input class="field hidden w-full max-w-md sidebar:ml-auto sidebar:block" type="search" placeholder="Rechercher" aria-label="Rechercher"
       [value]="store.search()" (input)="store.search.set($any($event.target).value)">

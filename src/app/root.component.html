@@ -1,5 +1,5 @@
 <div #shell class="fixed inset-0 flex h-screen touch-pan-y flex-col overflow-hidden bg-bg pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] sidebar:flex-row"
-     (pointerdown)="onDown($event)" (pointermove)="onMove($event)" (pointerup)="onUp($event)" (pointercancel)="onUp($event)">
+     (mouseover)="tooltip($event)" (pointerdown)="onDown($event)" (pointermove)="onMove($event)" (pointerup)="onUp($event)" (pointercancel)="onUp($event)">
   <div class="flex min-h-0 min-w-0 flex-1 flex-col sidebar:order-last"
        [class]="dragging() ? '' : 'transition-transform duration-200 ease-out'"
        [style.transform]="layout.sidebar() ? null : 'translateX(' + (1 + drawerX() / 280) * 48 + 'px)'">
@@ -13,15 +13,8 @@
       @if (!store.online()) { <div class="banner">Hors ligne : les articles enregistrés restent lisibles.</div> }
       <router-outlet />
     </main>
-    @if (onArticles()) {
-      <nav class="bg-side px-2.5 py-2.5 sidebar:hidden [&_.icon-btn]:size-12 [&_.icon-btn]:min-w-12 [&_.icon-btn]:text-[26px]" animate.enter="anim-up-in" animate.leave="anim-up-out"><rss-article-actions /></nav>
-    }
-    @if (articleId(); as id) {
-      <nav class="flex items-center justify-between bg-side px-2.5 py-2.5 sidebar:hidden [&_.icon-btn]:size-12 [&_.icon-btn]:min-w-12 [&_.icon-btn]:text-[26px]" animate.enter="anim-up-in" animate.leave="anim-up-out">
-        <a class="icon-btn" routerLink="/" aria-label="Précédent">{{ ui.back }}</a>
-        <rss-article-detail-actions [id]="id" />
-      </nav>
-    }
+    @if (onArticles()) { <rss-article-actions [radial]="true" /> }
+    @if (articleId(); as id) { <rss-article-detail-actions [id]="id" [radial]="true" /> }
   </div>
 
   <rss-app-prompt />

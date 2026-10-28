@@ -69,6 +69,7 @@
   .btn-ghost { @apply rounded-xl border border-line px-4 py-2 text-muted hover:text-slate-100; }
   .field { @apply min-w-0 rounded-xl border border-transparent bg-side px-3.5 py-2; }
   .panel { @apply mb-4 max-w-3xl rounded-2xl bg-side p-4; }
+  .radial-item { @apply absolute top-1 left-1 grid size-12 cursor-pointer place-items-center rounded-full bg-side font-mdi text-[24px] text-slate-100 shadow-lg transition-[transform,opacity] duration-200 ease-out disabled:opacity-50; }
   .banner { @apply mb-4 flex flex-wrap items-center gap-2 rounded-xl bg-[#243350] px-3.5 py-2 text-sm; }
   .banner button { @apply rounded-lg border border-accent px-2.5 text-accent; }
   .nav-item { @apply flex w-full items-center justify-between gap-2.5 rounded-xl px-3 py-2 text-left hover:bg-white/5; }
@@ -78,7 +79,7 @@
 
 /* Remote article HTML cannot carry utility classes. */
 .body { @apply wrap-anywhere; font-size: var(--body-size, 17px); line-height: 1.7; }
-.body p, .body ul, .body ol, .body figure { @apply my-4; }
+.body p, .body ul, .body ol, .body figure { @apply my-5; }
 .body img, .body video { @apply h-auto max-w-full rounded-lg; }
 .body a { @apply text-accent underline; }
 .body pre { @apply overflow-x-auto rounded-lg bg-side p-3; }

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, ElementRef, computed, effect, inject, signal, viewChild } from '@angular/core';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { RouterOutlet } from '@angular/router';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
 
@@ -25,7 +25,7 @@ const EDGE_WIDTH = 24;
 
 @Component({
   selector: 'rss-root',
-  imports: [RouterOutlet, TopBarComponent, DrawerContentComponent, AppPromptComponent, SnackbarComponent, DialogComponent, ArticleActionsComponent, ArticleDetailActionsComponent, RouterLink, PullRefreshDirective],
+  imports: [RouterOutlet, TopBarComponent, DrawerContentComponent, AppPromptComponent, SnackbarComponent, DialogComponent, ArticleActionsComponent, ArticleDetailActionsComponent, PullRefreshDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './root.component.html',
 })
@@ -53,6 +53,13 @@ export class RootComponent {
   protected readonly drawerX = computed(() => this.layout.sidebar() ? 0 : this.dragX() ?? (this.drawer.opened() ? 0 : -DRAWER_WIDTH));
   protected readonly backdropOpacity = computed(() => this.layout.sidebar() ? 0 : 1 + this.drawerX() / DRAWER_WIDTH);
   protected readonly drawerActive = computed(() => this.layout.sidebar() || this.drawer.opened());
+
+  /** Native tooltip from the aria-label of icon-only buttons (desktop hover). */
+  protected tooltip(event: MouseEvent): void {
+    const el = (event.target as Element).closest<HTMLElement>('.icon-btn[aria-label], button[aria-label]:not([role="switch"])');
+    const label = el?.getAttribute('aria-label');
+    if (el && label && el.title !== label && !el.textContent?.trim().match(/^[A-Za-z0-9À-ÿ]/)) el.title = label;
+  }
 
   private currentArticleId(): string | null {
     const match = /^\/article\/([^/?#]+)/.exec(this.router.url);
