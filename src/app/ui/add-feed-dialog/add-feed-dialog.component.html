@@ -8,7 +8,7 @@
         <button class="icon-btn" type="button" [attr.aria-label]="'common.close' | translate" (click)="dialog.close()">{{ ui.close }}</button>
       </div>
       <form class="flex gap-2" (ngSubmit)="submit()">
-        <input #field class="field min-w-0 flex-1 !bg-bg" name="text" type="text" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false"
+        <input #field class="field min-w-0 flex-1 !bg-bg" name="text" type="text" inputmode="text" enterkeyhint="search" autocomplete="off" autocapitalize="off" spellcheck="false"
           [placeholder]="'feeds.addPlaceholder' | translate" [(ngModel)]="text">
         <button class="icon-btn" type="submit" [attr.aria-label]="'common.search' | translate" [disabled]="busy()">{{ busy() ? '…' : ui.search }}</button>
       </form>
