@@ -24,15 +24,11 @@ import { DownloadQueueComponent } from '../ui/download-queue/download-queue.comp
 import { ArticleActionsComponent } from '../ui/article-actions/article-actions.component';
 import { ArticleDetailActionsComponent } from '../ui/article-detail-actions/article-detail-actions.component';
 import { UI_ICONS } from '../ui/icons';
-import { AxisGesture, isPrimaryPress } from '../ui/gestures/pointer-gestures';
-
-const DRAWER_WIDTH = 280;
-/** Width of the screen-edge bands where the browser starts its back/forward swipe. */
-const EDGE_WIDTH = 24;
+import { DrawerDragDirective } from '../ui/drawer-content/drawer-drag.directive';
 
 @Component({
   selector: 'rss-root',
-  imports: [RouterOutlet, TopBarComponent, DrawerContentComponent, AppPromptComponent, SnackbarComponent, DialogComponent, AddFeedDialogComponent, MiniPlayerComponent, DownloadQueueComponent, ArticleActionsComponent, ArticleDetailActionsComponent, PullRefreshDirective, TranslatePipe],
+  imports: [RouterOutlet, TopBarComponent, DrawerContentComponent, AppPromptComponent, SnackbarComponent, DialogComponent, AddFeedDialogComponent, MiniPlayerComponent, DownloadQueueComponent, ArticleActionsComponent, ArticleDetailActionsComponent, PullRefreshDirective, DrawerDragDirective, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './root.component.html',
 })
@@ -52,16 +48,6 @@ export class RootComponent {
   protected readonly refresh = (): Promise<void> => this.refresher.refreshAll();
 
   private readonly shell = viewChild.required<ElementRef<HTMLElement>>('shell');
-  private readonly edge = viewChild<ElementRef<HTMLElement>>('edge');
-  /** Horizontal offset of the drawer while a swipe is in progress, in [-DRAWER_WIDTH, 0]. */
-  private readonly dragX = signal<number | null>(null);
-  private readonly gesture = new AxisGesture();
-  private origin = 0;
-  private swiped = false;
-
-  protected readonly dragging = computed(() => this.dragX() !== null);
-  protected readonly drawerX = computed(() => this.layout.sidebar() ? 0 : this.dragX() ?? (this.drawer.opened() ? 0 : -DRAWER_WIDTH));
-  protected readonly backdropOpacity = computed(() => this.layout.sidebar() ? 0 : 1 + this.drawerX() / DRAWER_WIDTH);
   protected readonly drawerActive = computed(() => this.layout.sidebar() || this.drawer.opened());
 
   /** Native tooltip from the aria-label of icon-only buttons (desktop hover). */
@@ -101,63 +87,11 @@ export class RootComponent {
       this.articleId.set(id);
       this.onOptions.set(this.isOptions());
     });
-
-    // Non-passive so the browser's back/forward swipe is cancelled: while the drawer is dragged, and
-    // for horizontal moves of a touch that started on a screen edge (where that gesture begins).
-    let edgeTouch: { x: number; y: number } | null = null;
-    document.addEventListener('touchstart', (event) => {
-      const touch = event.touches?.[0];
-      const onEdge = touch !== undefined && (touch.clientX < EDGE_WIDTH || touch.clientX > window.innerWidth - EDGE_WIDTH);
-      edgeTouch = onEdge ? { x: touch.clientX, y: touch.clientY } : null;
-    }, { passive: true });
-    document.addEventListener('touchmove', (event) => {
-      if (this.gesture.axis === 'horizontal') {
-        event.preventDefault();
-        return;
-      }
-      const touch = event.touches?.[0];
-      if (!edgeTouch || !touch) return;
-      if (Math.abs(touch.clientX - edgeTouch.x) >= Math.abs(touch.clientY - edgeTouch.y)) event.preventDefault();
-      else edgeTouch = null;
-    }, { passive: false });
     // iOS leaves the page scrolled/shrunk once the keyboard of a field closes: bring the view back.
     document.addEventListener('focusout', () => {
       setTimeout(() => {
         if (!(document.activeElement instanceof HTMLInputElement || document.activeElement instanceof HTMLTextAreaElement)) window.scrollTo(0, 0);
       }, 100);
     });
-  }
-
-  protected onBackdropClick(): void {
-    if (this.swiped) {
-      this.swiped = false;
-      return;
-    }
-    this.drawer.close();
-  }
-
-  protected onDown(event: PointerEvent): void {
-    if (!isPrimaryPress(event)) return;
-    if (this.layout.sidebar()) return;
-    if (!this.drawer.opened() && event.target !== this.edge()?.nativeElement) return;
-    this.gesture.start(event);
-    this.origin = this.drawerX();
-    this.swiped = false;
-  }
-
-  protected onMove(event: PointerEvent): void {
-    const move = this.gesture.move(event);
-    if (move?.axis !== 'horizontal') return;
-    if (move.started) this.shell().nativeElement.setPointerCapture(event.pointerId);
-    this.swiped = true;
-    this.dragX.set(Math.min(0, Math.max(-DRAWER_WIDTH, this.origin + move.dx * this.i18n.sign())));
-  }
-
-  protected onUp(event: PointerEvent): void {
-    if (this.gesture.end(event)?.axis !== 'horizontal') return;
-    const open = this.drawerX() > -DRAWER_WIDTH / 2;
-    this.shell().nativeElement.releasePointerCapture?.(event.pointerId);
-    this.dragX.set(null);
-    if (open) this.drawer.show(); else this.drawer.close();
   }
 }

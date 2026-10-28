@@ -1,8 +1,8 @@
-<div #shell class="fixed inset-0 flex h-screen touch-pan-y flex-col overflow-hidden bg-bg pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] sidebar:flex-row"
-     (mouseover)="tooltip($event)" (pointerdown)="onDown($event)" (pointermove)="onMove($event)" (pointerup)="onUp($event)" (pointercancel)="onUp($event)">
+<div #shell rssDrawerDrag #drag="drawerDrag" class="fixed inset-0 flex h-screen touch-pan-y flex-col overflow-hidden bg-bg pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] sidebar:flex-row"
+     (mouseover)="tooltip($event)">
   <div class="flex min-h-0 min-w-0 flex-1 flex-col sidebar:order-last"
-       [class]="dragging() ? '' : 'transition-transform duration-200 ease-out'"
-       [style.transform]="layout.sidebar() ? null : 'translateX(' + (1 + drawerX() / 280) * 48 * i18n.sign() + 'px)'">
+       [class]="drag.dragging() ? '' : 'transition-transform duration-200 ease-out'"
+       [style.transform]="layout.sidebar() ? null : 'translateX(' + drag.progress() * 48 * i18n.sign() + 'px)'">
     <rss-top-bar [actions]="onArticles()" [articleId]="articleId()" [options]="onOptions()" />
 
     <main [rssPullRefresh]="refresh" [rssPullRefreshEnabled]="onArticles()" #pull="pullRefresh" class="min-h-0 flex-1 overflow-x-clip overscroll-contain overflow-y-auto p-3.5 pb-[calc(88px+env(safe-area-inset-bottom))] sm:p-5 sm:pb-[calc(88px+env(safe-area-inset-bottom))] sidebar:p-8">
@@ -24,17 +24,17 @@
   <rss-mini-player [articleId]="articleId()" />
   <rss-download-queue />
   @if (!drawerActive()) {
-    <div #edge class="absolute inset-y-0 start-0 z-20 w-6 touch-none" aria-hidden="true"></div>
+    <div data-drawer-edge class="absolute inset-y-0 start-0 z-20 w-6 touch-none" aria-hidden="true"></div>
   }
   <div class="absolute inset-0 z-30 bg-black/55 sidebar:hidden"
-       [class]="dragging() ? '' : 'transition-opacity duration-200'"
-       [class.pointer-events-none]="!drawer.opened() && !dragging()"
-       [style.opacity]="backdropOpacity()"
-       (click)="onBackdropClick()"></div>
+       [class]="drag.dragging() ? '' : 'transition-opacity duration-200'"
+       [class.pointer-events-none]="!drawer.opened() && !drag.dragging()"
+       [style.opacity]="drag.progress()"
+       (click)="drag.onBackdropClick()"></div>
 
   <aside class="absolute inset-y-0 start-0 z-30 flex w-[280px] shrink-0 touch-pan-y flex-col overflow-hidden bg-side p-3 pt-[calc(20px+env(safe-area-inset-top))] shadow-2xl ease-out sidebar:static sidebar:order-first sidebar:pt-4 sidebar:shadow-none"
-         [class]="dragging() ? '' : 'transition-transform duration-200'"
-         [style.transform]="layout.sidebar() ? null : 'translateX(' + drawerX() * i18n.sign() + 'px)'"
+         [class]="drag.dragging() ? '' : 'transition-transform duration-200'"
+         [style.transform]="layout.sidebar() ? null : 'translateX(' + drag.drawerX() * i18n.sign() + 'px)'"
          [attr.inert]="drawerActive() ? null : ''">
     <rss-drawer-content />
   </aside>
