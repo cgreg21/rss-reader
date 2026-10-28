@@ -5,6 +5,7 @@ const MDI_CODE_POINTS = {
   magnify: 0xF0349, 'arrow-left': 0xF004D, 'open-in-new': 0xF03CC, 'email-outline': 0xF01F0,
   'email-open-outline': 0xF05EF, 'trash-can-outline': 0xF0A7A, close: 0xF0156, 'view-list': 0xF0572, 'view-agenda': 0xF056A, 'cards-outline': 0xF0639,   download: 0xF01DA, upload: 0xF0552, bookmark: 0xF00C0, 'bookmark-outline': 0xF00C3, 'file-document-outline': 0xF0219, 'volume-high': 0xF057E,   stop: 0xF04DB, 'book-open-page-variant': 0xF05DA, 'dots-vertical': 0xF01D9, 'dots-grid': 0xF15FC, 'share-variant': 0xF0497, 'link-variant': 0xF0339,
   play: 0xF040A, headphones: 0xF02CB, video: 0xF0567, 'text-box-outline': 0xF09ED, pause: 0xF03E4, 'rewind-15': 0xF1946, 'fast-forward-30': 0xF0D06, 'filter-variant': 0xF0236, 'cloud-check': 0xF1BEB,
+  'chevron-left': 0xF0141, 'chevron-right': 0xF0142,
 } as const;
 
 export type IconName = keyof typeof MDI_CODE_POINTS;
@@ -52,6 +53,8 @@ export const UI_ICONS = {
   share: glyph('share-variant'),
   copyLink: glyph('link-variant'),
   reader: glyph('book-open-page-variant'),
+  previous: glyph('chevron-left'),
+  next: glyph('chevron-right'),
 };
 
 export const mediaIcon = (media?: { kind: string }): string =>

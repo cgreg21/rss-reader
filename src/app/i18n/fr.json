@@ -7,6 +7,7 @@
   "common.menu": "Menu",
   "common.back": "Retour",
   "common.previous": "Précédent",
+  "common.next": "Suivant",
   "common.search": "Rechercher",
   "filter.media": "Filtrer par type de média",
   "filter.all": "Tous les types",

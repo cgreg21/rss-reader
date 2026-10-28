@@ -1,6 +1,6 @@
 <div #shell rssDrawerDrag #drag="drawerDrag" class="fixed inset-0 flex h-screen touch-pan-y flex-col overflow-hidden bg-bg pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] sidebar:flex-row"
      (mouseover)="tooltip($event)">
-  <div class="flex min-h-0 min-w-0 flex-1 flex-col sidebar:order-last"
+  <div class="relative flex min-h-0 min-w-0 flex-1 flex-col sidebar:order-last"
        [class]="drag.dragging() ? '' : 'transition-transform duration-200 ease-out'"
        [style.transform]="layout.sidebar() ? null : 'translateX(' + drag.progress() * 48 * i18n.sign() + 'px)'">
     <rss-top-bar [actions]="onArticles()" [articleId]="articleId()" [options]="onOptions()" />
@@ -14,7 +14,7 @@
       <router-outlet />
     </main>
     @if (onArticles()) { <rss-article-actions [radial]="true" /> }
-    @if (articleId(); as id) { <rss-article-detail-actions [id]="id" [radial]="true" /> }
+    @if (articleId(); as id) { <rss-article-detail-actions [id]="id" [radial]="true" /> <rss-article-nav /> }
   </div>
 
   <rss-app-prompt />

@@ -23,12 +23,13 @@ import { MiniPlayerComponent } from '../ui/audio-player/mini-player.component';
 import { DownloadQueueComponent } from '../ui/download-queue/download-queue.component';
 import { ArticleActionsComponent } from '../ui/article-actions/article-actions.component';
 import { ArticleDetailActionsComponent } from '../ui/article-detail-actions/article-detail-actions.component';
+import { ArticleNavComponent } from '../ui/article-nav/article-nav.component';
 import { UI_ICONS } from '../ui/icons';
 import { DrawerDragDirective } from '../ui/drawer-content/drawer-drag.directive';
 
 @Component({
   selector: 'rss-root',
-  imports: [RouterOutlet, TopBarComponent, DrawerContentComponent, AppPromptComponent, SnackbarComponent, DialogComponent, AddFeedDialogComponent, MiniPlayerComponent, DownloadQueueComponent, ArticleActionsComponent, ArticleDetailActionsComponent, PullRefreshDirective, DrawerDragDirective, TranslatePipe],
+  imports: [RouterOutlet, TopBarComponent, DrawerContentComponent, AppPromptComponent, SnackbarComponent, DialogComponent, AddFeedDialogComponent, MiniPlayerComponent, DownloadQueueComponent, ArticleActionsComponent, ArticleDetailActionsComponent, ArticleNavComponent, PullRefreshDirective, DrawerDragDirective, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './root.component.html',
 })
