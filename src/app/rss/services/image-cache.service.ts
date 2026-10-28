@@ -2,7 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 
 import { FetchService } from './fetch.service';
 
-const CACHE_NAME = 'rss-images';
+export const IMAGE_CACHE = 'rss-images';
 const MAX_CACHED_IMAGES = 300;
 
 /** Images fetched through the proxy as blobs, persisted in the Cache API. */
@@ -27,18 +27,18 @@ export class ImageCache {
   }
 
   async refreshCount(): Promise<void> {
-    this.count.set('caches' in globalThis ? (await (await caches.open(CACHE_NAME)).keys()).length : 0);
+    this.count.set('caches' in globalThis ? (await (await caches.open(IMAGE_CACHE)).keys()).length : 0);
   }
 
   async clear(): Promise<void> {
     for (const blob of this.images.values()) void blob.then((u) => u.startsWith('blob:') && URL.revokeObjectURL(u));
     this.images.clear();
-    if ('caches' in globalThis) await caches.delete(CACHE_NAME);
+    if ('caches' in globalThis) await caches.delete(IMAGE_CACHE);
     this.count.set(0);
   }
 
   private async load(url: string): Promise<string> {
-    const cache = 'caches' in globalThis ? await caches.open(CACHE_NAME) : null;
+    const cache = 'caches' in globalThis ? await caches.open(IMAGE_CACHE) : null;
     let response = (await cache?.match(url)) ?? null;
     if (!response) {
       response = await this.net.request(url);

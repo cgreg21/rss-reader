@@ -1,10 +1,12 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 
+import { BytesPipe } from '../../i18n/bytes.pipe';
 import { I18nService } from '../../i18n/services/i18n.service';
 import { TranslatePipe } from '../../i18n/translate.pipe';
 import { APP_VERSION } from '../../pwa/app-info';
 import credits from '../../pwa/credits.json';
 import { UpdateService } from '../../pwa/services/update.service';
+import { StorageUsage, StorageUsageService } from '../../rss/services/storage-usage.service';
 import { UI_ICONS } from '../../ui/icons';
 
 interface Credit {
@@ -21,7 +23,7 @@ const CREDITS: Credit[] = credits;
   selector: 'rss-about',
   host: { class: 'block' },
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe],
+  imports: [TranslatePipe, BytesPipe],
   templateUrl: './about.page.html',
 })
 export class AboutPage {
@@ -32,6 +34,16 @@ export class AboutPage {
   protected readonly ui = UI_ICONS;
   protected readonly checking = signal(false);
   protected readonly status = signal('');
+  protected readonly storage = signal<StorageUsage | null>(null);
+
+  constructor() {
+    void inject(StorageUsageService).measure().then((usage) => this.storage.set(usage));
+  }
+
+  /** Share of the quota in use, 0..100. */
+  protected percent(s: StorageUsage): number {
+    return Math.min(100, Math.round((100 * s.used) / s.quota));
+  }
 
   protected async check(): Promise<void> {
     this.checking.set(true);

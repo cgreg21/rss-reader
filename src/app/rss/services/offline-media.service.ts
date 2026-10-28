@@ -3,7 +3,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { FetchService } from './fetch.service';
 import { SettingsStore } from '../stores/settings.store';
 
-const CACHE = 'rssreader-media';
+export const MEDIA_CACHE = 'rssreader-media';
 const key = (id: string): string => `/offline-media/${encodeURIComponent(id)}`;
 const RECENT_MS = 7 * 86_400_000;
 const AUTO_PER_BATCH = 3;
@@ -52,7 +52,7 @@ export class OfflineMediaService {
 
   private load(): Promise<void> {
     this.loaded ??= (async () => {
-      const cache = await caches.open(CACHE);
+      const cache = await caches.open(MEDIA_CACHE);
       for (const request of await cache.keys()) {
         const response = await cache.match(request);
         if (!response) continue;
@@ -153,7 +153,7 @@ export class OfflineMediaService {
     }
     if (!this.item(item.id)) return;
     const blob = new Blob(chunks, { type: response.headers.get('content-type') ?? 'audio/mpeg' });
-    const cache = await caches.open(CACHE);
+    const cache = await caches.open(MEDIA_CACHE);
     await cache.put(key(item.id), new Response(blob, { headers: { 'content-type': blob.type } }));
     const url = URL.createObjectURL(blob);
     this.urls.update((u) => ({ ...u, [item.id]: url }));
@@ -161,7 +161,7 @@ export class OfflineMediaService {
   }
 
   async remove(id: string): Promise<void> {
-    const cache = await caches.open(CACHE);
+    const cache = await caches.open(MEDIA_CACHE);
     await cache.delete(key(id));
     const url = this.urls()[id];
     if (url) URL.revokeObjectURL(url);

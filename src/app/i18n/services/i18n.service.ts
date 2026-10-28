@@ -47,6 +47,18 @@ export class I18nService {
     return value == null ? '' : formatDate(value, DATE_FORMATS[kind], this.lang());
   }
 
+  /** Byte count in the closest unit (B, kB, MB, GB), formatted for the selected language. */
+  bytes(value: number): string {
+    const units = ['byte', 'kilobyte', 'megabyte', 'gigabyte'] as const;
+    let i = 0;
+    let n = Math.max(0, value);
+    while (n >= 1000 && i < units.length - 1) {
+      n /= 1000;
+      i++;
+    }
+    return new Intl.NumberFormat(this.lang(), { style: 'unit', unit: units[i], maximumFractionDigits: i && n < 10 ? 1 : 0 }).format(n);
+  }
+
   /** Locale tag for the speech synthesis. */
   readonly speechLang = computed(() => ({ fr: 'fr-FR', en: 'en-US', es: 'es-ES', de: 'de-DE', ar: 'ar-SA' })[this.lang()]);
 }
