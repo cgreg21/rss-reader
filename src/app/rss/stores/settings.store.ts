@@ -5,9 +5,12 @@ import { MessageKey } from '../../i18n/messages';
 import { flag, json, num, oneOf, persisted, text } from '../storage/persisted';
 
 /** Each theme is a `[data-theme]` block in styles.css. */
-export const THEMES = ['dark', 'light', 'black', 'sepia', 'nord', 'dracula'] as const;
+export const THEMES = ['dark', 'light', 'black', 'sepia', 'nord', 'dracula', 'solarized', 'solarized-light', 'gruvbox', 'catppuccin', 'monokai', 'forest'] as const;
 export type Theme = (typeof THEMES)[number];
-export const THEME_LABELS: Record<Theme, MessageKey> = { dark: 'theme.dark', light: 'theme.light', black: 'theme.black', sepia: 'theme.sepia', nord: 'theme.nord', dracula: 'theme.dracula' };
+export const THEME_LABELS: Record<Theme, MessageKey> = {
+  dark: 'theme.dark', light: 'theme.light', black: 'theme.black', sepia: 'theme.sepia', nord: 'theme.nord', dracula: 'theme.dracula',
+  solarized: 'theme.solarized', 'solarized-light': 'theme.solarizedLight', gruvbox: 'theme.gruvbox', catppuccin: 'theme.catppuccin', monokai: 'theme.monokai', forest: 'theme.forest',
+};
 export type ArticleLayout = 'list' | 'detail' | 'card';
 
 /** The proxy relays the path as is, so only its origin matters; an invalid value means no proxy. */

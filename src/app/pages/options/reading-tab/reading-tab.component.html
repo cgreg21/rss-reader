@@ -9,7 +9,7 @@
   </div>
   <div class="py-1">
     <span class="block" id="theme-label">{{ 'reading.theme' | translate }}</span>
-    <div class="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-6" role="radiogroup" aria-labelledby="theme-label">
+    <div class="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4 wide:grid-cols-6" role="radiogroup" aria-labelledby="theme-label">
       @for (t of themes; track t.id) {
         <button type="button" role="radio" class="press flex flex-col items-center gap-1.5 rounded-xl border-2 p-2 text-[12px]"
                 [class]="settings.theme() === t.id ? 'border-accent' : 'border-transparent text-muted'"

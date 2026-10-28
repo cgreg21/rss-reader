@@ -114,6 +114,68 @@
     --color-accent: #bd93f9;
     --color-on-accent: #1e1a2e;
   }
+  [data-theme='solarized'] {
+    color-scheme: dark;
+    --color-bg: #002b36;
+    --color-side: #073642;
+    --color-active: #0f4a58;
+    --color-line: #0e4452;
+    --color-muted: #93a1a1;
+    --color-accent: #2aa198;
+    --color-on-accent: #002b36;
+  }
+  [data-theme='solarized-light'] {
+    color-scheme: light;
+    --color-bg: #fdf6e3;
+    --color-side: #eee8d5;
+    --color-active: #e0d9c3;
+    --color-line: #d9d2bb;
+    --color-muted: #657b83;
+    --color-accent: #268bd2;
+    --color-on-accent: #fdf6e3;
+    --color-slate-100: #073642;
+    --color-slate-300: #586e75;
+  }
+  [data-theme='gruvbox'] {
+    color-scheme: dark;
+    --color-bg: #282828;
+    --color-side: #3c3836;
+    --color-active: #504945;
+    --color-line: #45403b;
+    --color-muted: #a89984;
+    --color-accent: #fe8019;
+    --color-on-accent: #282828;
+  }
+  [data-theme='catppuccin'] {
+    color-scheme: dark;
+    --color-bg: #1e1e2e;
+    --color-side: #313244;
+    --color-active: #45475a;
+    --color-line: #3b3d52;
+    --color-muted: #a6adc8;
+    --color-accent: #89b4fa;
+    --color-on-accent: #1e1e2e;
+  }
+  [data-theme='monokai'] {
+    color-scheme: dark;
+    --color-bg: #272822;
+    --color-side: #3e3d32;
+    --color-active: #49483e;
+    --color-line: #44433a;
+    --color-muted: #a39f8b;
+    --color-accent: #a6e22e;
+    --color-on-accent: #272822;
+  }
+  [data-theme='forest'] {
+    color-scheme: dark;
+    --color-bg: #0f1a14;
+    --color-side: #1b2a21;
+    --color-active: #2a3d31;
+    --color-line: #263a2e;
+    --color-muted: #8fa897;
+    --color-accent: #6ccf8a;
+    --color-on-accent: #06160c;
+  }
   html, body { @apply bg-bg text-slate-100 antialiased wrap-anywhere select-none; -webkit-touch-callout: none; height: 100vh; margin: 0; font-family: var(--font-sans); -webkit-tap-highlight-color: transparent; overscroll-behavior: none; touch-action: pan-x pan-y; }
   button, input, select { font: inherit; color: inherit; }
   /* Below 16px iOS zooms into a focused field and the page stays zoomed afterwards. */

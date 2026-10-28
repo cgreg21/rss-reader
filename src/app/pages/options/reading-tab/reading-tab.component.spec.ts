@@ -22,7 +22,7 @@ describe('ReadingTabComponent', () => {
   it('switches the theme', () => {
     const { fixture, root, settings } = setup();
     const swatches = Array.from(root.querySelectorAll<HTMLButtonElement>('[role="radiogroup"] [role="radio"]'));
-    expect(swatches).toHaveLength(6);
+    expect(swatches).toHaveLength(12);
     expect(swatches[0].getAttribute('aria-checked')).toBe('true');
     swatches[1].click();
     expect(settings.theme()).toBe('light');
