@@ -219,6 +219,20 @@
   .nav-count { @apply text-[13px] not-italic text-muted; }
 }
 
+/* Desktop (mouse) scrollbars in the app palette: the track stays 10px wide so nothing shifts, the thumb is drawn
+ * thin inside it and widens while the scrolling area is hovered. Firefox only lets us recolour its thin scrollbar. */
+@media (hover: hover) and (pointer: fine) {
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track, ::-webkit-scrollbar-corner { background: transparent; }
+  ::-webkit-scrollbar-thumb { border: 3px solid transparent; border-radius: 999px; background: var(--color-line); background-clip: padding-box; }
+  :hover::-webkit-scrollbar-thumb { border-width: 1px; background-color: var(--color-muted); }
+  ::-webkit-scrollbar-thumb:hover, ::-webkit-scrollbar-thumb:active { background-color: var(--color-accent); }
+  @supports not selector(::-webkit-scrollbar) {
+    * { scrollbar-width: thin; scrollbar-color: var(--color-line) transparent; }
+    :hover { scrollbar-color: var(--color-muted) transparent; }
+  }
+}
+
 /* Remote article HTML cannot carry utility classes. */
 .body { @apply wrap-anywhere; font-size: var(--body-size, 17px); line-height: 1.7; }
 .body p, .body ul, .body ol, .body figure { @apply my-5; }
