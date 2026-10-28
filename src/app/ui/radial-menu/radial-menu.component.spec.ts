@@ -38,6 +38,10 @@ describe('RadialMenuComponent', () => {
 
     root.querySelector<HTMLButtonElement>('button[aria-label="run"]')!.click();
     expect(run).toHaveBeenCalled();
+    fixture.detectChanges();
+    expect(toggle().getAttribute('aria-expanded')).toBe('false');
+    toggle().click();
+    fixture.detectChanges();
     root.querySelector<HTMLButtonElement>('button[aria-label="noop"]')!.click();
     fixture.detectChanges();
     expect(toggle().getAttribute('aria-expanded')).toBe('true');

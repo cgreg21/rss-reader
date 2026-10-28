@@ -5,7 +5,7 @@
       <a class="radial-item" [href]="p.item.href" target="_blank" rel="noopener noreferrer" [attr.aria-label]="p.item.label" [style]="style(p)" (click)="open.set(false)">{{ p.item.icon }}</a>
     } @else {
       <button class="radial-item" type="button" [class]="p.item.activeClass ?? ''" [class.animate-pulse]="p.item.pulse" [disabled]="p.item.disabled"
-        [attr.aria-label]="p.item.label" [style]="style(p)" (click)="p.item.run?.()">{{ p.item.icon }}</button>
+        [attr.aria-label]="p.item.label" [style]="style(p)" (click)="open.set(false); p.item.run?.()">{{ p.item.icon }}</button>
     }
   }
   <button class="absolute inset-0 grid cursor-pointer place-items-center rounded-full bg-accent font-mdi text-[28px] text-white shadow-lg transition-transform active:scale-90"
