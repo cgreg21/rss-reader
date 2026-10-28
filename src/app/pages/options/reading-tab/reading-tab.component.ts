@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 
 import { LANGUAGES, LANGUAGE_NAMES } from '../../../i18n/languages';
 import { TranslatePipe } from '../../../i18n/translate.pipe';
-import { SettingsStore } from '../../../rss/stores/settings.store';
+import { SettingsStore, THEMES, THEME_LABELS } from '../../../rss/stores/settings.store';
 
 /** Options tab: theme, font size, muted words, video front-end and read-article purge. */
 @Component({
@@ -16,6 +16,7 @@ import { SettingsStore } from '../../../rss/stores/settings.store';
 export class ReadingTabComponent {
   protected readonly settings = inject(SettingsStore);
   protected readonly languages = LANGUAGES.map((id) => ({ id, name: LANGUAGE_NAMES[id] }));
+  protected readonly themes = THEMES.map((id) => ({ id, label: THEME_LABELS[id] }));
   protected readonly retentionOptions = [7, 30, 90];
   protected readonly fontSizes = [14, 15, 16, 17, 18, 20, 22];
 

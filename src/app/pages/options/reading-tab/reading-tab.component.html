@@ -7,11 +7,20 @@
       @for (l of languages; track l.id) { <option [value]="l.id" [attr.lang]="l.id">{{ l.name }}</option> }
     </select>
   </div>
-  <div class="flex items-center justify-between gap-3 py-1">
-    <span>{{ 'reading.theme' | translate }}</span>
-    <div class="flex rounded-full bg-bg p-0.5" role="group">
-      <button type="button" class="rounded-full px-3 py-1 text-[13px]" [class]="settings.theme() === 'dark' ? 'bg-accent text-white' : 'text-muted'" (click)="settings.theme.set('dark')">{{ 'reading.dark' | translate }}</button>
-      <button type="button" class="rounded-full px-3 py-1 text-[13px]" [class]="settings.theme() === 'light' ? 'bg-accent text-white' : 'text-muted'" (click)="settings.theme.set('light')">{{ 'reading.light' | translate }}</button>
+  <div class="py-1">
+    <span class="block" id="theme-label">{{ 'reading.theme' | translate }}</span>
+    <div class="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-6" role="radiogroup" aria-labelledby="theme-label">
+      @for (t of themes; track t.id) {
+        <button type="button" role="radio" class="press flex flex-col items-center gap-1.5 rounded-xl border-2 p-2 text-[12px]"
+                [class]="settings.theme() === t.id ? 'border-accent' : 'border-transparent text-muted'"
+                [attr.aria-checked]="settings.theme() === t.id" (click)="settings.theme.set(t.id)">
+          <span class="flex h-9 w-full overflow-hidden rounded-lg border border-line" [attr.data-theme]="t.id" aria-hidden="true">
+            <span class="w-1/3 bg-side"></span>
+            <span class="flex flex-1 items-center justify-center bg-bg"><span class="size-3 rounded-full bg-accent"></span></span>
+          </span>
+          {{ t.label | translate }}
+        </button>
+      }
     </div>
   </div>
   <div class="flex items-center justify-between gap-3 py-1">

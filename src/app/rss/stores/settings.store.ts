@@ -1,9 +1,13 @@
 import { Injectable, computed, effect } from '@angular/core';
 
 import { LANG_SETTINGS, LangSetting } from '../../i18n/languages';
+import { MessageKey } from '../../i18n/messages';
 import { flag, json, num, oneOf, persisted, text } from '../storage/persisted';
 
-export type Theme = 'dark' | 'light';
+/** Each theme is a `[data-theme]` block in styles.css. */
+export const THEMES = ['dark', 'light', 'black', 'sepia', 'nord', 'dracula'] as const;
+export type Theme = (typeof THEMES)[number];
+export const THEME_LABELS: Record<Theme, MessageKey> = { dark: 'theme.dark', light: 'theme.light', black: 'theme.black', sepia: 'theme.sepia', nord: 'theme.nord', dracula: 'theme.dracula' };
 export type ArticleLayout = 'list' | 'detail' | 'card';
 
 /** The proxy relays the path as is, so only its origin matters; an invalid value means no proxy. */
@@ -36,14 +40,18 @@ export class SettingsStore {
   /** Origin of an Invidious or Piped instance used to embed YouTube videos; '' plays through YouTube itself. */
   readonly videoFrontend = persisted('rssreader:video-frontend', text());
   readonly activeVideoFrontend = computed(() => proxyOrigin(this.videoFrontend()));
-  readonly theme = persisted<Theme>('rssreader:theme', oneOf(['dark', 'light'], 'dark'));
+  readonly theme = persisted<Theme>('rssreader:theme', oneOf(THEMES, 'dark'));
   /** 'auto' follows the browser language. */
   readonly language = persisted<LangSetting>('rssreader:language', oneOf(LANG_SETTINGS, 'auto'));
 
   constructor() {
     effect(() => {
-      document.documentElement.dataset['theme'] = this.theme();
-      document.documentElement.style.setProperty('--body-size', `${this.fontSize() || 17}px`);
+      const root = document.documentElement;
+      root.dataset['theme'] = this.theme();
+      root.style.setProperty('--body-size', `${this.fontSize() || 17}px`);
+      // Browser chrome (status bar, PWA title bar) follows the theme background.
+      const bg = getComputedStyle(root).getPropertyValue('--color-bg').trim();
+      if (bg) document.querySelector('meta[name="theme-color"]')?.setAttribute('content', bg);
     });
   }
 

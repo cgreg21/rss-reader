@@ -20,11 +20,17 @@ describe('ReadingTabComponent', () => {
   });
 
   it('switches the theme', () => {
-    const { root, settings } = setup();
-    const [dark, light] = Array.from(root.querySelectorAll<HTMLButtonElement>('[role="group"] button'));
-    light.click();
+    const { fixture, root, settings } = setup();
+    const swatches = Array.from(root.querySelectorAll<HTMLButtonElement>('[role="radiogroup"] [role="radio"]'));
+    expect(swatches).toHaveLength(6);
+    expect(swatches[0].getAttribute('aria-checked')).toBe('true');
+    swatches[1].click();
     expect(settings.theme()).toBe('light');
-    dark.click();
+    swatches[3].click();
+    expect(settings.theme()).toBe('sepia');
+    fixture.detectChanges();
+    expect(document.documentElement.dataset['theme']).toBe('sepia');
+    swatches[0].click();
     expect(settings.theme()).toBe('dark');
   });
 

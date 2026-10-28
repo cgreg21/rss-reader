@@ -37,6 +37,7 @@
   --color-line: #2a3650;
   --color-muted: #8d9ab3;
   --color-accent: #1fb5b0;
+  --color-on-accent: #04201f;
   --font-sans: "DM Sans", system-ui, sans-serif;
   --font-mdi: "Material Design Icons";
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
@@ -46,9 +47,20 @@
   --dur-slow: 250ms;
 }
 
+/* Themes are scoped by [data-theme] so a swatch can preview one inside another. Dark is repeated from @theme. */
 @layer base {
   :root { color-scheme: dark; }
-  :root[data-theme='light'] {
+  [data-theme='dark'] {
+    color-scheme: dark;
+    --color-bg: #0b1220;
+    --color-side: #1b2538;
+    --color-active: #2d3a54;
+    --color-line: #2a3650;
+    --color-muted: #8d9ab3;
+    --color-accent: #1fb5b0;
+    --color-on-accent: #04201f;
+  }
+  [data-theme='light'] {
     color-scheme: light;
     --color-bg: #f4f6fa;
     --color-side: #ffffff;
@@ -56,8 +68,51 @@
     --color-line: #d5dce8;
     --color-muted: #5b6880;
     --color-accent: #0f8f8a;
+    --color-on-accent: #ffffff;
     --color-slate-100: #0f172a;
     --color-slate-300: #334155;
+  }
+  [data-theme='black'] {
+    color-scheme: dark;
+    --color-bg: #000000;
+    --color-side: #121212;
+    --color-active: #262626;
+    --color-line: #2a2a2a;
+    --color-muted: #9a9a9a;
+    --color-accent: #1fb5b0;
+    --color-on-accent: #04201f;
+  }
+  [data-theme='sepia'] {
+    color-scheme: light;
+    --color-bg: #f4ecd8;
+    --color-side: #fbf5e6;
+    --color-active: #e6d9bd;
+    --color-line: #dccfb0;
+    --color-muted: #7a6a50;
+    --color-accent: #a0522d;
+    --color-on-accent: #fff8ee;
+    --color-slate-100: #3b2f1e;
+    --color-slate-300: #5c4b32;
+  }
+  [data-theme='nord'] {
+    color-scheme: dark;
+    --color-bg: #2e3440;
+    --color-side: #3b4252;
+    --color-active: #4c566a;
+    --color-line: #434c5e;
+    --color-muted: #9aa5bd;
+    --color-accent: #88c0d0;
+    --color-on-accent: #1d2531;
+  }
+  [data-theme='dracula'] {
+    color-scheme: dark;
+    --color-bg: #282a36;
+    --color-side: #343746;
+    --color-active: #44475a;
+    --color-line: #3d4052;
+    --color-muted: #9ea3c5;
+    --color-accent: #bd93f9;
+    --color-on-accent: #1e1a2e;
   }
   html, body { @apply bg-bg text-slate-100 antialiased wrap-anywhere select-none; -webkit-touch-callout: none; height: 100vh; margin: 0; font-family: var(--font-sans); -webkit-tap-highlight-color: transparent; overscroll-behavior: none; touch-action: pan-x pan-y; }
   button, input, select { font: inherit; color: inherit; }
@@ -80,7 +135,7 @@
 
 @layer components {
   .icon-btn { @apply inline-grid size-11 min-w-11 cursor-pointer place-items-center rounded-full font-mdi text-[22px] text-muted hover:scale-110 hover:bg-white/5 hover:text-slate-100 active:scale-90; }
-  .btn { @apply rounded-xl bg-accent px-4 py-2 font-semibold text-[#04201f] hover:brightness-110 active:scale-95 disabled:opacity-60; }
+  .btn { @apply rounded-xl bg-accent px-4 py-2 font-semibold text-on-accent hover:brightness-110 active:scale-95 disabled:opacity-60; }
   .btn-ghost { @apply rounded-xl border border-line px-4 py-2 text-muted hover:border-muted hover:text-slate-100 active:scale-95; }
   .press { @apply active:scale-95; }
   .lift { transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out); }
@@ -93,7 +148,7 @@
   .field { @apply min-w-0 rounded-xl border border-transparent bg-side px-3.5 py-2; }
   .panel { @apply mb-4 max-w-3xl rounded-2xl bg-side p-4; }
   .radial-item { @apply absolute top-1 start-1 grid size-12 cursor-pointer place-items-center rounded-full bg-side font-mdi text-[24px] text-slate-100 shadow-lg transition-[transform,opacity] duration-200 ease-out disabled:opacity-50; }
-  .banner { @apply mb-4 flex flex-wrap items-center gap-2 rounded-xl bg-[#243350] px-3.5 py-2 text-sm; }
+  .banner { @apply mb-4 flex flex-wrap items-center gap-2 rounded-xl bg-active px-3.5 py-2 text-sm; }
   .banner button { @apply rounded-lg border border-accent px-2.5 text-accent; }
   .nav-item { @apply flex w-full items-center justify-between gap-2.5 rounded-xl px-3 py-2 text-start hover:bg-white/5 active:scale-[0.98]; }
   .tab-btn { @apply transition-colors duration-150; }
