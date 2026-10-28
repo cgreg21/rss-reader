@@ -6,7 +6,7 @@
   </button>
   @if (articleId()) { <a class="icon-btn hidden sidebar:inline-grid rtl:-scale-x-100" routerLink="/" [attr.aria-label]="'common.previous' | translate">{{ ui.back }}</a> }
   @if (options()) { <a class="icon-btn hidden sidebar:inline-grid rtl:-scale-x-100" routerLink="/" [attr.aria-label]="'common.back' | translate">{{ ui.back }}</a> }
-  <strong class="min-w-0 flex-1 truncate text-center sidebar:text-start sidebar:flex-none sidebar:text-xl">  @if (options(); as title) { {{ title | translate }} } @else { {{ view.scopeTitle() || 'RSS' }} }
+  <strong class="min-w-0 flex-1 truncate text-center sidebar:text-start sidebar:flex-none sidebar:text-xl">  @if (options(); as title) { {{ title | translate }} } @else { <a class="rounded-md hover:text-accent focus-visible:outline-2 focus-visible:outline-accent" routerLink="/">{{ view.scopeTitle() || 'RSS' }}</a> }
       @if (!options()) { <small class="hidden text-[15px] font-normal text-muted sidebar:inline">{{ 'topbar.unread' | translate: { n: articles.unreadTotal() } }}</small> }</strong>
   @if (options()) {
     <span class="hidden flex-1 sidebar:block"></span>

@@ -35,6 +35,7 @@ describe('TopBarComponent', () => {
   it('shows the scope title, unread badge and opens the drawer', () => {
     const { fixture, root } = setup({ actions: true });
     expect(root.querySelector('strong')?.textContent).toContain('Scope');
+    expect(root.querySelector('strong a')?.getAttribute('href')).toBe('/');
     expect(root.querySelector('rss-article-actions')).not.toBeNull();
     const menu = root.querySelector<HTMLButtonElement>('[aria-label="Menu"]')!;
     expect(menu.textContent).toContain('3');
