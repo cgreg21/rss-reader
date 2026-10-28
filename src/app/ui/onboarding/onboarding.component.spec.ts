@@ -72,9 +72,14 @@ describe('OnboardingComponent', () => {
 
   it('jumps with the dots, the keyboard and swipes', () => {
     const { fixture, root } = setup();
+    const track = () => root.querySelector<HTMLElement>('[data-testid="slides"]')!;
+    const current = () => root.querySelector<HTMLElement>('[data-testid="slides"] > :not([aria-hidden="true"])')!;
+    expect(track().style.transform).toBe('translateX(calc(0% + 0px))');
+    expect(current().classList.contains('stagger')).toBe(true);
     root.querySelectorAll<HTMLButtonElement>('[role="tab"]')[2].click();
     fixture.detectChanges();
     expect(root.textContent).toContain('3 / 5');
+    expect(track().style.transform).toBe('translateX(calc(-200% + 0px))');
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
     fixture.detectChanges();
     expect(root.textContent).toContain('2 / 5');
@@ -87,11 +92,16 @@ describe('OnboardingComponent', () => {
     pointer('pointerdown', 200);
     pointer('pointermove', 150);
     fixture.detectChanges();
-    expect(root.querySelector<HTMLElement>('.stagger')!.style.transform).toBe('translateX(-50px)');
+    expect(track().style.transform).toBe('translateX(calc(-100% + -50px))');
+    expect(track().classList.contains('transition-transform')).toBe(false);
     pointer('pointerup', 100);
     fixture.detectChanges();
     expect(root.textContent).toContain('3 / 5');
-    expect(root.querySelector<HTMLElement>('.stagger')!.style.transform).toBe('');
+    expect(track().style.transform).toBe('translateX(calc(-200% + 0px))');
+    expect(track().classList.contains('transition-transform')).toBe(true);
+    // The slide was already in view while dragging, so its content does not cascade in again.
+    expect(current().textContent).toContain('Lisez');
+    expect(current().classList.contains('stagger')).toBe(false);
     pointer('pointerdown', 100);
     pointer('pointermove', 115);
     pointer('pointerup', 120);
@@ -112,7 +122,7 @@ describe('OnboardingComponent', () => {
     pointer('pointerdown', 300);
     pointer('pointermove', 210);
     fixture.detectChanges();
-    expect(root.querySelector<HTMLElement>('.stagger')!.style.transform).toBe('translateX(-30px)');
+    expect(root.querySelector<HTMLElement>('[data-testid="slides"]')!.style.transform).toBe('translateX(calc(-400% + -30px))');
     pointer('pointerup', 210);
     fixture.detectChanges();
     expect(root.textContent).toContain('5 / 5');

@@ -49,11 +49,11 @@ export class OnboardingComponent {
     { id: 'sync', icon: UI_ICONS.settings, title: 'onboarding.syncTitle', text: 'onboarding.syncText', action: { label: 'onboarding.openOptions', run: () => void this.router.navigateByUrl('/options') } },
   ];
   protected readonly index = signal(0);
-  /** 1 when moving forward, -1 backwards: picks the side the next slide comes from. */
-  protected readonly direction = signal(1);
+  /** Whether the current slide's content cascades in; off after a swipe since the slide was already in view. */
+  protected readonly staggered = signal(true);
   protected readonly slide = computed(() => this.slides[this.index()]);
   protected readonly last = computed(() => this.index() === this.slides.length - 1);
-  /** Horizontal shift of the slide while a finger drags it, in px. */
+  /** Horizontal shift of the slide track while a finger drags it, in px. */
   protected readonly offset = signal(0);
   private readonly gesture = new AxisGesture();
 
@@ -61,19 +61,19 @@ export class OnboardingComponent {
     effect(() => {
       if (this.onboarding.opened()) {
         this.index.set(0);
-        this.direction.set(1);
+        this.staggered.set(true);
       }
     });
   }
 
-  protected go(i: number): void {
+  protected go(i: number, staggered = true): void {
     if (i === this.index()) return;
-    this.direction.set(i > this.index() ? 1 : -1);
+    this.staggered.set(staggered);
     this.index.set(i);
   }
 
-  protected step(delta: number): void {
-    this.go(Math.min(this.slides.length - 1, Math.max(0, this.index() + delta)));
+  protected step(delta: number, staggered = true): void {
+    this.go(Math.min(this.slides.length - 1, Math.max(0, this.index() + delta)), staggered);
   }
 
   protected next(): void {
@@ -109,6 +109,6 @@ export class OnboardingComponent {
     if (end?.axis !== 'horizontal') return;
     card.releasePointerCapture?.(e.pointerId);
     const dx = end.dx * this.i18n.sign();
-    if (Math.abs(dx) >= SWIPE_MIN_PX) this.step(dx < 0 ? 1 : -1);
+    if (Math.abs(dx) >= SWIPE_MIN_PX) this.step(dx < 0 ? 1 : -1, false);
   }
 }
