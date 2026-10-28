@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { UpdateService } from '../../pwa/services/update.service';
 import { StorageUsageService } from '../../rss/services/storage-usage.service';
+import { OnboardingService } from '../../ui/onboarding/onboarding.service';
 import { AboutPage } from './about.page';
 
 describe('AboutPage', () => {
@@ -41,6 +42,14 @@ describe('AboutPage', () => {
     const { root } = setup();
     expect(root.textContent).toMatch(/Version \d/);
     expect(root.querySelectorAll('ul li').length).toBeGreaterThan(0);
+  });
+
+  it('replays the introduction', () => {
+    const { root } = setup();
+    const onboarding = TestBed.inject(OnboardingService);
+    onboarding.dismiss();
+    Array.from(root.querySelectorAll<HTMLButtonElement>('button')).find((b) => b.textContent?.includes('Revoir'))!.click();
+    expect(onboarding.opened()).toBe(true);
   });
 
   it.each([

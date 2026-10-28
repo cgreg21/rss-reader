@@ -14,6 +14,7 @@ import { DialogComponent } from '../ui/dialog/dialog.component';
 import { DrawerContentComponent } from '../ui/drawer-content/drawer-content.component';
 import { DrawerService } from '../ui/drawer-content/drawer.service';
 import { LayoutService } from '../ui/services/layout.service';
+import { OnboardingComponent } from '../ui/onboarding/onboarding.component';
 import { SnackbarComponent } from '../ui/snackbar/snackbar.component';
 import { TopBarComponent } from '../ui/top-bar/top-bar.component';
 import { RootComponent } from './root.component';
@@ -41,6 +42,8 @@ class PromptStub {}
 class SnackStub {}
 @Component({ selector: 'rss-dialog', template: '' })
 class DialogStub {}
+@Component({ selector: 'rss-onboarding', template: '' })
+class OnboardingStub {}
 
 const pointer = (type: string, x = 0, y = 0, extra: Record<string, unknown> = {}): Event => {
   const e = new Event(type, { bubbles: true, cancelable: true });
@@ -63,8 +66,8 @@ describe('RootComponent', () => {
     sidebar.set(false);
     TestBed.resetTestingModule();
     TestBed.overrideComponent(RootComponent, {
-      remove: { imports: [TopBarComponent, DrawerContentComponent, AppPromptComponent, SnackbarComponent, DialogComponent, ArticleActionsComponent, ArticleDetailActionsComponent] },
-      add: { imports: [TopBarStub, DrawerStub, PromptStub, SnackStub, DialogStub, ActionsStub, DetailStub] },
+      remove: { imports: [TopBarComponent, DrawerContentComponent, AppPromptComponent, SnackbarComponent, DialogComponent, OnboardingComponent, ArticleActionsComponent, ArticleDetailActionsComponent] },
+      add: { imports: [TopBarStub, DrawerStub, PromptStub, SnackStub, DialogStub, OnboardingStub, ActionsStub, DetailStub] },
     });
     TestBed.configureTestingModule({
       providers: [

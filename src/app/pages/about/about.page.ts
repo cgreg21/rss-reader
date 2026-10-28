@@ -8,6 +8,7 @@ import credits from '../../pwa/credits.json';
 import { UpdateService } from '../../pwa/services/update.service';
 import { StorageUsage, StorageUsageService } from '../../rss/services/storage-usage.service';
 import { UI_ICONS } from '../../ui/icons';
+import { OnboardingService } from '../../ui/onboarding/onboarding.service';
 
 interface Credit {
   name: string;
@@ -28,6 +29,7 @@ const CREDITS: Credit[] = credits;
 })
 export class AboutPage {
   protected readonly updates = inject(UpdateService);
+  protected readonly onboarding = inject(OnboardingService);
   private readonly i18n = inject(I18nService);
   protected readonly version = APP_VERSION;
   protected readonly credits = CREDITS;

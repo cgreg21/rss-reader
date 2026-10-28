@@ -32,6 +32,11 @@
 </section>
 
 <section class="panel">
+  <h2 class="mb-2.5 text-base font-bold">{{ 'about.help' | translate }}</h2>
+  <button class="btn-ghost" type="button" (click)="onboarding.show()">{{ 'about.replay' | translate }}</button>
+</section>
+
+<section class="panel">
   <h2 class="mb-2.5 text-base font-bold">{{ 'about.dependencies' | translate }}</h2>
   <ul>
     @for (c of credits; track c.name) {
