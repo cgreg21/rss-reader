@@ -5,6 +5,7 @@ import { BehaviorSubject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { FeedsStore } from '../../rss/stores/feeds.store';
+import { DEFAULT_SERVER } from '../../rss/stores/settings.store';
 import { PushService } from './push.service';
 
 describe('PushService', () => {
@@ -51,6 +52,7 @@ describe('PushService', () => {
 
   it('stores the worker url and tracks the subscription', () => {
     const s = create();
+    expect(s.url()).toBe(DEFAULT_SERVER);
     s.setUrl(' https://w.com/path ');
     expect(localStorage.getItem('rssreader:push-url')).toBe('https://w.com/path');
     sub$.next(fakeSub);
@@ -59,6 +61,7 @@ describe('PushService', () => {
 
   it('requires a valid url to enable', async () => {
     const s = create();
+    s.setUrl('not a url');
     await s.enable();
     expect(s.error()).toContain('adresse');
   });

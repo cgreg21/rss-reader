@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { SettingsStore, proxyOrigin } from './settings.store';
+import { SettingsStore, DEFAULT_SERVER, proxyOrigin } from './settings.store';
 
 describe('proxyOrigin', () => {
   it('keeps only the origin of http(s) urls', () => {
@@ -21,9 +21,9 @@ describe('SettingsStore', () => {
     TestBed.resetTestingModule();
   });
 
-  it('computes the active proxy', () => {
+  it('computes the active proxy, defaulting to the companion server', () => {
     const s = TestBed.inject(SettingsStore);
-    expect(s.activeProxy()).toBe('');
+    expect(s.activeProxy()).toBe(DEFAULT_SERVER);
     s.setProxy('  https://p.com/x ');
     expect(s.proxy()).toBe('https://p.com/x');
     expect(s.activeProxy()).toBe('https://p.com');

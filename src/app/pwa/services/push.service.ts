@@ -4,6 +4,7 @@ import { SwPush } from '@angular/service-worker';
 import { I18nService } from '../../i18n/services/i18n.service';
 import { MessageError } from '../../i18n/message-error';
 import { FeedsStore } from '../../rss/stores/feeds.store';
+import { DEFAULT_SERVER } from '../../rss/stores/settings.store';
 
 const URL_KEY = 'rssreader:push-url';
 
@@ -15,7 +16,7 @@ export class PushService {
   private readonly i18n = inject(I18nService);
 
   readonly supported = !!this.swPush?.isEnabled && 'PushManager' in window && 'Notification' in window;
-  readonly url = signal(localStorage.getItem(URL_KEY) ?? '');
+  readonly url = signal(localStorage.getItem(URL_KEY) ?? DEFAULT_SERVER);
   readonly enabled = signal(false);
   readonly busy = signal(false);
   readonly error = signal('');

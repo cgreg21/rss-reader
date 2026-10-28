@@ -13,6 +13,9 @@ export const THEME_LABELS: Record<Theme, MessageKey> = {
 };
 export type ArticleLayout = 'list' | 'detail' | 'card';
 
+/** Companion server used by default for the CORS proxy and push notifications. */
+export const DEFAULT_SERVER = 'https://rss-reader-server-eygg.onrender.com';
+
 /** The proxy relays the path as is, so only its origin matters; an invalid value means no proxy. */
 export const proxyOrigin = (value: string): string => {
   try {
@@ -26,7 +29,7 @@ export const proxyOrigin = (value: string): string => {
 /** User preferences, persisted per device. */
 @Injectable({ providedIn: 'root' })
 export class SettingsStore {
-  readonly proxy = persisted('rssreader:caldav-proxy', text());
+  readonly proxy = persisted('rssreader:caldav-proxy', text(DEFAULT_SERVER));
   readonly proxyEnabled = persisted('rssreader:proxy-enabled', flag(true));
   /** Origin of the proxy to use, or '' when disabled or invalid. */
   readonly activeProxy = computed(() => (this.proxyEnabled() ? proxyOrigin(this.proxy()) : ''));

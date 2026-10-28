@@ -20,6 +20,7 @@ describe('FetchService', () => {
   afterEach(() => vi.unstubAllGlobals());
 
   it('fetches directly without a proxy', async () => {
+    settings.proxyEnabled.set(false);
     fetchMock.mockResolvedValue(new Response('ok'));
     await service.request('https://a.com/x');
     expect(fetchMock).toHaveBeenCalledWith('https://a.com/x');

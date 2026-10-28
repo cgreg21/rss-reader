@@ -33,7 +33,7 @@
   </div>
   @if (push.supported) {
     <p class="mb-2 text-[13px] text-muted">{{ 'system.pushHelp' | translate }}</p>
-    <input class="field w-full" name="pushUrl" placeholder="https://rss-reader-server.onrender.com" [ngModel]="push.url()" (ngModelChange)="push.setUrl($event)">
+    <input class="field w-full" name="pushUrl" placeholder="https://rss-reader-server-eygg.onrender.com" [ngModel]="push.url()" (ngModelChange)="push.setUrl($event)">
     @if (push.error()) { <p class="mt-2 text-sm text-red-400">{{ push.error() }}</p> }
   } @else {
     <p class="text-[13px] text-muted">{{ 'system.pushUnavailable' | translate }}</p>
@@ -50,7 +50,7 @@
     </button>
   </div>
   <p class="mb-2 text-[13px] text-muted">{{ 'system.proxyHelp' | translate }}</p>
-  <input class="field w-full disabled:opacity-50" name="proxy" placeholder="https://rss-reader-server.onrender.com" [disabled]="!settings.proxyEnabled()" [ngModel]="settings.proxy()" (ngModelChange)="settings.setProxy($event)">
+  <input class="field w-full disabled:opacity-50" name="proxy" placeholder="https://rss-reader-server-eygg.onrender.com" [disabled]="!settings.proxyEnabled()" [ngModel]="settings.proxy()" (ngModelChange)="settings.setProxy($event)">
 </section>
 
 <section class="panel">
