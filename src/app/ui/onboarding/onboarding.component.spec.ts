@@ -79,19 +79,43 @@ describe('OnboardingComponent', () => {
     fixture.detectChanges();
     expect(root.textContent).toContain('2 / 5');
     const dialog = root.querySelector<HTMLElement>('[role="dialog"]')!;
-    const touch = (type: string, x: number) => {
+    const pointer = (type: string, x: number) => {
       const e = new Event(type, { bubbles: true });
-      Object.assign(e, { touches: [{ clientX: x }], changedTouches: [{ clientX: x }] });
+      Object.assign(e, { clientX: x, clientY: 0, pointerId: 1, pointerType: 'touch', button: 0 });
       dialog.dispatchEvent(e);
     };
-    touch('touchstart', 200);
-    touch('touchend', 100);
+    pointer('pointerdown', 200);
+    pointer('pointermove', 150);
+    fixture.detectChanges();
+    expect(root.querySelector<HTMLElement>('.stagger')!.style.transform).toBe('translateX(-50px)');
+    pointer('pointerup', 100);
     fixture.detectChanges();
     expect(root.textContent).toContain('3 / 5');
-    touch('touchstart', 100);
-    touch('touchend', 110);
+    expect(root.querySelector<HTMLElement>('.stagger')!.style.transform).toBe('');
+    pointer('pointerdown', 100);
+    pointer('pointermove', 115);
+    pointer('pointerup', 120);
     fixture.detectChanges();
     expect(root.textContent).toContain('3 / 5');
+  });
+
+  it('only follows the finger a little past the last slide', () => {
+    const { fixture, root } = setup();
+    root.querySelectorAll<HTMLButtonElement>('[role="tab"]')[4].click();
+    fixture.detectChanges();
+    const dialog = root.querySelector<HTMLElement>('[role="dialog"]')!;
+    const pointer = (type: string, x: number) => {
+      const e = new Event(type, { bubbles: true });
+      Object.assign(e, { clientX: x, clientY: 0, pointerId: 1, pointerType: 'touch', button: 0 });
+      dialog.dispatchEvent(e);
+    };
+    pointer('pointerdown', 300);
+    pointer('pointermove', 210);
+    fixture.detectChanges();
+    expect(root.querySelector<HTMLElement>('.stagger')!.style.transform).toBe('translateX(-30px)');
+    pointer('pointerup', 210);
+    fixture.detectChanges();
+    expect(root.textContent).toContain('5 / 5');
   });
 
   it('runs the slide shortcuts after closing', async () => {

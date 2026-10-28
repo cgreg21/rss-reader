@@ -5,6 +5,7 @@ import { I18nService } from '../../i18n/services/i18n.service';
 import { MessageKey } from '../../i18n/messages';
 import { TranslatePipe } from '../../i18n/translate.pipe';
 import { AddFeedDialogService } from '../add-feed-dialog/add-feed-dialog.service';
+import { AxisGesture, isPrimaryPress } from '../gestures/pointer-gestures';
 import { UI_ICONS } from '../icons';
 import { OnboardingService } from './onboarding.service';
 
@@ -17,7 +18,10 @@ interface Slide {
   action?: { label: MessageKey; run: () => void };
 }
 
-const SWIPE_MIN_PX = 40;
+/** Horizontal distance after which releasing the finger changes the slide. */
+const SWIPE_MIN_PX = 60;
+/** How much a slide follows the finger when there is nothing beyond it. */
+const RUBBER_BAND = 3;
 
 /** Presentation and setup help carousel; place it once in the root layout. */
 @Component({
@@ -49,7 +53,9 @@ export class OnboardingComponent {
   protected readonly direction = signal(1);
   protected readonly slide = computed(() => this.slides[this.index()]);
   protected readonly last = computed(() => this.index() === this.slides.length - 1);
-  private touchX: number | null = null;
+  /** Horizontal shift of the slide while a finger drags it, in px. */
+  protected readonly offset = signal(0);
+  private readonly gesture = new AxisGesture();
 
   constructor() {
     effect(() => {
@@ -84,15 +90,25 @@ export class OnboardingComponent {
     slide.action?.run();
   }
 
-  protected touchStart(e: TouchEvent): void {
-    this.touchX = e.touches[0]?.clientX ?? null;
+  protected onDown(e: PointerEvent): void {
+    if (isPrimaryPress(e)) this.gesture.start(e);
   }
 
-  protected touchEnd(e: TouchEvent): void {
-    const x = e.changedTouches[0]?.clientX;
-    if (this.touchX === null || x === undefined) return;
-    const dx = (x - this.touchX) * this.i18n.sign();
-    this.touchX = null;
+  protected onMove(e: PointerEvent, card: HTMLElement): void {
+    const move = this.gesture.move(e);
+    if (move?.axis !== 'horizontal') return;
+    if (move.started) card.setPointerCapture?.(e.pointerId);
+    const forward = move.dx * this.i18n.sign() < 0;
+    const blocked = forward ? this.last() : this.index() === 0;
+    this.offset.set(blocked ? move.dx / RUBBER_BAND : move.dx);
+  }
+
+  protected onUp(e: PointerEvent, card: HTMLElement): void {
+    const end = this.gesture.end(e);
+    this.offset.set(0);
+    if (end?.axis !== 'horizontal') return;
+    card.releasePointerCapture?.(e.pointerId);
+    const dx = end.dx * this.i18n.sign();
     if (Math.abs(dx) >= SWIPE_MIN_PX) this.step(dx < 0 ? 1 : -1);
   }
 }
