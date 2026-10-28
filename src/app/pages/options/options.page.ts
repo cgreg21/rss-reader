@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, inject, signal } from '@angular/core';
 
 import { MessageKey } from '../../i18n/messages';
 import { TranslatePipe } from '../../i18n/translate.pipe';
@@ -26,4 +26,11 @@ export class OptionsPage {
     { id: 'about', label: 'nav.about', icon: UI_ICONS.info },
   ] as const satisfies readonly { id: string; label: MessageKey; icon: string }[];
   protected readonly tab = signal<(typeof this.tabs)[number]['id']>('feeds');
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+
+  /** Shows a tab from the top: the scrolling container is the shell's main element. */
+  protected select(id: (typeof this.tabs)[number]['id']): void {
+    this.tab.set(id);
+    this.host.nativeElement.closest('main')?.scrollTo(0, 0);
+  }
 }

@@ -10,7 +10,7 @@
 
 <nav class="fixed inset-x-0 bottom-0 z-30 sidebar:start-[280px] flex border-t border-line bg-side pb-[calc(env(safe-area-inset-bottom)*0.35)]" [attr.aria-label]="'nav.sections' | translate">
   @for (t of tabs; track t.id) {
-    <button type="button" class="flex-1 py-3 font-mdi text-2xl transition-colors duration-150 active:scale-90" [class]="tab() === t.id ? 'text-accent' : 'text-muted hover:text-slate-100'" [attr.aria-label]="t.label | translate" [attr.aria-current]="tab() === t.id ? 'page' : null" (click)="tab.set(t.id)">{{ t.icon }}</button>
+    <button type="button" class="flex-1 py-3 font-mdi text-2xl transition-colors duration-150 active:scale-90" [class]="tab() === t.id ? 'text-accent' : 'text-muted hover:text-slate-100'" [attr.aria-label]="t.label | translate" [attr.aria-current]="tab() === t.id ? 'page' : null" (click)="select(t.id)">{{ t.icon }}</button>
   }
 </nav>
 <div class="h-16"></div>

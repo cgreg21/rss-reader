@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { OptionsPage } from './options.page';
 
@@ -30,6 +30,9 @@ describe('OptionsPage', () => {
     const fixture = TestBed.createComponent(OptionsPage);
     fixture.detectChanges();
     const root = fixture.nativeElement as HTMLElement;
+    const main = document.createElement('main');
+    main.scrollTo = vi.fn() as never;
+    main.append(root);
     const tabs = root.querySelectorAll<HTMLButtonElement>('nav button');
     expect(tabs).toHaveLength(5);
     expect(root.querySelector('rss-feeds-tab')).not.toBeNull();
@@ -40,5 +43,7 @@ describe('OptionsPage', () => {
       expect(root.querySelector(expected[i])).not.toBeNull();
       expect(tab.getAttribute('aria-current')).toBe('page');
     });
+    expect(main.scrollTo).toHaveBeenCalledTimes(5);
+    expect(main.scrollTo).toHaveBeenCalledWith(0, 0);
   });
 });
