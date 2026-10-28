@@ -29,10 +29,10 @@
 </ng-template>
 
 @if (article(); as a) {
-  @if (moving()) {
-    <div class="pointer-events-none absolute -inset-x-3.5 overflow-hidden bg-bg px-3.5 py-3.5 sm:-inset-x-5 sm:px-5 sm:py-5 sidebar:-inset-x-8 sidebar:px-8 sidebar:py-8" [style.top.px]="underTop()" [style.height.px]="underHeight()"
-         [style.transform]="underTransform()"
-         [style.transition]="animating() ? 'transform 200ms ease-out' : null" [style.opacity]="underOpacity()">
+  @if (swipe.moving()) {
+    <div class="pointer-events-none absolute -inset-x-3.5 overflow-hidden bg-bg px-3.5 py-3.5 sm:-inset-x-5 sm:px-5 sm:py-5 sidebar:-inset-x-8 sidebar:px-8 sidebar:py-8" [style.top.px]="swipe.underTop()" [style.height.px]="swipe.underHeight()"
+         [style.transform]="swipe.underTransform()"
+         [style.transition]="swipe.animating() ? 'transform 200ms ease-out' : null" [style.opacity]="swipe.underOpacity()">
       @if (target(); as t) {
         <ng-container [ngTemplateOutlet]="body" [ngTemplateOutletContext]="{ $implicit: t }" />
       } @else {
@@ -40,9 +40,9 @@
       }
     </div>
   }
-  <div class="relative -mx-3.5 -my-3.5 bg-bg px-3.5 py-3.5 sm:-mx-5 sm:-my-5 sm:px-5 sm:py-5 sidebar:-mx-8 sidebar:-my-8 sidebar:px-8 sidebar:py-8" [style.transform]="currentTransform()"
-       [style.box-shadow]="currentShadow()"
-       [style.transition]="animating() ? 'transform 200ms ease-out' : null" [style.min-height.px]="moving() ? underHeight() : null">
+  <div class="relative -mx-3.5 -my-3.5 bg-bg px-3.5 py-3.5 sm:-mx-5 sm:-my-5 sm:px-5 sm:py-5 sidebar:-mx-8 sidebar:-my-8 sidebar:px-8 sidebar:py-8"   [style.transform]="swipe.currentTransform()"
+         [style.box-shadow]="swipe.currentShadow()"
+         [style.transition]="swipe.animating() ? 'transform 200ms ease-out' : null" [style.min-height.px]="swipe.moving() ? swipe.underHeight() : null">
     <ng-container [ngTemplateOutlet]="body" [ngTemplateOutletContext]="{ $implicit: a }" />
   </div>
 } @else {
