@@ -20,6 +20,7 @@ import { SnackbarComponent } from '../ui/snackbar/snackbar.component';
 import { DialogComponent } from '../ui/dialog/dialog.component';
 import { AddFeedDialogComponent } from '../ui/add-feed-dialog/add-feed-dialog.component';
 import { MiniPlayerComponent } from '../ui/audio-player/mini-player.component';
+import { DownloadQueueComponent } from '../ui/download-queue/download-queue.component';
 import { ArticleActionsComponent } from '../ui/article-actions/article-actions.component';
 import { ArticleDetailActionsComponent } from '../ui/article-detail-actions/article-detail-actions.component';
 import { UI_ICONS } from '../ui/icons';
@@ -31,7 +32,7 @@ const EDGE_WIDTH = 24;
 
 @Component({
   selector: 'rss-root',
-  imports: [RouterOutlet, TopBarComponent, DrawerContentComponent, AppPromptComponent, SnackbarComponent, DialogComponent, AddFeedDialogComponent, MiniPlayerComponent, ArticleActionsComponent, ArticleDetailActionsComponent, PullRefreshDirective, TranslatePipe],
+  imports: [RouterOutlet, TopBarComponent, DrawerContentComponent, AppPromptComponent, SnackbarComponent, DialogComponent, AddFeedDialogComponent, MiniPlayerComponent, DownloadQueueComponent, ArticleActionsComponent, ArticleDetailActionsComponent, PullRefreshDirective, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './root.component.html',
 })

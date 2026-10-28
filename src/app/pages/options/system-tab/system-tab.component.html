@@ -12,6 +12,18 @@
 
 <section class="panel">
   <div class="mb-2.5 flex items-center justify-between gap-3">
+    <h2 class="text-base font-bold">{{ 'system.autoDownload' | translate }}</h2>
+    <button type="button" role="switch" [attr.aria-label]="'system.autoDownload' | translate" [attr.aria-checked]="settings.autoDownloadPodcasts()"
+      class="relative h-6 w-11 shrink-0 rounded-full transition-colors" [class]="settings.autoDownloadPodcasts() ? 'bg-accent' : 'bg-line'"
+      (click)="settings.autoDownloadPodcasts.set(!settings.autoDownloadPodcasts())">
+      <span class="absolute start-0.5 top-0.5 size-5 rounded-full bg-white transition-transform" [class]="settings.autoDownloadPodcasts() ? 'translate-x-5 rtl:-translate-x-5' : ''"></span>
+    </button>
+  </div>
+  <p class="text-[13px] text-muted">{{ 'system.autoDownloadHelp' | translate }}</p>
+</section>
+
+<section class="panel">
+  <div class="mb-2.5 flex items-center justify-between gap-3">
     <h2 class="text-base font-bold">{{ 'system.notifications' | translate }}</h2>
     <button type="button" role="switch" [attr.aria-label]="'system.enableNotifications' | translate" [attr.aria-checked]="push.enabled()"
       class="relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:opacity-50" [class]="push.enabled() ? 'bg-accent' : 'bg-line'"

@@ -19,7 +19,7 @@ const CREDITS: Credit[] = credits;
 
 @Component({
   selector: 'rss-about',
-  host: { class: 'block anim-fade-in' },
+  host: { class: 'block' },
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [TranslatePipe],
   templateUrl: './about.page.html',

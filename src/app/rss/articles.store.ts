@@ -8,6 +8,7 @@ import { db } from './db';
 import { extractReadable } from './feed-parser';
 import { Article, ParsedFeed } from './models';
 import { FetchService } from './services/fetch.service';
+import { OfflineMediaService } from './services/offline-media.service';
 import { SettingsStore } from './settings.store';
 
 export type ArticleFlag = 'read' | 'favorite' | 'later';
@@ -40,6 +41,7 @@ export class ArticlesStore {
   private readonly net = inject(FetchService);
   private readonly snackbar = inject(SnackbarService);
   private readonly i18n = inject(I18nService);
+  private readonly offline = inject(OfflineMediaService);
 
   readonly articles = signal<Article[]>([]);
 
@@ -174,6 +176,7 @@ export class ArticlesStore {
     await db.removeMany('articles', stale.map((a) => a.id));
     const dropped = new Set(stale.map((a) => a.id));
     this.articles.set(all.filter((a) => !dropped.has(a.id)));
+    this.offline.autoEnqueue(fresh);
   }
 
   private async removeWhere(predicate: (a: Article) => boolean): Promise<void> {

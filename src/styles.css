@@ -74,8 +74,7 @@
   @keyframes anim-view-out { to { opacity: 0; } }
   @keyframes anim-view-in { from { opacity: 0; transform: translateX(calc(12px * var(--dir-sign, 1))); } }
   :root[dir='rtl'] { --dir-sign: -1; }
-  ::view-transition-old(root) { animation: anim-view-out var(--dur-fast) ease-in both; }
-  ::view-transition-new(root) { animation: anim-view-in var(--dur-slow) var(--ease-out) both; }
+  ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
 }
 
 @layer components {

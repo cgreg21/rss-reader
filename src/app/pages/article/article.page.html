@@ -14,10 +14,11 @@
             @if (offline.src(a.id)) {
               <span class="flex-1">{{ ui.check }} {{ 'media.saved' | translate }}</span>
               <button class="icon-btn !text-red-400 hover:!text-red-300" type="button" [attr.aria-label]="'media.remove' | translate" [attr.title]="'media.remove' | translate" (click)="offline.remove(a.id)">{{ ui.trash }}</button>
-            } @else if (offline.progress()[a.id] !== undefined) {
-              <span>{{ 'media.downloading' | translate }} @if (offline.progress()[a.id] >= 0) { {{ (offline.progress()[a.id] * 100).toFixed(0) }}% }</span>
+            } @else if (offline.item(a.id); as it) {
+              <span class="flex-1">{{ (it.status === 'error' ? 'media.failed' : it.status === 'waiting' ? 'media.waiting' : 'media.downloading') | translate }} @if (it.status === 'downloading' && it.progress >= 0) { {{ (it.progress * 100).toFixed(0) }}% }</span>
+              @if (it.status === 'error') { <button class="btn-ghost" type="button" (click)="offline.enqueue(a.id, m.url, a.title)">{{ 'media.retry' | translate }}</button> }
             } @else {
-              <button class="btn-ghost" type="button" (click)="saveMedia(a.id, m.url)">{{ ui.download }} {{ 'media.download' | translate }}</button>
+              <button class="btn-ghost" type="button" (click)="offline.enqueue(a.id, m.url, a.title)">{{ ui.download }} {{ 'media.download' | translate }}</button>
             }
           </div>
         }

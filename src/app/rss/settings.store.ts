@@ -30,6 +30,8 @@ export class SettingsStore {
   readonly mutedWords = persisted('rssreader:muted-words', json<string[]>([]));
   /** Read, non-favorite articles older than this many days are purged; 0 keeps everything. */
   readonly retentionDays = persisted('rssreader:retention-days', num(0));
+  /** Saves new podcast episodes on the device in the background. */
+  readonly autoDownloadPodcasts = persisted('rssreader:auto-download-podcasts', flag(false));
   readonly fontSize = persisted('rssreader:font-size', num(17));
   readonly theme = persisted<Theme>('rssreader:theme', oneOf(['dark', 'light'], 'dark'));
   /** 'auto' follows the browser language. */

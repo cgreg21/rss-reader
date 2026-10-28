@@ -17,7 +17,7 @@ import { UI_ICONS, mediaIcon } from '../../ui/icons';
 
 @Component({
   selector: 'rss-articles',
-  host: { class: 'block anim-fade-in' },
+  host: { class: 'block' },
   imports: [RouterLink, LocalDatePipe, TranslatePipe, NgTemplateOutlet, CardListComponent, RevealDirective, ProxyImgDirective, LongPressDirective, SwipeActionsDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './articles.page.html',

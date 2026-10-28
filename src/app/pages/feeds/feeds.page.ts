@@ -11,7 +11,7 @@ import { SystemTabComponent } from '../options/system-tab/system-tab.component';
 /** Options page: one component per tab, plus the bottom tab bar. */
 @Component({
   selector: 'rss-feeds',
-  host: { class: 'block anim-fade-in' },
+  host: { class: 'block' },
   imports: [FeedsTabComponent, ReadingTabComponent, SyncTabComponent, SystemTabComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './feeds.page.html',
