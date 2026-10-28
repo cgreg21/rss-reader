@@ -35,7 +35,7 @@ describe('ArticleNavigationService', () => {
     expect(nav.next()).toBeUndefined();
   });
 
-  it('re-reads the list when opening an article outside the snapshot', () => {
+  it('re-reads the list when opening an article outside the snapshot or after closing', () => {
     nav.open('a');
     store.visible.set([art('c'), art('b')]);
     nav.open('x');
@@ -43,5 +43,11 @@ describe('ArticleNavigationService', () => {
     expect(nav.next()).toBeUndefined();
     nav.open('b');
     expect(nav.previous()?.id).toBe('c');
+    nav.close();
+    expect(nav.previous()).toBeUndefined();
+    store.visible.set([art('b'), art('a')]);
+    nav.open('b');
+    expect(nav.previous()).toBeUndefined();
+    expect(nav.next()?.id).toBe('a');
   });
 });

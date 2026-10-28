@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ArticlesStore } from '../../rss/stores/articles.store';
 import { FeedsStore } from '../../rss/stores/feeds.store';
 import { Article } from '../../rss/models';
+import { ArticleNavigationService } from '../../rss/services/article-navigation.service';
 import { FullTextService } from '../../rss/services/full-text.service';
 import { SettingsStore } from '../../rss/stores/settings.store';
 import { ViewStore } from '../../rss/stores/view.store';
@@ -74,6 +75,14 @@ describe('ArticlePage', () => {
   it('renders a missing article message', () => {
     const { el } = setup('nope');
     expect(el.textContent).toContain('introuvable');
+  });
+
+  it('forgets the list order when the page closes', () => {
+    const nav = TestBed.inject(ArticleNavigationService);
+    const { fixture } = setup();
+    expect(nav.next()?.id).toBe('c');
+    fixture.destroy();
+    expect(nav.next()).toBeUndefined();
   });
 
   it('offers to load the full text above the content until it is loaded', async () => {

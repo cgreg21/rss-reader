@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, computed, effect, inject, input, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, computed, effect, inject, input, untracked } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
@@ -68,6 +68,7 @@ export class ArticlePage {
   }
 
   constructor() {
+    inject(DestroyRef).onDestroy(() => this.nav.close());
     effect(() => {
       const id = this.id();
       untracked(() => {

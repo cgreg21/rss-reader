@@ -30,4 +30,10 @@ export class ArticleNavigationService {
       this.order.set(ids.includes(id) ? ids : [id]);
     }
   }
+
+  /** Called when leaving the detail page, so the next article opened starts from the list as it is then. */
+  close(): void {
+    this.current.set(null);
+    this.order.set([]);
+  }
 }
