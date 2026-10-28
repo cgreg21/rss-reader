@@ -209,7 +209,7 @@
   "onboarding.offlineTitle": "Offline podcasts and videos",
   "onboarding.offlineText": "Download episodes to listen without a network, or turn on automatic download of new podcasts in the options.",
   "onboarding.syncTitle": "Sync and customise",
-  "onboarding.syncText": "Sync your feeds and reading state across devices with CalDAV, enable notifications and the proxy, pick a theme and a language.",
+  "onboarding.syncText": "Sync your feeds and reading state across devices through the companion server and a PIN code, enable notifications and the proxy, pick a theme and a language.",
   "onboarding.openOptions": "Open the options",
   "storage.title": "Storage used",
   "storage.articles": "Articles",

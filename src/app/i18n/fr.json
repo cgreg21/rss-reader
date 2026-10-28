@@ -209,7 +209,7 @@
   "onboarding.offlineTitle": "Podcasts et vidéos hors ligne",
   "onboarding.offlineText": "Téléchargez les épisodes pour les écouter sans réseau, ou activez le téléchargement automatique des nouveaux podcasts dans les options.",
   "onboarding.syncTitle": "Synchronisez et personnalisez",
-  "onboarding.syncText": "Synchronisez vos flux et votre état de lecture entre appareils via CalDAV, activez les notifications et le proxy, choisissez un thème et la langue.",
+  "onboarding.syncText": "Synchronisez vos flux et votre état de lecture entre appareils via le serveur compagnon et un code PIN, activez les notifications et le proxy, choisissez un thème et la langue.",
   "onboarding.openOptions": "Ouvrir les options",
   "storage.title": "Stockage utilisé",
   "storage.articles": "Articles",

@@ -60,5 +60,5 @@ export class I18nService {
   }
 
   /** Locale tag for the speech synthesis. */
-  readonly speechLang = computed(() => ({ fr: 'fr-FR', en: 'en-US', es: 'es-ES', de: 'de-DE', ar: 'ar-SA' })[this.lang()]);
+  readonly speechLang = computed(() => ({ fr: 'fr-FR', en: 'en-US', es: 'es-ES', de: 'de-DE', ar: 'ar-SA', ja: 'ja-JP' })[this.lang()]);
 }

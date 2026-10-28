@@ -5,12 +5,13 @@ import de from './de.json';
 import en from './en.json';
 import es from './es.json';
 import fr from './fr.json';
+import ja from './ja.json';
 import { LANGUAGES, LANGUAGE_NAMES, detectLang, isRtl } from './languages';
 import { MESSAGES } from './messages';
 import { MessageError } from './message-error';
 
 const placeholders = (text: string) => (text.match(/\{\w+\}/g) ?? []).sort();
-const dictionaries = { en, es, de, ar } as Record<string, Record<string, string>>;
+const dictionaries = { en, es, de, ar, ja } as Record<string, Record<string, string>>;
 
 describe('dictionaries', () => {
   const reference = fr as Record<string, string>;
@@ -35,6 +36,7 @@ describe('languages', () => {
   it('detects the primary subtag', () => {
     expect(detectLang(['en-GB'])).toBe('en');
     expect(detectLang(['zz', 'AR-EG'])).toBe('ar');
+    expect(detectLang(['ja-JP'])).toBe('ja');
     expect(detectLang([])).toBe('en');
   });
 

@@ -1,4 +1,4 @@
-export const LANGUAGES = ['fr', 'en', 'es', 'de', 'ar'] as const;
+export const LANGUAGES = ['fr', 'en', 'es', 'de', 'ar', 'ja'] as const;
 export type Lang = (typeof LANGUAGES)[number];
 export type LangSetting = 'auto' | Lang;
 export const LANG_SETTINGS: readonly LangSetting[] = ['auto', ...LANGUAGES];
@@ -10,6 +10,7 @@ export const LANGUAGE_NAMES: Record<Lang, string> = {
   es: 'Español',
   de: 'Deutsch',
   ar: 'العربية',
+  ja: '日本語',
 };
 
 export const FALLBACK_LANG: Lang = 'en';

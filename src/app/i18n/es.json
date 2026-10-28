@@ -209,7 +209,7 @@
   "onboarding.offlineTitle": "Pódcasts y vídeos sin conexión",
   "onboarding.offlineText": "Descarga los episodios para escucharlos sin red o activa la descarga automática de los nuevos pódcasts en las opciones.",
   "onboarding.syncTitle": "Sincroniza y personaliza",
-  "onboarding.syncText": "Sincroniza tus fuentes y tu estado de lectura entre dispositivos mediante CalDAV, activa las notificaciones y el proxy, elige un tema y un idioma.",
+  "onboarding.syncText": "Sincroniza tus fuentes y tu estado de lectura entre dispositivos mediante el servidor complementario y un código PIN, activa las notificaciones y el proxy, elige un tema y un idioma.",
   "onboarding.openOptions": "Abrir las opciones",
   "storage.title": "Almacenamiento usado",
   "storage.articles": "Artículos",

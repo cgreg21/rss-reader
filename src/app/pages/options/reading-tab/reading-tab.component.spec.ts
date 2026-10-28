@@ -38,9 +38,9 @@ describe('ReadingTabComponent', () => {
     const { root, settings } = setup();
     const select = root.querySelector<HTMLSelectElement>('select[name="language"]')!;
     expect(Array.from(select.options).map((o) => o.textContent?.trim())).toEqual(
-      expect.arrayContaining(['Français', 'English', 'Español', 'Deutsch', 'العربية']),
+      expect.arrayContaining(['Français', 'English', 'Español', 'Deutsch', 'العربية', '日本語']),
     );
-    expect(select.options).toHaveLength(6);
+    expect(select.options).toHaveLength(7);
     select.value = 'de';
     select.dispatchEvent(new Event('change'));
     expect(settings.language()).toBe('de');

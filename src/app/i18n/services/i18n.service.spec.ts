@@ -26,7 +26,7 @@ describe('I18nService', () => {
   });
 
   it('falls back to English for unsupported languages', () => {
-    expect(setup(['ja-JP']).i18n.lang()).toBe('en');
+    expect(setup(['ko-KR']).i18n.lang()).toBe('en');
   });
 
   it('uses navigator.language when the list is empty', () => {
