@@ -11,6 +11,8 @@ import { FeedsStore } from '../../rss/feeds.store';
 import { ViewStore } from '../../rss/view.store';
 import { UI_ICONS } from '../../ui/icons';
 import { ProxyContentDirective } from '../../ui/directives/proxy-img.directive';
+import { OfflineMediaService } from '../../rss/services/offline-media.service';
+import { SnackbarService } from '../../ui/services/snackbar.service';
 import { MediaSessionDirective } from '../../ui/directives/media-session.directive';
 import { ArticlesPage } from '../articles/articles.page';
 
@@ -30,8 +32,18 @@ export class ArticlePage {
   private readonly view = inject(ViewStore);
   protected readonly i18n = inject(I18nService);
   protected readonly ui = UI_ICONS;
+  protected readonly offline = inject(OfflineMediaService);
+  private readonly snackbar = inject(SnackbarService);
   protected readonly article = computed(() => this.store.article(this.id()));
   private readonly sanitizer = inject(DomSanitizer);
+
+  protected async saveMedia(id: string, url: string): Promise<void> {
+    try {
+      await this.offline.download(id, url);
+    } catch {
+      this.snackbar.error(this.i18n.t('media.failed'));
+    }
+  }
 
   protected youtube(videoId: string): SafeResourceUrl {
     return this.sanitizer.bypassSecurityTrustResourceUrl(`https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}`);

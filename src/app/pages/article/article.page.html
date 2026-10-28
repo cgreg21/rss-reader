@@ -5,9 +5,21 @@
     @if (a.media; as m) {
       <div class="my-4" (pointerdown)="$event.stopPropagation()">
         @switch (m.kind) {
-          @case ('audio') { <audio class="w-full" controls preload="none" [src]="m.url" [rssMediaSession]="{ title: a.title, artist: feedName(a.feedId), artwork: a.image }"></audio> }
-          @case ('video') { <video class="w-full rounded-lg" controls preload="none" playsinline [src]="m.url" [rssMediaSession]="{ title: a.title, artist: feedName(a.feedId), artwork: a.image }"></video> }
+          @case ('audio') { <audio class="w-full" controls preload="none" [src]="offline.src(a.id) ?? m.url" [rssMediaSession]="{ title: a.title, artist: feedName(a.feedId), artwork: a.image }"></audio> }
+          @case ('video') { <video class="w-full rounded-lg" controls preload="none" playsinline [src]="offline.src(a.id) ?? m.url" [rssMediaSession]="{ title: a.title, artist: feedName(a.feedId), artwork: a.image }"></video> }
           @default { <iframe class="aspect-video w-full rounded-lg" allowfullscreen loading="lazy" [src]="youtube(m.url)" [attr.title]="'common.video' | translate"></iframe> }
+        }
+        @if (offline.supported && m.kind !== 'youtube') {
+          <div class="mt-2 flex items-center gap-2 text-sm text-muted">
+            @if (offline.src(a.id)) {
+              <span>{{ ui.check }} {{ 'media.saved' | translate }}</span>
+              <button class="btn-ghost" type="button" (click)="offline.remove(a.id)">{{ 'media.remove' | translate }}</button>
+            } @else if (offline.progress()[a.id] !== undefined) {
+              <span>{{ 'media.downloading' | translate }} @if (offline.progress()[a.id] >= 0) { {{ (offline.progress()[a.id] * 100).toFixed(0) }}% }</span>
+            } @else {
+              <button class="btn-ghost" type="button" (click)="saveMedia(a.id, m.url)">{{ ui.download }} {{ 'media.download' | translate }}</button>
+            }
+          </div>
         }
       </div>
     }
