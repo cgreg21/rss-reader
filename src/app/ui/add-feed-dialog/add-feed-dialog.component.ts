@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, effect, inject, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { I18nService } from '../../i18n/services/i18n.service';
@@ -29,6 +29,15 @@ export class AddFeedDialogComponent {
   protected readonly error = signal('');
   protected readonly hits = signal<FeedHit[]>([]);
   protected readonly searched = signal(false);
+  protected readonly tab = signal<'all' | FeedHit['kind']>('all');
+  protected readonly counts = computed(() => {
+    const all = this.hits();
+    return (['text', 'audio', 'video'] as const)
+      .map((kind) => ({ kind, count: all.filter((h) => h.kind === kind).length }))
+      .filter((t) => t.count > 0);
+  });
+  protected readonly shown = computed(() => (this.tab() === 'all' ? this.hits() : this.hits().filter((h) => h.kind === this.tab())));
+  protected readonly kindIcon = { text: UI_ICONS.mediaText, audio: UI_ICONS.mediaAudio, video: UI_ICONS.mediaVideo };
 
   constructor() {
     effect(() => {
@@ -58,6 +67,7 @@ export class AddFeedDialogComponent {
         this.dialog.close();
       } else {
         this.hits.set(await this.net.searchFeeds(value));
+        this.tab.set('all');
         this.searched.set(true);
       }
     } catch (e) {

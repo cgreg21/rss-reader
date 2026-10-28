@@ -14,7 +14,7 @@
       </form>
       @if (error()) { <p class="mt-2 text-red-400">{{ error() }}</p> }
       <ul class="mt-2 min-h-0 overflow-y-auto">
-        @for (h of hits(); track h.url) {
+        @for (h of shown(); track h.url) {
           <li class="flex items-center gap-2.5 border-t border-line py-2">
             <span class="grid size-12 shrink-0 place-items-center overflow-hidden rounded-lg bg-bg font-mdi text-2xl text-muted">
               @if (h.image) { <img class="size-full object-cover" [rssProxyImg]="h.image" alt="" (error)="$any($event.target).remove()"> } @else { {{ ui.all }} }
@@ -26,6 +26,18 @@
           </li>
         } @empty { @if (searched() && !busy()) { <li class="text-muted">{{ 'feeds.noResult' | translate }}</li> } }
       </ul>
+      @if (counts().length > 1) {
+        <nav class="mt-2 flex gap-1 border-t border-line pt-2" role="tablist">
+          <button type="button" role="tab" class="btn-ghost flex flex-1 items-center justify-center gap-1.5 rounded-lg px-2 py-1.5" [class.bg-bg]="tab() === 'all'" [attr.aria-selected]="tab() === 'all'" (click)="tab.set('all')">
+            <span class="font-mdi text-xl">{{ ui.all }}</span><small class="rounded-full bg-accent px-1.5 text-white">{{ hits().length }}</small>
+          </button>
+          @for (t of counts(); track t.kind) {
+            <button type="button" role="tab" class="btn-ghost flex flex-1 items-center justify-center gap-1.5 rounded-lg px-2 py-1.5" [class.bg-bg]="tab() === t.kind" [attr.aria-selected]="tab() === t.kind" (click)="tab.set(t.kind)">
+              <span class="font-mdi text-xl">{{ kindIcon[t.kind] }}</span><small class="rounded-full bg-accent px-1.5 text-white">{{ t.count }}</small>
+            </button>
+          }
+        </nav>
+      }
     </div>
   </div>
 }
