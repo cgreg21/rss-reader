@@ -3,7 +3,7 @@
          [style.transform]="'translateX(' + offset() * i18n.sign() + 'px) rotate(' + offset() * i18n.sign() / 20 + 'deg)'"
          (pointerdown)="onDown($event)" (pointermove)="onMove($event)" (pointerup)="onUp($event)" (pointercancel)="onCancel()">
   <div class="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-bg">
-    <div class="absolute inset-0 grid place-items-center bg-gradient-to-br from-accent/40 to-bg font-mdi text-7xl text-white/70">{{ ui.all }}</div>
+    <div class="absolute inset-0 grid place-items-center bg-gradient-to-br from-accent/40 to-bg font-mdi text-7xl text-white/70">{{ placeholder() }}</div>
     @if (article().image; as image) {
       <img class="img-fade absolute inset-0 size-full object-cover" draggable="false" [rssProxyImg]="image" alt="" (error)="$any($event.target).remove()">
     }

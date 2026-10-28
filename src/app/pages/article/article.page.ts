@@ -14,11 +14,12 @@ import { ProxyContentDirective } from '../../ui/directives/proxy-img.directive';
 import { OfflineMediaService } from '../../rss/services/offline-media.service';
 import { SnackbarService } from '../../ui/services/snackbar.service';
 import { MediaSessionDirective } from '../../ui/directives/media-session.directive';
+import { AudioPlayerComponent } from '../../ui/audio-player/audio-player.component';
 import { ArticlesPage } from '../articles/articles.page';
 
 @Component({
   selector: 'rss-article',
-  imports: [RouterLink, LocalDatePipe, TranslatePipe, NgTemplateOutlet, ArticlesPage, ProxyContentDirective, MediaSessionDirective],
+  imports: [RouterLink, LocalDatePipe, TranslatePipe, NgTemplateOutlet, ArticlesPage, ProxyContentDirective, MediaSessionDirective, AudioPlayerComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './article.page.html',
   host: {
@@ -95,7 +96,7 @@ export class ArticlePage {
   /** Touch events (not pointer ones) so vertical scrolling stays native: the page only takes over horizontal
    *  moves, and a pull down when the article is already scrolled to the top. */
   private swipeStart(event: TouchEvent): void {
-    if (this.animating() || event.touches.length !== 1 || (event.target as Element).closest('audio, video, iframe')) return;
+    if (this.animating() || event.touches.length !== 1 || (event.target as Element).closest('audio, video, iframe, rss-audio-player')) return;
     const main = this.host.nativeElement.closest('main');
     this.underTop.set(main ? main.getBoundingClientRect().top - this.host.nativeElement.getBoundingClientRect().top : 0);
     this.underHeight.set(main?.clientHeight ?? window.innerHeight);

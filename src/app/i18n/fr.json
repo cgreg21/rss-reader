@@ -82,6 +82,7 @@
   "flag.laterOn": "Ajouté à À lire plus tard",
   "flag.laterOff": "Retiré de À lire plus tard",
   "feeds.add": "Ajouter un flux",
+  "feeds.addPlaceholder": "Coller une URL ou rechercher un flux",
   "feeds.urlPlaceholder": "https://exemple.fr/rss.xml",
   "feeds.noCategory": "Sans catégorie",
   "feeds.subscribe": "S'abonner",

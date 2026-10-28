@@ -75,7 +75,7 @@ describe('ArticlePage', () => {
   });
 
   it.each([
-    ['audio', 'audio'],
+    ['audio', 'rss-audio-player'],
     ['video', 'video'],
     ['youtube', 'iframe'],
   ])('renders %s media', (kind, tag) => {

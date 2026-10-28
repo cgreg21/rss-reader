@@ -7,7 +7,7 @@ import { TranslatePipe } from '../../i18n/translate.pipe';
 import { ArticlesStore } from '../../rss/articles.store';
 import { FeedsStore } from '../../rss/feeds.store';
 import { Article } from '../../rss/models';
-import { UI_ICONS } from '../../ui/icons';
+import { UI_ICONS, mediaIcon } from '../../ui/icons';
 import { AxisGesture, LongPressTimer, SWIPE_THRESHOLD, isPrimaryPress } from '../../ui/gestures/pointer-gestures';
 import { ProxyImgDirective } from '../../ui/directives/proxy-img.directive';
 
@@ -34,6 +34,11 @@ export class ArticleCardComponent {
   private readonly longPress = new LongPressTimer(() => this.articles.toggle(this.article(), 'later'), TAP_SLOP);
 
   protected readonly ui = UI_ICONS;
+  /** Default picture when the article has no image: depends on the media type (text keeps the feed icon). */
+  protected readonly placeholder = computed(() => {
+    const media = this.article().media;
+    return media ? mediaIcon(media) : UI_ICONS.all;
+  });
   protected readonly dragX = signal(0);
   protected readonly flying = signal<Direction | null>(null);
   protected readonly dragging = signal(false);

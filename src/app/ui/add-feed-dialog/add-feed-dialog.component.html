@@ -1,0 +1,28 @@
+@if (dialog.opened()) {
+  <div class="fixed inset-0 z-[60] grid place-items-center bg-black/60 p-4" (click)="dialog.close()"
+       animate.enter="anim-fade-in" animate.leave="anim-fade-out" (keydown.escape)="dialog.close()">
+    <div class="flex max-h-[85vh] w-full max-w-md flex-col rounded-2xl border border-line bg-side p-5 shadow-2xl" role="dialog" aria-modal="true"
+      animate.enter="anim-pop-in" [attr.aria-label]="'feeds.add' | translate" (click)="$event.stopPropagation()">
+      <div class="mb-3 flex items-center justify-between">
+        <h2 class="text-lg font-semibold">{{ 'feeds.add' | translate }}</h2>
+        <button class="icon-btn" type="button" [attr.aria-label]="'common.close' | translate" (click)="dialog.close()">{{ ui.close }}</button>
+      </div>
+      <form class="flex gap-2" (ngSubmit)="submit()">
+        <input #field class="field min-w-0 flex-1 !bg-bg" name="text" type="text" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false"
+          [placeholder]="'feeds.addPlaceholder' | translate" [(ngModel)]="text">
+        <button class="icon-btn" type="submit" [attr.aria-label]="'common.search' | translate" [disabled]="busy()">{{ busy() ? '…' : ui.search }}</button>
+      </form>
+      @if (error()) { <p class="mt-2 text-red-400">{{ error() }}</p> }
+      <ul class="mt-2 min-h-0 overflow-y-auto">
+        @for (h of hits(); track h.url) {
+          <li class="flex items-center gap-2.5 border-t border-line py-2">
+            <div class="min-w-0 flex-1"><strong class="block truncate">{{ h.title }}</strong>
+              @if (h.description) { <small class="line-clamp-2 block text-muted">{{ h.description }}</small> }
+              <small class="block truncate text-muted">{{ h.url }}</small></div>
+            <button class="icon-btn" type="button" [attr.aria-label]="(followed(h.url) ? 'feeds.following' : 'feeds.subscribe') | translate" [disabled]="followed(h.url)" (click)="follow(h)">{{ followed(h.url) ? ui.check : ui.add }}</button>
+          </li>
+        } @empty { @if (searched() && !busy()) { <li class="text-muted">{{ 'feeds.noResult' | translate }}</li> } }
+      </ul>
+    </div>
+  </div>
+}

@@ -8,6 +8,7 @@ import { ArticlesStore } from '../../rss/articles.store';
 import { RefreshService } from '../../rss/services/refresh.service';
 import { Scope, ViewStore } from '../../rss/view.store';
 import { DrawerService } from '../services/drawer.service';
+import { AddFeedDialogService } from '../add-feed-dialog/add-feed-dialog.service';
 import { UI_ICONS } from '../icons';
 
 /** Drawer body: unread toggle, filters, categories with their feeds, sync status and version. */
@@ -24,6 +25,12 @@ export class DrawerContentComponent {
   protected readonly refresher = inject(RefreshService);
   protected readonly drawer = inject(DrawerService);
   private readonly sync = inject(SyncService);
+  private readonly addFeedDialog = inject(AddFeedDialogService);
+
+  protected addFeed(): void {
+    this.drawer.close();
+    this.addFeedDialog.open();
+  }
 
   /** Manual refresh: feeds, plus a sync retry (clears a failure stop). */
   protected refresh(): void {

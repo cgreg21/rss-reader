@@ -82,6 +82,7 @@
   "flag.laterOn": "Added to Read later",
   "flag.laterOff": "Removed from Read later",
   "feeds.add": "Add a feed",
+  "feeds.addPlaceholder": "Paste a URL or search for a feed",
   "feeds.urlPlaceholder": "https://example.com/rss.xml",
   "feeds.noCategory": "No category",
   "feeds.subscribe": "Subscribe",

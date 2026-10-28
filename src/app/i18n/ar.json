@@ -82,6 +82,7 @@
   "flag.laterOn": "تمت الإضافة إلى القراءة لاحقًا",
   "flag.laterOff": "تمت الإزالة من القراءة لاحقًا",
   "feeds.add": "إضافة خلاصة",
+  "feeds.addPlaceholder": "الصق عنوان URL أو ابحث عن خلاصة",
   "feeds.urlPlaceholder": "https://example.com/rss.xml",
   "feeds.noCategory": "بدون فئة",
   "feeds.subscribe": "اشتراك",

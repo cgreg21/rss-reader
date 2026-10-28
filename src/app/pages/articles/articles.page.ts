@@ -13,7 +13,7 @@ import { RevealDirective } from '../../ui/directives/reveal.directive';
 import { ProxyImgDirective } from '../../ui/directives/proxy-img.directive';
 import { LongPressDirective } from '../../ui/directives/long-press.directive';
 import { SwipeActionsDirective } from '../../ui/directives/swipe-actions.directive';
-import { UI_ICONS } from '../../ui/icons';
+import { UI_ICONS, mediaIcon } from '../../ui/icons';
 
 @Component({
   selector: 'rss-articles',
@@ -28,6 +28,7 @@ export class ArticlesPage {
   protected readonly feedsStore = inject(FeedsStore);
   protected readonly settings = inject(SettingsStore);
   protected readonly ui = UI_ICONS;
+  protected readonly mediaIcon = mediaIcon;
 
   protected feedTitle(id: string): string {
     return this.feedsStore.feeds().find((f) => f.id === id)?.title ?? '';

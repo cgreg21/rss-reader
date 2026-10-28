@@ -10,7 +10,7 @@
   <span class="swipe-icon absolute top-1/2 -end-10 -translate-y-1/2 font-mdi text-2xl text-green-400">{{ a.read ? ui.unread : ui.read }}</span>
 </ng-template>
 <ng-template #title let-a let-size="size">
-  <h2 [class]="size">@if (a.favorite) { <span class="me-1 font-mdi text-yellow-300">{{ ui.favoriteOn }}</span> }@if (a.later) { <span class="me-1 font-mdi text-accent">{{ ui.laterOn }}</span> }{{ a.title }}</h2>
+  <h2 [class]="size"><span class="me-1 font-mdi text-muted">{{ mediaIcon(a.media) }}</span>@if (a.favorite) { <span class="me-1 font-mdi text-yellow-300">{{ ui.favoriteOn }}</span> }@if (a.later) { <span class="me-1 font-mdi text-accent">{{ ui.laterOn }}</span> }{{ a.title }}</h2>
 </ng-template>
 <ng-template #date let-a>
   <span class="text-xs text-accent">{{ a.read ? '' : '● ' }}{{ a.published | localDate }} · {{ feedTitle(a.feedId) }}</span>

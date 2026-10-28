@@ -6,7 +6,7 @@
       [class]="!view.unreadOnly() ? 'bg-accent text-white' : 'text-muted'" (click)="view.unreadOnly.set(false)">{{ 'drawer.all' | translate }}</button>
   </div>
   <button class="icon-btn" type="button" [attr.aria-label]="'common.refresh' | translate" [class.animate-spin]="refresher.syncing()" (click)="refresh()">{{ ui.refresh }}</button>
-  <a class="icon-btn" routerLink="/feeds" [attr.aria-label]="'feeds.add' | translate" (click)="drawer.close()">{{ ui.add }}</a>
+  <button class="icon-btn" type="button" [attr.aria-label]="'feeds.add' | translate" (click)="addFeed()">{{ ui.add }}</button>
 </div>
 
 <nav class="mt-3 flex-1 overflow-y-auto">
