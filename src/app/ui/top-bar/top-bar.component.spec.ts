@@ -11,6 +11,7 @@ import { TopBarComponent } from './top-bar.component';
 describe('TopBarComponent', () => {
   const store = {
     search: signal(''),
+    mediaFilter: signal('all'),
     unreadTotal: signal(3),
     scopeTitle: signal('Scope'),
     article: () => undefined,

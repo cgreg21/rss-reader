@@ -31,7 +31,6 @@ export const clock = (seconds: number): string => {
           <button type="button" class="icon-btn" aria-label="+30s" [disabled]="!active()" (click)="player.skip(30)">{{ forward }}</button>
         </div>
         <span class="w-14 text-end text-xs tabular-nums text-muted">{{ clock(duration()) }}</span>
-        <button type="button" class="rounded-full px-2 py-1 text-xs font-semibold text-muted hover:bg-white/5 hover:text-slate-100" aria-label="Speed" (click)="player.cycleRate()">{{ player.rate() }}×</button>
       </div>
     </div>
   `,

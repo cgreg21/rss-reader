@@ -14,9 +14,9 @@ export class ImageCache {
   private readonly images = new Map<string, Promise<string>>();
   readonly count = signal(0);
 
-  /** URL to display for an image: a cached blob when the proxy is enabled, else the original URL. */
+  /** URL to display for an image: a blob persisted in the Cache API (falls back to the original URL if it cannot be fetched). */
   url(url: string): Promise<string> {
-    if (!this.settings.activeProxy() || !/^https?:/i.test(url)) return Promise.resolve(url);
+    if (!/^https?:/i.test(url)) return Promise.resolve(url);
     let blob = this.images.get(url);
     if (!blob) {
       blob = this.load(url).catch(() => {

@@ -59,7 +59,7 @@
     --color-slate-100: #0f172a;
     --color-slate-300: #334155;
   }
-  html, body { @apply bg-bg text-slate-100 antialiased; height: 100vh; margin: 0; font-family: var(--font-sans); -webkit-tap-highlight-color: transparent; overscroll-behavior: none; touch-action: pan-x pan-y; }
+  html, body { @apply bg-bg text-slate-100 antialiased wrap-anywhere; height: 100vh; margin: 0; font-family: var(--font-sans); -webkit-tap-highlight-color: transparent; overscroll-behavior: none; touch-action: pan-x pan-y; }
   button, input, select { font: inherit; color: inherit; }
   /* Below 16px iOS zooms into a focused field and the page stays zoomed afterwards. */
   input, select { font-size: max(16px, 1em); }
@@ -104,7 +104,8 @@
 /* Remote article HTML cannot carry utility classes. */
 .body { @apply wrap-anywhere; font-size: var(--body-size, 17px); line-height: 1.7; }
 .body p, .body ul, .body ol, .body figure { @apply my-5; }
-.body img, .body video { @apply h-auto max-w-full rounded-lg; }
+.body img, .body video, .body picture, .body figure, .body iframe, .body svg { @apply h-auto rounded-lg; max-width: 100% !important; }
+.body img, .body video { width: auto; box-sizing: border-box; }
 .body a { @apply text-accent underline; }
 .body pre { @apply overflow-x-auto rounded-lg bg-side p-3; }
 .body h1, .body h2, .body h3 { @apply mt-6 mb-2 font-bold; }

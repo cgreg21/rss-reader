@@ -53,7 +53,7 @@ export class FeedsStore {
     this.noteFollowed(url);
     const id = newId('f');
     const parsed = parseFeed(body, id);
-    await this.putFeed({ id, url, title: parsed.title || new URL(url).hostname, siteUrl: parsed.siteUrl, description: parsed.description, format: parsed.format, categoryId, lastFetched: Date.now() });
+    await this.putFeed({ id, url, title: parsed.title || new URL(url).hostname, siteUrl: parsed.siteUrl, description: parsed.description, image: parsed.image, format: parsed.format, categoryId, lastFetched: Date.now() });
     await this.articlesStore.merge(id, parsed.items);
   }
 

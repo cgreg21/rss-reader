@@ -69,7 +69,7 @@ export class RefreshService {
     try {
       const parsed = parseFeed(await this.net.download(feed.url), feed.id);
       await this.articlesStore.merge(feed.id, parsed.items);
-      updated = { ...feed, siteUrl: feed.siteUrl ?? parsed.siteUrl, description: parsed.description ?? feed.description, format: parsed.format, lastFetched: Date.now(), error: undefined, failures: 0 };
+      updated = { ...feed, siteUrl: feed.siteUrl ?? parsed.siteUrl, description: parsed.description ?? feed.description, image: parsed.image ?? feed.image, format: parsed.format, lastFetched: Date.now(), error: undefined, failures: 0 };
     } catch (error) {
       updated = { ...feed, error: this.i18n.errorText(error), failures: (feed.failures ?? 0) + 1 };
     }

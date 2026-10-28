@@ -39,6 +39,7 @@ export class ArticleCardComponent {
     const media = this.article().media;
     return media ? mediaIcon(media) : UI_ICONS.all;
   });
+  protected readonly feedImage = computed(() => this.feeds.feeds().find((f) => f.id === this.article().feedId)?.image);
   protected readonly dragX = signal(0);
   protected readonly flying = signal<Direction | null>(null);
   protected readonly dragging = signal(false);

@@ -9,7 +9,6 @@ export interface AudioTrack {
   meta: MediaMeta;
 }
 
-const RATES = [1, 1.25, 1.5, 2, 0.75];
 
 /** Single app-wide audio element, so playback continues when the user navigates away from the article. */
 @Injectable({ providedIn: 'root' })
@@ -19,7 +18,6 @@ export class AudioPlayerService {
   readonly playing = signal(false);
   readonly current = signal(0);
   readonly duration = signal(0);
-  readonly rate = signal(1);
 
   constructor() {
     this.audio.preload = 'none';
@@ -36,7 +34,6 @@ export class AudioPlayerService {
     if (this.track()?.id !== track.id) {
       this.audio.pause();
       this.audio.src = track.src;
-      this.audio.playbackRate = this.rate();
       this.current.set(0);
       this.duration.set(0);
       this.track.set(track);
@@ -61,12 +58,6 @@ export class AudioPlayerService {
 
   skip(seconds: number): void {
     this.audio.currentTime = Math.max(0, Math.min(this.audio.duration || Infinity, this.audio.currentTime + seconds));
-  }
-
-  cycleRate(): void {
-    const next = RATES[(RATES.indexOf(this.rate()) + 1) % RATES.length];
-    this.rate.set(next);
-    this.audio.playbackRate = next;
   }
 
   stop(): void {

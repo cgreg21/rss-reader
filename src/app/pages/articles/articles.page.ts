@@ -14,6 +14,7 @@ import { ProxyImgDirective } from '../../ui/directives/proxy-img.directive';
 import { LongPressDirective } from '../../ui/directives/long-press.directive';
 import { SwipeActionsDirective } from '../../ui/directives/swipe-actions.directive';
 import { UI_ICONS, mediaIcon } from '../../ui/icons';
+import { OfflineMediaService } from '../../rss/services/offline-media.service';
 
 @Component({
   selector: 'rss-articles',
@@ -27,8 +28,13 @@ export class ArticlesPage {
   protected readonly articles = inject(ArticlesStore);
   protected readonly feedsStore = inject(FeedsStore);
   protected readonly settings = inject(SettingsStore);
+  protected readonly offline = inject(OfflineMediaService);
   protected readonly ui = UI_ICONS;
   protected readonly mediaIcon = mediaIcon;
+
+  protected feedImage(id: string): string | undefined {
+    return this.feedsStore.feeds().find((f) => f.id === id)?.image;
+  }
 
   protected feedTitle(id: string): string {
     return this.feedsStore.feeds().find((f) => f.id === id)?.title ?? '';

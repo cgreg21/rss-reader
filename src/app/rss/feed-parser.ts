@@ -126,7 +126,7 @@ interface JsonFeedItem {
 }
 
 function parseJsonFeed(json: string, feedId: string): ParsedFeed {
-  let data: { title?: string; description?: string; home_page_url?: string; items?: JsonFeedItem[] };
+  let data: { title?: string; description?: string; home_page_url?: string; icon?: string; items?: JsonFeedItem[] };
   try {
     data = JSON.parse(json);
   } catch {
@@ -151,7 +151,7 @@ function parseJsonFeed(json: string, feedId: string): ParsedFeed {
       published: Number.isNaN(date) ? Date.now() : date,
     };
   });
-  return { title: toText(data.title ?? ''), siteUrl: data.home_page_url, description: toText(data.description ?? '') || undefined, format: 'JSON Feed', items };
+  return { title: toText(data.title ?? ''), siteUrl: data.home_page_url, description: toText(data.description ?? '') || undefined, image: data.icon, format: 'JSON Feed', items };
 }
 
 export function parseFeed(xml: string, feedId: string): ParsedFeed {
@@ -206,5 +206,15 @@ export function parseFeed(xml: string, feedId: string): ParsedFeed {
 
   const description = toText(text(channel, 'description', 'subtitle')) || undefined;
   const format: FeedFormat = isAtom ? 'Atom' : isRdf ? 'RSS 1.0 (RDF)' : 'RSS 2.0';
-  return { title: toText(text(channel, 'title')), siteUrl: siteLink, description, format, items };
+  return { title: toText(text(channel, 'title')), siteUrl: siteLink, description, image: channelImage(channel), format, items };
+}
+
+/** Cover of the feed: itunes:image, RSS <image><url>, or Atom logo / icon. */
+function channelImage(channel: Element): string | undefined {
+  const children = Array.from(channel.children);
+  const itunes = children.find((c) => c.localName === 'image' && c.getAttribute('href'))?.getAttribute('href');
+  const rss = children.find((c) => c.localName === 'image')?.querySelector('url')?.textContent?.trim();
+  const atom = children.find((c) => c.localName === 'logo' || c.localName === 'icon')?.textContent?.trim();
+  const url = itunes || rss || atom;
+  return url && /^https?:/i.test(url) ? url : undefined;
 }

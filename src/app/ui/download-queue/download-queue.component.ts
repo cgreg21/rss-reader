@@ -12,15 +12,14 @@ import { UI_ICONS } from '../icons';
   host: { class: 'pointer-events-none fixed start-3 bottom-[calc(16px+env(safe-area-inset-bottom))] z-20 sidebar:start-[296px]' },
   template: `
     @if (media.queue().length) {
-      <button type="button" class="pointer-events-auto flex w-40 flex-col gap-1 rounded-2xl border border-line bg-side px-3 py-2 text-start shadow-lg active:scale-95"
-        [attr.aria-label]="'downloads.title' | translate" (click)="open.set(true)">
-        <span class="flex items-center gap-2 text-xs text-slate-100">
-          <span class="font-mdi text-lg text-accent">{{ ui.download }}</span>
-          <span class="truncate">{{ 'downloads.count' | translate: { n: media.pending() } }}</span>
-        </span>
-        <span class="h-1.5 overflow-hidden rounded-full bg-line">
-          <i class="block h-full bg-accent transition-[width] duration-200" [class.animate-pulse]="barWidth() < 0" [style.width.%]="barWidth() < 0 ? 40 : barWidth()"></i>
-        </span>
+      <button type="button" class="pointer-events-auto relative grid size-12 place-items-center rounded-full bg-side shadow-lg active:scale-95"
+        [attr.aria-label]="('downloads.title' | translate) + ' · ' + ('downloads.count' | translate: { n: media.pending() })" (click)="open.set(true)">
+        <svg class="absolute inset-0 -rotate-90" viewBox="0 0 48 48" aria-hidden="true" [class.animate-spin]="barWidth() < 0">
+          <circle cx="24" cy="24" r="21" fill="none" stroke-width="3" class="stroke-line" />
+          <circle cx="24" cy="24" r="21" fill="none" stroke-width="3" stroke-linecap="round" class="stroke-accent transition-[stroke-dashoffset] duration-200"
+            [attr.stroke-dasharray]="circumference" [attr.stroke-dashoffset]="circumference * (1 - (barWidth() < 0 ? 0.25 : barWidth() / 100))" />
+        </svg>
+        <span class="relative text-sm font-semibold text-slate-100">{{ media.pending() }}</span>
       </button>
     }
     @if (open()) {
@@ -61,6 +60,7 @@ import { UI_ICONS } from '../icons';
 export class DownloadQueueComponent {
   protected readonly media = inject(OfflineMediaService);
   protected readonly ui = UI_ICONS;
+  protected readonly circumference = 2 * Math.PI * 21;
   protected readonly open = signal(false);
   protected readonly barWidth = computed(() => {
     const p = this.media.currentProgress();

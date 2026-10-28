@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, ElementRef, effect, inject, input, 
 import { MessageKey } from '../../i18n/messages';
 import { TranslatePipe } from '../../i18n/translate.pipe';
 import { ArticlesStore } from '../../rss/articles.store';
-import { ViewStore } from '../../rss/view.store';
+import { ViewStore, MediaFilter } from '../../rss/view.store';
 import { RouterLink } from '@angular/router';
 import { ArticleDetailActionsComponent } from '../article-detail-actions/article-detail-actions.component';
 import { ArticleActionsComponent } from '../article-actions/article-actions.component';
@@ -28,10 +28,22 @@ export class TopBarComponent {
   /** Message key of a secondary page title (Options, About); empty on the reading pages. */
   readonly options = input<MessageKey | ''>('');
   protected readonly searching = signal(this.view.search() !== '');
+  protected readonly filtering = signal(false);
+  protected readonly mediaOptions: { value: MediaFilter; icon: string; label: MessageKey }[] = [
+    { value: 'all', icon: UI_ICONS.all, label: 'filter.all' },
+    { value: 'text', icon: UI_ICONS.mediaText, label: 'filter.text' },
+    { value: 'audio', icon: UI_ICONS.mediaAudio, label: 'filter.audio' },
+    { value: 'video', icon: UI_ICONS.mediaVideo, label: 'filter.video' },
+  ];
   private readonly field = viewChild<ElementRef<HTMLInputElement>>('field');
 
   constructor() {
     effect(() => this.field()?.nativeElement.focus());
+  }
+
+  protected pick(value: MediaFilter): void {
+    this.view.mediaFilter.set(value);
+    this.filtering.set(false);
   }
 
   protected toggleSearch(): void {

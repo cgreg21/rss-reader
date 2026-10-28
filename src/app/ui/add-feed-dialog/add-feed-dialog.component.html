@@ -16,6 +16,9 @@
       <ul class="mt-2 min-h-0 overflow-y-auto">
         @for (h of hits(); track h.url) {
           <li class="flex items-center gap-2.5 border-t border-line py-2">
+            <span class="grid size-12 shrink-0 place-items-center overflow-hidden rounded-lg bg-bg font-mdi text-2xl text-muted">
+              @if (h.image) { <img class="size-full object-cover" [rssProxyImg]="h.image" alt="" (error)="$any($event.target).remove()"> } @else { {{ ui.all }} }
+            </span>
             <div class="min-w-0 flex-1"><strong class="block truncate">{{ h.title }}</strong>
               @if (h.description) { <small class="line-clamp-2 block text-muted">{{ h.description }}</small> }
               <small class="block truncate text-muted">{{ h.url }}</small></div>

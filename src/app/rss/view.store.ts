@@ -14,6 +14,8 @@ export type Scope =
   | { type: 'feed'; id: string }
   | { type: 'category'; id: string };
 
+export type MediaFilter = 'all' | 'text' | 'audio' | 'video';
+
 /** What the user is looking at: scope, filters and the resulting article list and feed groups. */
 @Injectable({ providedIn: 'root' })
 export class ViewStore {
@@ -25,6 +27,7 @@ export class ViewStore {
   readonly scope = signal<Scope>({ type: 'all' });
   readonly unreadOnly = signal(true);
   readonly search = signal('');
+  readonly mediaFilter = signal<MediaFilter>('all');
 
   readonly scopeTitle = computed(() => {
     const s = this.scope();
@@ -38,6 +41,7 @@ export class ViewStore {
     const s = this.scope();
     const unreadOnly = this.unreadOnly();
     const q = this.search().trim().toLowerCase();
+    const mediaFilter = this.mediaFilter();
     const muted = this.settings.mutedWords();
     const feedIds = s.type === 'category' ? new Set(this.feedsStore.feeds().filter((f) => f.categoryId === s.id).map((f) => f.id)) : null;
     const today = startOfToday();
@@ -49,6 +53,7 @@ export class ViewStore {
         if (s.type === 'today' && a.published < today) return false;
         if (s.type === 'favorites' && !a.favorite) return false;
         if (s.type === 'later' && !a.later) return false;
+        if (mediaFilter !== 'all' && (a.media?.kind ?? 'text') !== mediaFilter) return false;
         if (unreadOnly && a.read && s.type !== 'favorites' && s.type !== 'later') return false;
         if (muted.length && !a.favorite && !a.later) {
           const hay = `${a.title} ${a.summary}`.toLowerCase();

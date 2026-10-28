@@ -18,6 +18,20 @@
   } @else {
     <input class="field hidden w-full max-w-md sidebar:ms-auto sidebar:block" type="search" [placeholder]="'common.search' | translate" [attr.aria-label]="'common.search' | translate"
       [value]="view.search()" (input)="view.search.set($any($event.target).value)">
+    <div class="relative">
+      <button class="icon-btn" type="button" [class.!text-accent]="view.mediaFilter() !== 'all'" [attr.aria-label]="'filter.media' | translate" [attr.aria-expanded]="filtering()" (click)="filtering.set(!filtering())">{{ ui.filter }}</button>
+      @if (filtering()) {
+        <div class="fixed inset-0 z-30" (click)="filtering.set(false)"></div>
+        <div class="absolute end-0 top-full z-40 mt-1 flex min-w-40 flex-col rounded-2xl border border-line bg-bg p-1 shadow-xl" role="menu" animate.enter="anim-down-in" animate.leave="anim-down-out">
+          @for (o of mediaOptions; track o.value) {
+            <button class="flex items-center gap-2 rounded-xl px-3 py-2 text-start hover:bg-white/5" type="button" role="menuitemradio" [attr.aria-checked]="view.mediaFilter() === o.value"
+              [class.text-accent]="view.mediaFilter() === o.value" (click)="pick(o.value)">
+              <span class="font-mdi text-xl">{{ o.icon }}</span>{{ o.label | translate }}
+            </button>
+          }
+        </div>
+      }
+    </div>
     @if (actions()) { <div class="hidden sidebar:block"><rss-article-actions /></div> }
     <button class="icon-btn sidebar:hidden" type="button" [attr.aria-label]="'common.search' | translate" [attr.aria-expanded]="searching()" (click)="toggleSearch()">{{ ui.search }}</button>
   }

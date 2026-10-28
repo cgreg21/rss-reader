@@ -8,6 +8,7 @@ export interface FeedHit {
   website?: string;
   description?: string;
   subscribers?: number;
+  image?: string;
 }
 
 /** Network access for feeds, pages and images, through the CORS proxy when it is enabled. */
@@ -40,17 +41,17 @@ export class FetchService {
 
   private async searchPodcasts(query: string): Promise<FeedHit[]> {
     const text = await this.download(`https://itunes.apple.com/search?media=podcast&limit=20&term=${encodeURIComponent(query.trim())}`);
-    const data = JSON.parse(text) as { results?: { feedUrl?: string; collectionName?: string; artistName?: string; collectionViewUrl?: string }[] };
+    const data = JSON.parse(text) as { results?: { feedUrl?: string; collectionName?: string; artistName?: string; collectionViewUrl?: string; artworkUrl100?: string; artworkUrl600?: string }[] };
     return (data.results ?? [])
       .filter((r) => r.feedUrl)
-      .map((r) => ({ url: r.feedUrl!, title: r.collectionName ?? r.feedUrl!, website: r.collectionViewUrl, description: r.artistName }));
+      .map((r) => ({ url: r.feedUrl!, title: r.collectionName ?? r.feedUrl!, website: r.collectionViewUrl, description: r.artistName, image: r.artworkUrl100 ?? r.artworkUrl600 }));
   }
 
   private async searchFeedly(query: string): Promise<FeedHit[]> {
     const text = await this.download(`https://cloud.feedly.com/v3/search/feeds?count=20&query=${encodeURIComponent(query.trim())}`);
-    const data = JSON.parse(text) as { results?: { feedId: string; title?: string; website?: string; description?: string; subscribers?: number }[] };
+    const data = JSON.parse(text) as { results?: { feedId: string; title?: string; website?: string; description?: string; subscribers?: number; visualUrl?: string; iconUrl?: string }[] };
     return (data.results ?? [])
       .filter((r) => r.feedId?.startsWith('feed/'))
-      .map((r) => ({ url: r.feedId.slice(5), title: r.title ?? r.feedId.slice(5), website: r.website, description: r.description, subscribers: r.subscribers }));
+      .map((r) => ({ url: r.feedId.slice(5), title: r.title ?? r.feedId.slice(5), website: r.website, description: r.description, subscribers: r.subscribers, image: r.visualUrl ?? r.iconUrl }));
   }
 }

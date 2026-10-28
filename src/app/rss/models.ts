@@ -16,6 +16,8 @@ export interface Feed {
   title: string;
   siteUrl?: string;
   description?: string;
+  /** Logo / cover of the feed (podcast artwork), used when an article has no picture. */
+  image?: string;
   format?: FeedFormat;
   categoryId: string | null;
   lastFetched?: number;
@@ -46,6 +48,7 @@ export interface ParsedFeed {
   title: string;
   siteUrl?: string;
   description?: string;
+  image?: string;
   format?: FeedFormat;
   items: Omit<Article, 'feedId' | 'read' | 'favorite' | 'later' | 'fullText'>[];
 }

@@ -10,7 +10,7 @@
   <span class="swipe-icon absolute top-1/2 -end-10 -translate-y-1/2 font-mdi text-2xl text-green-400">{{ a.read ? ui.unread : ui.read }}</span>
 </ng-template>
 <ng-template #title let-a let-size="size">
-  <h2 [class]="size"><span class="me-1 font-mdi text-muted">{{ mediaIcon(a.media) }}</span>@if (a.favorite) { <span class="me-1 font-mdi text-yellow-300">{{ ui.favoriteOn }}</span> }@if (a.later) { <span class="me-1 font-mdi text-accent">{{ ui.laterOn }}</span> }{{ a.title }}</h2>
+  <h2 [class]="size"><span class="me-1 font-mdi text-muted">{{ mediaIcon(a.media) }}</span>@if (offline.src(a.id)) { <span class="me-1 font-mdi text-green-400">{{ ui.offline }}</span> }@if (a.favorite) { <span class="me-1 font-mdi text-yellow-300">{{ ui.favoriteOn }}</span> }@if (a.later) { <span class="me-1 font-mdi text-accent">{{ ui.laterOn }}</span> }{{ a.title }}</h2>
 </ng-template>
 <ng-template #date let-a>
   <span class="text-xs text-accent">{{ a.read ? '' : '● ' }}{{ a.published | localDate }} · {{ feedTitle(a.feedId) }}</span>
@@ -38,7 +38,7 @@
         <a rssReveal rssSwipe (swipeLeft)="articles.toggle(a, 'read')" (swipeRight)="articles.toggle(a, 'favorite')" (rssLongPress)="articles.toggle(a, 'later')" class="relative mb-6 flex min-w-0 break-inside-avoid flex-col gap-2.5 border-b border-line pb-6" [routerLink]="['/article', a.id]" [class.is-read]="a.read">
           <ng-container *ngTemplateOutlet="swipeIcons; context: { $implicit: a }" />
           <ng-container *ngTemplateOutlet="title; context: { $implicit: a, size: 'text-lg leading-tight font-bold sidebar:text-xl' }" />
-          @if (a.image) { <img class="aspect-[16/10] w-full rounded-xl bg-side object-cover" [rssProxyImg]="a.image" alt="" (error)="$any($event.target).remove()"> }
+          @if (a.image ?? feedImage(a.feedId); as image) { <img class="aspect-[16/10] w-full rounded-xl bg-side object-cover" [rssProxyImg]="image" alt="" (error)="$any($event.target).remove()"> }
           <ng-container *ngTemplateOutlet="date; context: { $implicit: a }" />
           <p class="line-clamp-5 flex-1 text-sm text-slate-300">{{ a.summary }}</p>
         </a>

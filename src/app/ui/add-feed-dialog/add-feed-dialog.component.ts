@@ -6,12 +6,13 @@ import { TranslatePipe } from '../../i18n/translate.pipe';
 import { FeedsStore } from '../../rss/feeds.store';
 import { FeedHit, FetchService } from '../../rss/services/fetch.service';
 import { UI_ICONS } from '../icons';
+import { ProxyImgDirective } from '../directives/proxy-img.directive';
 import { AddFeedDialogService } from './add-feed-dialog.service';
 
 /** Modal with a single field: a pasted URL subscribes directly, any other text searches feeds. */
 @Component({
   selector: 'rss-add-feed-dialog',
-  imports: [FormsModule, TranslatePipe],
+  imports: [FormsModule, TranslatePipe, ProxyImgDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './add-feed-dialog.component.html',
 })

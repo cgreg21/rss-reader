@@ -33,10 +33,15 @@ describe('ImageCache', () => {
   });
   afterEach(() => vi.unstubAllGlobals());
 
-  it('returns the original url without proxy or for non-http urls', async () => {
+  it('returns the original url for non-http urls', async () => {
     expect(await cache$.url('data:image/png;base64,AA')).toBe('data:image/png;base64,AA');
+  });
+
+  it('caches images even without a proxy, and falls back to the url when the fetch fails', async () => {
     TestBed.inject(SettingsStore).proxyEnabled.set(false);
-    expect(await cache$.url('https://a.com/i.png')).toBe('https://a.com/i.png');
+    expect(await cache$.url('https://a.com/i.png')).toBe('blob:x');
+    request.mockRejectedValue(new Error('cors'));
+    expect(await cache$.url('https://b.com/i.png')).toBe('https://b.com/i.png');
   });
 
   it('loads through the network once and memoises', async () => {
