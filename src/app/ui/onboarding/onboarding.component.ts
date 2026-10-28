@@ -45,18 +45,29 @@ export class OnboardingComponent {
     { id: 'sync', icon: UI_ICONS.settings, title: 'onboarding.syncTitle', text: 'onboarding.syncText', action: { label: 'onboarding.openOptions', run: () => void this.router.navigateByUrl('/options') } },
   ];
   protected readonly index = signal(0);
+  /** 1 when moving forward, -1 backwards: picks the side the next slide comes from. */
+  protected readonly direction = signal(1);
   protected readonly slide = computed(() => this.slides[this.index()]);
   protected readonly last = computed(() => this.index() === this.slides.length - 1);
   private touchX: number | null = null;
 
   constructor() {
     effect(() => {
-      if (this.onboarding.opened()) this.index.set(0);
+      if (this.onboarding.opened()) {
+        this.index.set(0);
+        this.direction.set(1);
+      }
     });
   }
 
+  protected go(i: number): void {
+    if (i === this.index()) return;
+    this.direction.set(i > this.index() ? 1 : -1);
+    this.index.set(i);
+  }
+
   protected step(delta: number): void {
-    this.index.update((i) => Math.min(this.slides.length - 1, Math.max(0, i + delta)));
+    this.go(Math.min(this.slides.length - 1, Math.max(0, this.index() + delta)));
   }
 
   protected next(): void {

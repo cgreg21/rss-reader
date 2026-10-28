@@ -239,6 +239,9 @@
 @keyframes anim-toggle-pop { 40% { transform: scale(1.35); } }
 @keyframes anim-skeleton { 50% { opacity: 0.5; } }
 @keyframes anim-stagger-in { from { opacity: 0; transform: translateY(8px); } }
+@keyframes anim-slide-in { from { opacity: 0; transform: translateX(calc(var(--slide-dir, 1) * 56px)); } }
+@keyframes anim-slide-out { to { opacity: 0; transform: translateX(calc(var(--slide-dir, 1) * -56px)); } }
+@keyframes anim-icon-in { from { opacity: 0; transform: scale(0.5) rotate(-12deg); } }
 .anim-fade-in { animation: anim-fade-in 180ms ease-out; }
 .anim-fade-out { animation: anim-fade-out 150ms ease-in forwards; }
 .anim-pop-in { animation: anim-pop-in 180ms ease-out; }
@@ -247,6 +250,15 @@
 .anim-up-out { animation: anim-up-out 160ms ease-in forwards; }
 .anim-down-in { animation: anim-down-in 180ms ease-out; }
 .anim-down-out { animation: anim-down-out 140ms ease-in forwards; }
+.anim-slide-in { animation: anim-slide-in 320ms var(--ease-out); }
+.anim-slide-out { animation: anim-slide-out 180ms ease-in forwards; }
+/* Children appear one after the other (icon, title, text, button); the first one springs in. */
+.stagger > * { animation: anim-stagger-in 360ms var(--ease-out) both; }
+.stagger > :nth-child(1) { animation: anim-icon-in 480ms var(--ease-spring) both; animation-delay: 60ms; }
+.stagger > :nth-child(2) { animation-delay: 160ms; }
+.stagger > :nth-child(3) { animation-delay: 240ms; }
+.stagger > :nth-child(4) { animation-delay: 320ms; }
+.anim-slide-out.stagger > * { animation: none; }
 @media (prefers-reduced-motion: reduce) {
   .reveal { opacity: 1; transform: none; transition: none; }
   [class*='anim-'], .pop, .img-fade, .skeleton, .animate-spin, .animate-pulse { animation-duration: 1ms !important; animation-iteration-count: 1 !important; }
