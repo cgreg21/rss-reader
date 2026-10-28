@@ -1,0 +1,42 @@
+@if (radial()) {
+  <rss-radial-menu [items]="radialItems()" />
+} @else if (overflow()) {
+  @if (overflowItems().length) {
+    <div class="relative">
+      <button class="icon-btn" type="button" aria-label="Plus d'actions" aria-haspopup="menu" [attr.aria-expanded]="menuOpen()" (click)="menuOpen.set(!menuOpen())">{{ ui.more }}</button>
+      @if (menuOpen()) {
+        <div class="fixed inset-0 z-30" (click)="menuOpen.set(false)"></div>
+        <div class="absolute right-0 top-full z-40 mt-1 flex flex-col gap-1 rounded-2xl bg-bg p-1 shadow-xl" role="menu">
+          @for (item of overflowItems(); track item.label) {
+            @if (item.href) {
+              <a class="icon-btn" role="menuitem" [href]="item.href" target="_blank" rel="noopener noreferrer" [attr.aria-label]="item.label" (click)="menuOpen.set(false)">{{ item.icon }}</a>
+            } @else {
+              <button class="icon-btn" type="button" role="menuitem" [class]="item.activeClass ?? ''" [class.animate-pulse]="item.pulse" [disabled]="item.disabled"
+                [attr.aria-label]="item.label" (click)="item.run?.(); menuOpen.set(false)">{{ item.icon }}</button>
+            }
+          }
+        </div>
+      }
+    </div>
+  }
+} @else if (article(); as a) {
+  <button class="icon-btn" type="button" [attr.aria-label]="a.favorite ? 'Retirer des favoris' : 'Ajouter aux favoris'"
+    [class.!text-yellow-300]="a.favorite" (click)="store.patch(a.id, { favorite: !a.favorite })">{{ a.favorite ? ui.favoriteOn : ui.favorite }}</button>
+  <button class="icon-btn" type="button" [attr.aria-label]="a.later ? 'Retirer de À lire plus tard' : 'Lire plus tard'"
+    [class.!text-accent]="a.later" (click)="store.patch(a.id, { later: !a.later })">{{ a.later ? ui.laterOn : ui.later }}</button>
+  <button class="icon-btn" type="button" aria-label="Basculer lu / non lu"
+    [class.!text-green-400]="!a.read" (click)="store.patch(a.id, { read: !a.read })">{{ a.read ? ui.read : ui.unread }}</button>
+  @if (a.link && !a.fullText) {
+    <button class="icon-btn" type="button" aria-label="Charger le texte complet" [class.animate-pulse]="loading()" [disabled]="loading()" (click)="fullText(a.id)">{{ ui.fullText }}</button>
+  }
+  @if (speechSupported) {
+    <button class="icon-btn" type="button" [attr.aria-label]="speaking() ? 'Arrêter la lecture' : 'Lire à voix haute'" [class.!text-accent]="speaking()"
+      (click)="toggleSpeech(a.title, a.content || a.summary)">{{ speaking() ? ui.stop : ui.speak }}</button>
+  }
+  @if (a.link) {
+    <a class="icon-btn" [href]="'https://wallhop.io/' + a.link" target="_blank" rel="noopener noreferrer" aria-label="Lire via wallhop.io">{{ ui.reader }}</a>
+    <a class="icon-btn" [href]="a.link" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'original">{{ ui.external }}</a>
+    @if (canShare) { <button class="icon-btn" type="button" aria-label="Partager" (click)="share(a.title, a.link)">{{ ui.share }}</button> }
+    <button class="icon-btn" type="button" aria-label="Copier le lien" (click)="copyLink(a.link)">{{ ui.copyLink }}</button>
+  }
+}

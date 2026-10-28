@@ -6,7 +6,7 @@ import { provideServiceWorker } from '@angular/service-worker';
 
 import { routes } from './app/app.routes';
 import { ReplaceLocationStrategy } from './app/pwa/replace-location-strategy';
-import { RootComponent } from './app/root.component';
+import { RootComponent } from './app/root/root.component';
 
 bootstrapApplication(RootComponent, {
   providers: [

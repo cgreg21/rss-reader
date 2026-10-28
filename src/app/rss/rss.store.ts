@@ -1,7 +1,7 @@
 import { Injectable, computed, effect, inject, signal, untracked } from '@angular/core';
 
 import { db } from './db';
-import { FetchService } from './fetch.service';
+import { FetchService } from './services/fetch.service';
 import { deduceFeedUrl, discoverFeedUrl, extractReadable, looksLikeHtml, parseFeed } from './feed-parser';
 import { Article, Category, Feed, ParsedFeed } from './models';
 import { json, persisted } from './persisted';

@@ -15,3 +15,5 @@ yarn-error.log*
 /playwright-report
 
 .idea/
+
+/coverage

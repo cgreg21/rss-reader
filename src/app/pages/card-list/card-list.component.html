@@ -1,0 +1,3 @@
+<div class="mx-auto flex w-full max-w-md flex-col gap-5">
+  @for (a of articles(); track a.id) { <div rssReveal><rss-article-card [article]="a" /></div> }
+</div>

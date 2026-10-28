@@ -114,4 +114,25 @@ describe('extractReadable', () => {
     expect(out).not.toContain('menu');
     expect(out).not.toContain('pied');
   });
+
+  it('falls back to the densest container, then the body', () => {
+    const html = '<div><p>court</p></div><section><p>un texte nettement plus long</p></section>';
+    const out = extractReadable(html, 'https://example.com');
+    expect(out).toContain('plus long');
+    expect(out).not.toContain('court');
+    expect(extractReadable('<p>seul</p>', 'https://example.com')).toContain('seul');
+  });
 });
+
+describe('error paths', () => {
+  it('rejects malformed JSON feeds', () => {
+    expect(() => parseFeed('{"items": [', 'f')).toThrow('Flux invalide');
+    expect(() => parseFeed('{"version":"https://jsonfeed.org/version/1.1"}', 'f')).toThrow('Flux invalide');
+  });
+
+  it('skips advertised links with an unusable href', () => {
+    const html = '<link rel="alternate" type="application/rss+xml" href="http://[bad"><link rel="alternate" type="application/atom+xml" href="/ok">';
+    expect(discoverFeedUrl(html, 'https://example.com')).toBe('https://example.com/ok');
+  });
+});
+

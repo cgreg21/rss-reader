@@ -45,7 +45,9 @@
           "options": {
             "tsConfig": "tsconfig.spec.json",
             "buildTarget": "rssreader:build:development",
-            "runner": "vitest"
+            "runner": "vitest",
+              "coverageInclude": ["src/app/**/*.ts"],
+              "coverageExclude": ["src/app/**/*.spec.ts"]
           }
         }
       }

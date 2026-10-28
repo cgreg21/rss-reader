@@ -24,6 +24,13 @@ describe('persisted', () => {
     expect(persisted('f', flag(true))()).toBe(false);
   });
 
+  it('falls back to 0 for non numeric numbers and reads json', () => {
+    localStorage.setItem('n', 'abc');
+    expect(persisted('n', num(5))()).toBe(0);
+    localStorage.setItem('j', '[1]');
+    expect(persisted('j', json<number[]>([]))()).toEqual([1]);
+  });
+
   it('rejects unknown enum values', () => {
     localStorage.setItem('o', 'zzz');
     expect(persisted('o', oneOf(['a', 'b'], 'b'))()).toBe('b');

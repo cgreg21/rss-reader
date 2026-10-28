@@ -3,7 +3,7 @@ const MDI_CODE_POINTS = {
   menu: 0xF035C, check: 0xF012C, info: 0xF02FC, refresh: 0xF0450, plus: 0xF0415, 'cog-outline': 0xF08BB, rss: 0xF046B,
   'calendar-today': 0xF00F6, 'star-outline': 0xF04D2, star: 0xF04CE, 'check-all': 0xF012D,
   magnify: 0xF0349, 'arrow-left': 0xF004D, 'open-in-new': 0xF03CC, 'email-outline': 0xF01F0,
-  'email-open-outline': 0xF05EF, 'trash-can-outline': 0xF0A7A, close: 0xF0156, 'view-list': 0xF0572, 'view-agenda': 0xF056A, 'cards-outline': 0xF0639,   download: 0xF01DA, upload: 0xF0552, bookmark: 0xF00C0, 'bookmark-outline': 0xF00C3, 'file-document-outline': 0xF0219, 'volume-high': 0xF057E,   stop: 0xF04DB, 'book-open-page-variant': 0xF05DA, 'dots-vertical': 0xF01D9, 'share-variant': 0xF0497, 'link-variant': 0xF0337,
+  'email-open-outline': 0xF05EF, 'trash-can-outline': 0xF0A7A, close: 0xF0156, 'view-list': 0xF0572, 'view-agenda': 0xF056A, 'cards-outline': 0xF0639,   download: 0xF01DA, upload: 0xF0552, bookmark: 0xF00C0, 'bookmark-outline': 0xF00C3, 'file-document-outline': 0xF0219, 'volume-high': 0xF057E,   stop: 0xF04DB, 'book-open-page-variant': 0xF05DA, 'dots-vertical': 0xF01D9, 'dots-grid': 0xF15FC, 'share-variant': 0xF0497, 'link-variant': 0xF0339,
 } as const;
 
 export type IconName = keyof typeof MDI_CODE_POINTS;
@@ -14,6 +14,7 @@ export function glyph(name: IconName): string {
 
 export const UI_ICONS = {
   menu: glyph('menu'),
+  grid: glyph('dots-grid'),
   refresh: glyph('refresh'),
   add: glyph('plus'),
   check: glyph('check'),
