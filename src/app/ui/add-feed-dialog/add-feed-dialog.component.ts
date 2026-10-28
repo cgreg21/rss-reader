@@ -49,6 +49,7 @@ export class AddFeedDialogComponent {
   protected async submit(): Promise<void> {
     const value = this.text.trim();
     if (!value || this.busy()) return;
+    this.field()?.nativeElement.blur();
     this.busy.set(true);
     this.error.set('');
     try {
