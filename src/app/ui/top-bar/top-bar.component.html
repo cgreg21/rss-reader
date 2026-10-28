@@ -22,11 +22,11 @@
       <button class="icon-btn" type="button" [class.!text-accent]="view.mediaFilter() !== 'all'" [attr.aria-label]="'filter.media' | translate" [attr.aria-expanded]="filtering()" (click)="filtering.set(!filtering())">{{ ui.filter }}</button>
       @if (filtering()) {
         <div class="fixed inset-0 z-30" (click)="filtering.set(false)"></div>
-        <div class="absolute end-0 top-full z-40 mt-1 flex min-w-40 flex-col rounded-2xl border border-line bg-bg p-1 shadow-xl" role="menu" animate.enter="anim-down-in" animate.leave="anim-down-out">
+        <div class="absolute end-0 top-full z-40 mt-1 flex w-max max-w-[calc(100vw-1.5rem)] flex-col rounded-2xl border border-line bg-bg p-1 shadow-xl" role="menu" animate.enter="anim-down-in" animate.leave="anim-down-out">
           @for (o of mediaOptions; track o.value) {
             <button class="flex items-center gap-2 rounded-xl px-3 py-2 text-start hover:bg-white/5" type="button" role="menuitemradio" [attr.aria-checked]="view.mediaFilter() === o.value"
               [class.text-accent]="view.mediaFilter() === o.value" (click)="pick(o.value)">
-              <span class="font-mdi text-xl">{{ o.icon }}</span>{{ o.label | translate }}
+              <span class="font-mdi text-xl">{{ o.icon }}</span><span class="truncate">{{ o.label | translate }}</span>
             </button>
           }
         </div>
