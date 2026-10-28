@@ -6,6 +6,8 @@
     <div class="absolute inset-0 grid place-items-center bg-gradient-to-br from-accent/40 to-bg font-mdi text-7xl text-white/70">{{ placeholder() }}</div>
     @if (article().image ?? feedImage(); as image) {
       <img class="img-fade absolute inset-0 size-full object-cover" draggable="false" [rssProxyImg]="image" alt="" (error)="$any($event.target).remove()">
+    } @else if (feedSite(); as site) {
+      <img class="img-fade absolute inset-0 m-auto size-16 rounded-xl object-contain" draggable="false" [rssFavicon]="site" alt="">
     }
     <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-3 pt-12">
       <h2 class="text-start text-lg leading-tight font-bold text-white">{{ article().title }}</h2>

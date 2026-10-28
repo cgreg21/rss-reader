@@ -89,7 +89,16 @@ export class ArticlesStore {
   toggle(article: Pick<Article, 'id' | ArticleFlag>, flag: ArticleFlag): void {
     const on = !article[flag];
     void this.patch(article.id, { [flag]: on });
+    if (flag === 'later' && on) this.prepareOffline(article.id);
     this.snackbar.show(this.i18n.t(MESSAGES[flag][on ? 'on' : 'off']));
+  }
+
+  /** Read-later articles are made available offline: audio download and full text, when possible. */
+  private prepareOffline(id: string): void {
+    const full = this.article(id);
+    if (!full) return;
+    if (full.media?.kind === 'audio') this.offline.enqueue(id, full.media.url, full.title);
+    if (full.link && !full.fullText) void this.fetchFullText(id).catch(() => undefined);
   }
 
   async markRead(ids: string[]): Promise<void> {

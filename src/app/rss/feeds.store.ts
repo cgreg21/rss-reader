@@ -40,7 +40,7 @@ export class FeedsStore {
     this.removalListeners.push(listener);
   }
 
-  async addFeed(rawUrl: string, categoryId: string | null): Promise<void> {
+  async addFeed(rawUrl: string, categoryId: string | null, fallbackImage?: string): Promise<void> {
     let url = deduceFeedUrl(rawUrl.trim()) ?? new URL(rawUrl.trim()).href;
     let body = await this.net.download(url);
     if (looksLikeHtml(body)) {
@@ -53,7 +53,7 @@ export class FeedsStore {
     this.noteFollowed(url);
     const id = newId('f');
     const parsed = parseFeed(body, id);
-    await this.putFeed({ id, url, title: parsed.title || new URL(url).hostname, siteUrl: parsed.siteUrl, description: parsed.description, image: parsed.image, format: parsed.format, categoryId, lastFetched: Date.now() });
+    await this.putFeed({ id, url, title: parsed.title || new URL(url).hostname, siteUrl: parsed.siteUrl, description: parsed.description, image: parsed.image ?? fallbackImage, format: parsed.format, categoryId, lastFetched: Date.now() });
     await this.articlesStore.merge(id, parsed.items);
   }
 

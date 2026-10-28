@@ -110,7 +110,7 @@ export class FeedsTabComponent {
   protected async follow(hit: FeedHit): Promise<void> {
     this.searchError.set('');
     try {
-      await this.store.addFeed(hit.url, this.categoryId);
+      await this.store.addFeed(hit.url, this.categoryId, hit.image);
     } catch (e) {
       this.searchError.set(this.i18n.errorText(e, 'feeds.cannotRead'));
     }

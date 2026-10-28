@@ -36,6 +36,43 @@ export class ProxyImgDirective implements OnDestroy {
   }
 }
 
+/** Favicon of a site: its /favicon.ico, then Google's favicon service when that image cannot be loaded. */
+@Directive({ selector: 'img[rssFavicon]', host: { '(error)': 'fallback()' } })
+export class FaviconDirective {
+  readonly site = input.required<string>({ alias: 'rssFavicon' });
+  private readonly images = inject(ImageCache);
+  private readonly img = inject<ElementRef<HTMLImageElement>>(ElementRef).nativeElement;
+  private google = false;
+
+  constructor() {
+    effect(() => {
+      this.google = false;
+      let origin: string;
+      try {
+        origin = new URL(this.site()).origin;
+      } catch {
+        return;
+      }
+      void loadVia(this.images, this.img, `${origin}/favicon.ico`);
+    });
+  }
+
+  protected fallback(): void {
+    if (this.google) {
+      this.img.remove();
+      return;
+    }
+    this.google = true;
+    let host: string;
+    try {
+      host = new URL(this.site()).hostname;
+    } catch {
+      return;
+    }
+    void loadVia(this.images, this.img, `https://www.google.com/s2/favicons?sz=128&domain=${encodeURIComponent(host)}`);
+  }
+}
+
 /** Renders sanitized article HTML, loading its images through the CORS proxy (when enabled). */
 @Directive({ selector: '[rssProxyContent]' })
 export class ProxyContentDirective {

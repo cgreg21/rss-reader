@@ -69,7 +69,7 @@ export class AddFeedDialogComponent {
   protected async follow(hit: FeedHit): Promise<void> {
     this.error.set('');
     try {
-      await this.store.addFeed(hit.url, null);
+      await this.store.addFeed(hit.url, null, hit.image);
     } catch (e) {
       this.error.set(this.i18n.errorText(e, 'feeds.cannotRead'));
     }

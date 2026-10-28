@@ -59,12 +59,13 @@
     --color-slate-100: #0f172a;
     --color-slate-300: #334155;
   }
-  html, body { @apply bg-bg text-slate-100 antialiased wrap-anywhere; height: 100vh; margin: 0; font-family: var(--font-sans); -webkit-tap-highlight-color: transparent; overscroll-behavior: none; touch-action: pan-x pan-y; }
+  html, body { @apply bg-bg text-slate-100 antialiased wrap-anywhere select-none; -webkit-touch-callout: none; height: 100vh; margin: 0; font-family: var(--font-sans); -webkit-tap-highlight-color: transparent; overscroll-behavior: none; touch-action: pan-x pan-y; }
   button, input, select { font: inherit; color: inherit; }
   /* Below 16px iOS zooms into a focused field and the page stays zoomed afterwards. */
   input, select { font-size: max(16px, 1em); }
   button { @apply cursor-pointer; }
   button:disabled { @apply cursor-default opacity-40; }
+  input, textarea, [contenteditable] { @apply select-text; }
   input:focus, select:focus { @apply outline-2 outline-accent; }
   input, select { transition: outline-color var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out), background-color var(--dur-base) var(--ease-out); outline-offset: 0; }
   input:not(:focus), select:not(:focus) { outline: 2px solid transparent; }

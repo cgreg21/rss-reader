@@ -119,7 +119,7 @@ describe('FeedsTabComponent', () => {
     const { comp } = setup();
     const hit = { url: 'http://h', title: 'Hit' };
     await comp.follow(hit);
-    expect(store.addFeed).toHaveBeenCalledWith('http://h', null);
+    expect(store.addFeed).toHaveBeenCalledWith('http://h', null, undefined);
     store.addFeed.mockRejectedValueOnce(new Error('nope'));
     await comp.follow(hit);
     expect(comp.searchError()).toBe('nope');

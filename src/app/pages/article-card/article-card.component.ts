@@ -9,7 +9,7 @@ import { FeedsStore } from '../../rss/feeds.store';
 import { Article } from '../../rss/models';
 import { UI_ICONS, mediaIcon } from '../../ui/icons';
 import { AxisGesture, LongPressTimer, SWIPE_THRESHOLD, isPrimaryPress } from '../../ui/gestures/pointer-gestures';
-import { ProxyImgDirective } from '../../ui/directives/proxy-img.directive';
+import { FaviconDirective, ProxyImgDirective } from '../../ui/directives/proxy-img.directive';
 
 const TAP_SLOP = 6;
 const FLY_MS = 200;
@@ -19,7 +19,7 @@ type Direction = 'left' | 'right';
 /** Card with a Tinder-style swipe: left toggles read/unread, right toggles favorite. */
 @Component({
   selector: 'rss-article-card',
-  imports: [LocalDatePipe, TranslatePipe, ProxyImgDirective],
+  imports: [LocalDatePipe, TranslatePipe, ProxyImgDirective, FaviconDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './article-card.component.html',
 })
@@ -40,6 +40,10 @@ export class ArticleCardComponent {
     return media ? mediaIcon(media) : UI_ICONS.all;
   });
   protected readonly feedImage = computed(() => this.feeds.feeds().find((f) => f.id === this.article().feedId)?.image);
+  protected readonly feedSite = computed(() => {
+    const feed = this.feeds.feeds().find((f) => f.id === this.article().feedId);
+    return feed ? feed.siteUrl ?? feed.url : undefined;
+  });
   protected readonly dragX = signal(0);
   protected readonly flying = signal<Direction | null>(null);
   protected readonly dragging = signal(false);
