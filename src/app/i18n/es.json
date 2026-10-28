@@ -75,6 +75,7 @@
   "detail.removeLater": "Quitar de Leer más tarde",
   "detail.toggleRead": "Alternar leído / no leído",
   "detail.fullText": "Cargar el texto completo",
+  "detail.fullTextLoading": "Cargando el texto completo…",
   "detail.speak": "Leer en voz alta",
   "detail.stopSpeech": "Detener la lectura",
   "detail.wallhop": "Leer con wallhop.io",

@@ -13,6 +13,7 @@ import { ViewStore } from '../../rss/stores/view.store';
 import { UI_ICONS } from '../../ui/icons';
 import { ProxyContentDirective } from '../../ui/directives/proxy-img.directive';
 import { OfflineMediaService } from '../../rss/services/offline-media.service';
+import { FullTextService } from '../../rss/services/full-text.service';
 import { MediaSessionDirective } from '../../ui/directives/media-session.directive';
 import { AudioPlayerComponent } from '../../ui/audio-player/audio-player.component';
 import { ArticlesPage } from '../articles/articles.page';
@@ -36,6 +37,7 @@ export class ArticlePage {
   protected readonly i18n = inject(I18nService);
   protected readonly ui = UI_ICONS;
   protected readonly offline = inject(OfflineMediaService);
+  protected readonly fullText = inject(FullTextService);
   protected readonly article = computed(() => this.store.article(this.id()));
   private readonly sanitizer = inject(DomSanitizer);
   private readonly router = inject(Router);

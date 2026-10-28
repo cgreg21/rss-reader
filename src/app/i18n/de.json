@@ -75,6 +75,7 @@
   "detail.removeLater": "Aus „Später lesen“ entfernen",
   "detail.toggleRead": "Gelesen / ungelesen umschalten",
   "detail.fullText": "Volltext laden",
+  "detail.fullTextLoading": "Volltext wird geladen…",
   "detail.speak": "Vorlesen",
   "detail.stopSpeech": "Vorlesen beenden",
   "detail.wallhop": "Über wallhop.io lesen",

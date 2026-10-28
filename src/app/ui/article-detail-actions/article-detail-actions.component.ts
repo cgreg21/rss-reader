@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, computed, inject, input, signal } from '@angular/core';
 
 import { ArticlesStore, READER_PROXY } from '../../rss/stores/articles.store';
+import { FullTextService } from '../../rss/services/full-text.service';
 import { I18nService } from '../../i18n/services/i18n.service';
 import { TranslatePipe } from '../../i18n/translate.pipe';
 import { UI_ICONS } from '../icons';
@@ -21,12 +22,13 @@ export class ArticleDetailActionsComponent implements OnDestroy {
   readonly overflow = input(false);
   protected readonly menuOpen = signal(false);
   protected readonly store = inject(ArticlesStore);
+  protected readonly fullText = inject(FullTextService);
   private readonly snackbar = inject(SnackbarService);
   protected readonly i18n = inject(I18nService);
   protected readonly ui = UI_ICONS;
   protected readonly readerProxy = READER_PROXY;
   protected readonly article = computed(() => this.store.article(this.id()));
-  protected readonly loading = signal(false);
+  protected readonly loading = computed(() => this.fullText.loading(this.id()));
   protected readonly speaking = signal(false);
   protected readonly speechSupported = 'speechSynthesis' in window;
 
@@ -51,7 +53,7 @@ export class ArticleDetailActionsComponent implements OnDestroy {
     const t = this.i18n.t.bind(this.i18n);
     if (!a) return items;
     if (a.link) {
-      items.push({ label: t('detail.fullText'), icon: this.ui.fullText, activeClass: a.fullText ? '!text-accent' : undefined, pulse: this.loading(), disabled: this.loading(), run: () => void this.fullText(a.id) });
+      items.push({ label: t('detail.fullText'), icon: this.ui.fullText, activeClass: a.fullText ? '!text-accent' : undefined, pulse: this.loading(), disabled: this.loading(), run: () => void this.fullText.load(a.id) });
     }
     if (this.speechSupported) {
       items.push({ label: t(this.speaking() ? 'detail.stopSpeech' : 'detail.speak'), icon: this.speaking() ? this.ui.stop : this.ui.speak,
@@ -89,18 +91,6 @@ export class ArticleDetailActionsComponent implements OnDestroy {
       this.snackbar.show(this.i18n.t('detail.linkCopied'));
     } catch {
       this.snackbar.error(this.i18n.t('detail.copyFailed'));
-    }
-  }
-
-  protected async fullText(id: string): Promise<void> {
-    this.loading.set(true);
-    try {
-      await this.store.fetchFullText(id);
-      this.snackbar.show(this.i18n.t('detail.fullTextLoaded'));
-    } catch (error) {
-      this.snackbar.error(this.i18n.errorText(error, 'detail.loadFailed'));
-    } finally {
-      this.loading.set(false);
     }
   }
 

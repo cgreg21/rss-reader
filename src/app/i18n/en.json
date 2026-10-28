@@ -75,6 +75,7 @@
   "detail.removeLater": "Remove from Read later",
   "detail.toggleRead": "Toggle read / unread",
   "detail.fullText": "Load full text",
+  "detail.fullTextLoading": "Loading full text…",
   "detail.speak": "Read aloud",
   "detail.stopSpeech": "Stop reading",
   "detail.wallhop": "Read via wallhop.io",

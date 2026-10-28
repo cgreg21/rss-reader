@@ -25,6 +25,11 @@
         }
       </div>
     }
+    @if (a.link && !a.fullText) {
+      <button class="btn mb-6 w-full justify-center gap-2 py-3 text-base font-semibold shadow-lg" type="button" [class.animate-pulse]="fullText.loading(a.id)" [disabled]="fullText.loading(a.id)" (click)="fullText.load(a.id)">
+        <span class="font-mdi text-2xl">{{ ui.fullText }}</span>{{ (fullText.loading(a.id) ? 'detail.fullTextLoading' : 'detail.fullText') | translate }}
+      </button>
+    }
     @if (a.content) { <div class="body" [rssProxyContent]="a.content"></div> } @else { <p>{{ a.summary }}</p> }
   </article>
 </ng-template>

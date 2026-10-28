@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ArticlesStore } from '../../rss/stores/articles.store';
 import { FeedsStore } from '../../rss/stores/feeds.store';
 import { Article } from '../../rss/models';
+import { FullTextService } from '../../rss/services/full-text.service';
 import { SettingsStore } from '../../rss/stores/settings.store';
 import { ViewStore } from '../../rss/stores/view.store';
 import { ArticlePage } from './article.page';
@@ -73,6 +74,26 @@ describe('ArticlePage', () => {
   it('renders a missing article message', () => {
     const { el } = setup('nope');
     expect(el.textContent).toContain('introuvable');
+  });
+
+  it('offers to load the full text above the content until it is loaded', async () => {
+    const fullText = TestBed.inject(FullTextService);
+    const load = vi.spyOn(fullText, 'load').mockResolvedValue(undefined);
+    const { fixture, el } = setup();
+    const button = () => el.querySelector<HTMLButtonElement>('article > button.btn');
+    expect(button()!.textContent).toContain('Charger le texte complet');
+    button()!.click();
+    expect(load).toHaveBeenCalledWith('b');
+    vi.spyOn(fullText, 'loading').mockReturnValue(true);
+    fixture.detectChanges();
+    expect(button()!.disabled).toBe(true);
+    expect(button()!.textContent).toContain('Chargement du texte complet');
+    articles.set([art('b', { fullText: true })]);
+    fixture.detectChanges();
+    expect(button()).toBeNull();
+    articles.set([art('b', { link: '' })]);
+    fixture.detectChanges();
+    expect(button()).toBeNull();
   });
 
   it.each([

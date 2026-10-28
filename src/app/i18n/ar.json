@@ -75,6 +75,7 @@
   "detail.removeLater": "إزالة من القراءة لاحقًا",
   "detail.toggleRead": "تبديل مقروء / غير مقروء",
   "detail.fullText": "تحميل النص الكامل",
+  "detail.fullTextLoading": "جارٍ تحميل النص الكامل…",
   "detail.speak": "القراءة بصوت عالٍ",
   "detail.stopSpeech": "إيقاف القراءة",
   "detail.wallhop": "القراءة عبر wallhop.io",

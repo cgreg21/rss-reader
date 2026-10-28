@@ -27,7 +27,7 @@
   <button class="icon-btn" type="button" [attr.aria-label]="'detail.toggleRead' | translate"
     [class.!text-green-400]="!a.read" (click)="store.toggle(a, 'read')">@if (a.read) { <span animate.enter="pop">{{ ui.read }}</span> } @else { <span animate.enter="pop">{{ ui.unread }}</span> }</button>
   @if (a.link) {
-    <button class="icon-btn" type="button" [attr.aria-label]="'detail.fullText' | translate" [class.!text-accent]="a.fullText" [class.animate-pulse]="loading()" [disabled]="loading()" (click)="fullText(a.id)">{{ ui.fullText }}</button>
+    <button class="icon-btn" type="button" [attr.aria-label]="'detail.fullText' | translate" [class.!text-accent]="a.fullText" [class.animate-pulse]="loading()" [disabled]="loading()" (click)="fullText.load(a.id)">{{ ui.fullText }}</button>
   }
   @if (speechSupported) {
     <button class="icon-btn" type="button" [attr.aria-label]="(speaking() ? 'detail.stopSpeech' : 'detail.speak') | translate" [class.!text-accent]="speaking()"
