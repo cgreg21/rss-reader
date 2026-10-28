@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 
 import { LANGUAGES, LANGUAGE_NAMES } from '../../../i18n/languages';
 import { TranslatePipe } from '../../../i18n/translate.pipe';
-import { SettingsStore } from '../../../rss/settings.store';
+import { SettingsStore } from '../../../rss/stores/settings.store';
 
 /** Options tab: theme, font size, muted words and read-article purge. */
 @Component({

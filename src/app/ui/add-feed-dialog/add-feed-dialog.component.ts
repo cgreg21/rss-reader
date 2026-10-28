@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 
 import { I18nService } from '../../i18n/services/i18n.service';
 import { TranslatePipe } from '../../i18n/translate.pipe';
-import { FeedsStore } from '../../rss/feeds.store';
+import { FeedsStore } from '../../rss/stores/feeds.store';
 import { FeedHit, FetchService } from '../../rss/services/fetch.service';
 import { UI_ICONS } from '../icons';
 import { ProxyImgDirective } from '../directives/proxy-img.directive';

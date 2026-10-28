@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, effect, inject } from '@angular/core';
 
 import { I18nService } from '../../i18n/services/i18n.service';
-import { SnackbarService } from '../../ui/services/snackbar.service';
+import { SnackbarService } from '../../ui/snackbar/snackbar.service';
 import { InstallService } from '../services/install.service';
 import { UpdateService } from '../services/update.service';
 

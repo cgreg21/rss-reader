@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { Category, Feed } from './models';
+import { Category, Feed } from '../models';
 import { buildOpml, parseOpml } from './opml';
 
 const categories: Category[] = [{ id: 'c1', name: 'Tech & Co' }];

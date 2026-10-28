@@ -1,13 +1,13 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 
-import { MessageError } from '../i18n/message-error';
+import { MessageError } from '../../i18n/message-error';
 import { ArticlesStore } from './articles.store';
-import { db } from './db';
-import { deduceFeedUrl, discoverFeedUrl, looksLikeHtml, parseFeed } from './feed-parser';
-import { newId } from './ids';
-import { Category, Feed } from './models';
-import { json, persisted } from './persisted';
-import { FetchService } from './services/fetch.service';
+import { db } from '../storage/db';
+import { deduceFeedUrl, discoverFeedUrl, looksLikeHtml, parseFeed } from '../parsing/feed-parser';
+import { newId } from '../storage/ids';
+import { Category, Feed } from '../models';
+import { json, persisted } from '../storage/persisted';
+import { FetchService } from '../services/fetch.service';
 
 export type FeedRemoval = { kind: 'feed' | 'category'; id: string };
 

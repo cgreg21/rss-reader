@@ -4,7 +4,7 @@ import { SwPush } from '@angular/service-worker';
 import { BehaviorSubject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { FeedsStore } from '../../rss/feeds.store';
+import { FeedsStore } from '../../rss/stores/feeds.store';
 import { PushService } from './push.service';
 
 describe('PushService', () => {

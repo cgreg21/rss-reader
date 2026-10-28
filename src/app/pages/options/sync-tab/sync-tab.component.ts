@@ -5,10 +5,10 @@ import { I18nService } from '../../../i18n/services/i18n.service';
 import { LocalDatePipe } from '../../../i18n/local-date.pipe';
 import { TranslatePipe } from '../../../i18n/translate.pipe';
 import { LibraryService } from '../../../rss/services/library.service';
-import { FeedsStore } from '../../../rss/feeds.store';
+import { FeedsStore } from '../../../rss/stores/feeds.store';
 import { SyncService } from '../../../pwa/services/sync.service';
 import { UI_ICONS } from '../../../ui/icons';
-import { download, pickedText } from '../download';
+import { download, pickedText } from '../../../ui/utils/files';
 
 /** Options tab: PIN-based sync and backup files. */
 @Component({

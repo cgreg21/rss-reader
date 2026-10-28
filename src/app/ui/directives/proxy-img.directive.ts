@@ -1,8 +1,8 @@
 import { Directive, ElementRef, OnDestroy, effect, inject, input } from '@angular/core';
 
-import { sanitizeHtml } from '../../rss/feed-parser';
+import { sanitizeHtml } from '../../rss/parsing/feed-parser';
 import { ImageCache } from '../../rss/services/image-cache.service';
-import { SettingsStore } from '../../rss/settings.store';
+import { SettingsStore } from '../../rss/stores/settings.store';
 
 const loadVia = async (images: ImageCache, img: HTMLImageElement, url: string): Promise<void> => {
   img.src = await images.url(url);

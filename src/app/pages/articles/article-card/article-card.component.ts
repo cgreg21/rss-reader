@@ -1,15 +1,15 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { I18nService } from '../../i18n/services/i18n.service';
-import { LocalDatePipe } from '../../i18n/local-date.pipe';
-import { TranslatePipe } from '../../i18n/translate.pipe';
-import { ArticlesStore } from '../../rss/articles.store';
-import { FeedsStore } from '../../rss/feeds.store';
-import { Article } from '../../rss/models';
-import { UI_ICONS, mediaIcon } from '../../ui/icons';
-import { AxisGesture, LongPressTimer, SWIPE_THRESHOLD, isPrimaryPress } from '../../ui/gestures/pointer-gestures';
-import { FaviconDirective, ProxyImgDirective } from '../../ui/directives/proxy-img.directive';
+import { I18nService } from '../../../i18n/services/i18n.service';
+import { LocalDatePipe } from '../../../i18n/local-date.pipe';
+import { TranslatePipe } from '../../../i18n/translate.pipe';
+import { ArticlesStore } from '../../../rss/stores/articles.store';
+import { FeedsStore } from '../../../rss/stores/feeds.store';
+import { Article } from '../../../rss/models';
+import { UI_ICONS, mediaIcon } from '../../../ui/icons';
+import { AxisGesture, LongPressTimer, SWIPE_THRESHOLD, isPrimaryPress } from '../../../ui/gestures/pointer-gestures';
+import { FaviconDirective, ProxyImgDirective } from '../../../ui/directives/proxy-img.directive';
 
 const TAP_SLOP = 6;
 const FLY_MS = 200;

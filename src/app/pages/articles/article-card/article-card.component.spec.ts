@@ -3,9 +3,9 @@ import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { Article } from '../../rss/models';
-import { ArticlesStore } from '../../rss/articles.store';
-import { FeedsStore } from '../../rss/feeds.store';
+import { Article } from '../../../rss/models';
+import { ArticlesStore } from '../../../rss/stores/articles.store';
+import { FeedsStore } from '../../../rss/stores/feeds.store';
 import { ArticleCardComponent } from './article-card.component';
 
 const pointer = (type: string, x = 0, y = 0, extra: Record<string, unknown> = {}): Event => {

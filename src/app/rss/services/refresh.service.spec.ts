@@ -2,12 +2,12 @@ import 'fake-indexeddb/auto';
 import { TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ArticlesStore, stateKey } from '../articles.store';
-import { db } from '../db';
-import { FeedsStore } from '../feeds.store';
-import { parseFeed } from '../feed-parser';
+import { ArticlesStore, stateKey } from '../stores/articles.store';
+import { db } from '../storage/db';
+import { FeedsStore } from '../stores/feeds.store';
+import { parseFeed } from '../parsing/feed-parser';
 import { Article, Feed } from '../models';
-import { SettingsStore } from '../settings.store';
+import { SettingsStore } from '../stores/settings.store';
 import { FetchService } from './fetch.service';
 import { RefreshService } from './refresh.service';
 

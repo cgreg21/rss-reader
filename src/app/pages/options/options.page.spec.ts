@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { describe, expect, it } from 'vitest';
 
-import { FeedsPage } from './feeds.page';
+import { OptionsPage } from './options.page';
 
 @Component({ selector: 'rss-feeds-tab', template: 'feeds-tab' })
 class FeedsTabStub {}
@@ -16,18 +16,18 @@ class SystemTabStub {}
 class AboutStub {}
 
 import { AboutPage } from '../about/about.page';
-import { FeedsTabComponent } from '../options/feeds-tab/feeds-tab.component';
-import { ReadingTabComponent } from '../options/reading-tab/reading-tab.component';
-import { SyncTabComponent } from '../options/sync-tab/sync-tab.component';
-import { SystemTabComponent } from '../options/system-tab/system-tab.component';
+import { FeedsTabComponent } from './feeds-tab/feeds-tab.component';
+import { ReadingTabComponent } from './reading-tab/reading-tab.component';
+import { SyncTabComponent } from './sync-tab/sync-tab.component';
+import { SystemTabComponent } from './system-tab/system-tab.component';
 
-describe('FeedsPage', () => {
+describe('OptionsPage', () => {
   it('switches between the option tabs', () => {
-    TestBed.overrideComponent(FeedsPage, {
+    TestBed.overrideComponent(OptionsPage, {
       remove: { imports: [FeedsTabComponent, ReadingTabComponent, SyncTabComponent, SystemTabComponent, AboutPage] },
       add: { imports: [FeedsTabStub, ReadingTabStub, SyncTabStub, SystemTabStub, AboutStub] },
     });
-    const fixture = TestBed.createComponent(FeedsPage);
+    const fixture = TestBed.createComponent(OptionsPage);
     fixture.detectChanges();
     const root = fixture.nativeElement as HTMLElement;
     const tabs = root.querySelectorAll<HTMLButtonElement>('nav button');

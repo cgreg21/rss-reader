@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { SettingsStore } from '../../../rss/settings.store';
+import { SettingsStore } from '../../../rss/stores/settings.store';
 import { ReadingTabComponent } from './reading-tab.component';
 
 describe('ReadingTabComponent', () => {

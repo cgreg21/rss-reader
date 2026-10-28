@@ -3,11 +3,11 @@ import { TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { LibraryService } from '../../rss/services/library.service';
-import { ArticlesStore } from '../../rss/articles.store';
-import { FeedsStore } from '../../rss/feeds.store';
+import { ArticlesStore } from '../../rss/stores/articles.store';
+import { FeedsStore } from '../../rss/stores/feeds.store';
 import { RefreshService } from '../../rss/services/refresh.service';
-import { SettingsStore } from '../../rss/settings.store';
-import { SnackbarService } from '../../ui/services/snackbar.service';
+import { SettingsStore } from '../../rss/stores/settings.store';
+import { SnackbarService } from '../../ui/snackbar/snackbar.service';
 import { SyncService, tokenFor } from './sync.service';
 
 class FakeSocket {

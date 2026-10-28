@@ -3,12 +3,12 @@ import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ArticlesStore, flagsOf, stateKey } from './articles.store';
-import { db } from './db';
-import { parseFeed } from './feed-parser';
-import { Article } from './models';
-import { FetchService } from './services/fetch.service';
+import { db } from '../storage/db';
+import { parseFeed } from '../parsing/feed-parser';
+import { Article } from '../models';
+import { FetchService } from '../services/fetch.service';
 import { SettingsStore } from './settings.store';
-import { SnackbarService } from '../ui/services/snackbar.service';
+import { SnackbarService } from '../../ui/snackbar/snackbar.service';
 
 const DAY = 86_400_000;
 const rss = (items: string) => `<?xml version="1.0"?><rss version="2.0"><channel><title>Blog</title><link>https://s.com</link>${items}</channel></rss>`;

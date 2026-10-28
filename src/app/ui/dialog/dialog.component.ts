@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, ElementRef, effect, inject, viewChild } from '@angular/core';
 
-import { DialogService } from '../services/dialog.service';
+import { DialogService } from './dialog.service';
 
 /** Renders the current dialog; place it once in the root layout. */
 @Component({

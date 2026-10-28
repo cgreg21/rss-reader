@@ -2,7 +2,7 @@ import { Component, input } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { describe, expect, it } from 'vitest';
 
-import { Article } from '../../rss/models';
+import { Article } from '../../../rss/models';
 import { ArticleCardComponent } from '../article-card/article-card.component';
 import { CardListComponent } from './card-list.component';
 

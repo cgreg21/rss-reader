@@ -1,7 +1,7 @@
 import { Injectable, computed, effect, inject } from '@angular/core';
 import { formatDate } from '@angular/common';
 
-import { SettingsStore } from '../../rss/settings.store';
+import { SettingsStore } from '../../rss/stores/settings.store';
 import { Lang, detectLang, isRtl } from '../languages';
 import '../locales';
 import { MessageError } from '../message-error';

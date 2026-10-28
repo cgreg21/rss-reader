@@ -3,10 +3,10 @@ import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ArticlesStore } from '../../rss/articles.store';
-import { FeedsStore } from '../../rss/feeds.store';
+import { ArticlesStore } from '../../rss/stores/articles.store';
+import { FeedsStore } from '../../rss/stores/feeds.store';
 import { Article } from '../../rss/models';
-import { ViewStore } from '../../rss/view.store';
+import { ViewStore } from '../../rss/stores/view.store';
 import { ArticlePage } from './article.page';
 
 const touch = (type: string, x = 0, y = 0, count = 1, target?: Element): Event => {

@@ -4,10 +4,10 @@ import { Router, provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { SyncService } from '../../pwa/services/sync.service';
-import { ArticlesStore } from '../../rss/articles.store';
+import { ArticlesStore } from '../../rss/stores/articles.store';
 import { RefreshService } from '../../rss/services/refresh.service';
-import { Scope, ViewStore } from '../../rss/view.store';
-import { DrawerService } from '../services/drawer.service';
+import { Scope, ViewStore } from '../../rss/stores/view.store';
+import { DrawerService } from './drawer.service';
 import { DrawerContentComponent } from './drawer-content.component';
 
 describe('DrawerContentComponent', () => {

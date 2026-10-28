@@ -2,12 +2,12 @@ import { ChangeDetectionStrategy, Component, ElementRef, effect, inject, input, 
 
 import { MessageKey } from '../../i18n/messages';
 import { TranslatePipe } from '../../i18n/translate.pipe';
-import { ArticlesStore } from '../../rss/articles.store';
-import { ViewStore, MediaFilter } from '../../rss/view.store';
+import { ArticlesStore } from '../../rss/stores/articles.store';
+import { ViewStore, MediaFilter } from '../../rss/stores/view.store';
 import { RouterLink } from '@angular/router';
 import { ArticleDetailActionsComponent } from '../article-detail-actions/article-detail-actions.component';
 import { ArticleActionsComponent } from '../article-actions/article-actions.component';
-import { DrawerService } from '../services/drawer.service';
+import { DrawerService } from '../drawer-content/drawer.service';
 import { UI_ICONS } from '../icons';
 
 /** Mobile/portrait header: drawer button, current scope title and refresh. */

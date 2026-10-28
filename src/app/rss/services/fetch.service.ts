@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 
-import { SettingsStore } from '../settings.store';
+import { SettingsStore } from '../stores/settings.store';
 
 export interface FeedHit {
   url: string;

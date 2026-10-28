@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { SnackbarService } from '../../ui/services/snackbar.service';
+import { SnackbarService } from '../../ui/snackbar/snackbar.service';
 import { InstallService } from '../services/install.service';
 import { UpdateService } from '../services/update.service';
 import { AppPromptComponent } from './app-prompt.component';

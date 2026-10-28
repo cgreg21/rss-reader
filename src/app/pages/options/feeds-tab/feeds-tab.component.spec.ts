@@ -4,12 +4,12 @@ import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ArticlesStore } from '../../../rss/articles.store';
-import { FeedsStore } from '../../../rss/feeds.store';
+import { ArticlesStore } from '../../../rss/stores/articles.store';
+import { FeedsStore } from '../../../rss/stores/feeds.store';
 import { Article, Feed } from '../../../rss/models';
 import { FetchService } from '../../../rss/services/fetch.service';
 import { LibraryService } from '../../../rss/services/library.service';
-import { DialogService } from '../../../ui/services/dialog.service';
+import { DialogService } from '../../../ui/dialog/dialog.service';
 import { FeedsTabComponent } from './feeds-tab.component';
 
 describe('FeedsTabComponent', () => {

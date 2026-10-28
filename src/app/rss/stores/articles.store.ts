@@ -1,14 +1,14 @@
 import { Injectable, computed, effect, inject, signal, untracked } from '@angular/core';
 
-import { I18nService } from '../i18n/services/i18n.service';
-import { MessageError } from '../i18n/message-error';
-import { MessageKey } from '../i18n/messages';
-import { SnackbarService } from '../ui/services/snackbar.service';
-import { db } from './db';
-import { extractReadable } from './feed-parser';
-import { Article, ParsedFeed } from './models';
-import { FetchService } from './services/fetch.service';
-import { OfflineMediaService } from './services/offline-media.service';
+import { I18nService } from '../../i18n/services/i18n.service';
+import { MessageError } from '../../i18n/message-error';
+import { MessageKey } from '../../i18n/messages';
+import { SnackbarService } from '../../ui/snackbar/snackbar.service';
+import { db } from '../storage/db';
+import { extractReadable } from '../parsing/feed-parser';
+import { Article, ParsedFeed } from '../models';
+import { FetchService } from '../services/fetch.service';
+import { OfflineMediaService } from '../services/offline-media.service';
 import { SettingsStore } from './settings.store';
 
 export type ArticleFlag = 'read' | 'favorite' | 'later';

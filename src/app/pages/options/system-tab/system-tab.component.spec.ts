@@ -2,9 +2,9 @@ import { TestBed } from '@angular/core/testing';
 import { describe, expect, it, vi } from 'vitest';
 
 import { ImageCache } from '../../../rss/services/image-cache.service';
-import { SettingsStore } from '../../../rss/settings.store';
+import { SettingsStore } from '../../../rss/stores/settings.store';
 import { PushService } from '../../../pwa/services/push.service';
-import { DialogService } from '../../../ui/services/dialog.service';
+import { DialogService } from '../../../ui/dialog/dialog.service';
 import { signal } from '@angular/core';
 import { SystemTabComponent } from './system-tab.component';
 

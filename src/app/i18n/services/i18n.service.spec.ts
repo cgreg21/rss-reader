@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { SettingsStore } from '../../rss/settings.store';
+import { SettingsStore } from '../../rss/stores/settings.store';
 import { MessageError } from '../message-error';
 import { I18nService } from './i18n.service';
 

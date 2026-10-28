@@ -1,9 +1,9 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 
-import { I18nService } from '../i18n/services/i18n.service';
+import { I18nService } from '../../i18n/services/i18n.service';
 import { ArticlesStore, startOfToday } from './articles.store';
 import { FeedsStore } from './feeds.store';
-import { Article } from './models';
+import { Article } from '../models';
 import { SettingsStore } from './settings.store';
 
 export type Scope =

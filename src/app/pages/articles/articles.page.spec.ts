@@ -5,10 +5,10 @@ import { provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Article } from '../../rss/models';
-import { ArticlesStore } from '../../rss/articles.store';
-import { FeedsStore } from '../../rss/feeds.store';
-import { SettingsStore } from '../../rss/settings.store';
-import { ViewStore } from '../../rss/view.store';
+import { ArticlesStore } from '../../rss/stores/articles.store';
+import { FeedsStore } from '../../rss/stores/feeds.store';
+import { SettingsStore } from '../../rss/stores/settings.store';
+import { ViewStore } from '../../rss/stores/view.store';
 import { LongPressDirective } from '../../ui/directives/long-press.directive';
 import { SwipeActionsDirective } from '../../ui/directives/swipe-actions.directive';
 import { ArticlesPage } from './articles.page';

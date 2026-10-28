@@ -1,7 +1,7 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 
 import { FetchService } from './fetch.service';
-import { SettingsStore } from '../settings.store';
+import { SettingsStore } from '../stores/settings.store';
 
 const CACHE = 'rssreader-media';
 const key = (id: string): string => `/offline-media/${encodeURIComponent(id)}`;

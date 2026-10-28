@@ -4,10 +4,10 @@ import { Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '../../i18n/translate.pipe';
 import { APP_VERSION } from '../../pwa/app-info';
 import { SyncService } from '../../pwa/services/sync.service';
-import { ArticlesStore } from '../../rss/articles.store';
+import { ArticlesStore } from '../../rss/stores/articles.store';
 import { RefreshService } from '../../rss/services/refresh.service';
-import { Scope, ViewStore } from '../../rss/view.store';
-import { DrawerService } from '../services/drawer.service';
+import { Scope, ViewStore } from '../../rss/stores/view.store';
+import { DrawerService } from './drawer.service';
 import { AddFeedDialogService } from '../add-feed-dialog/add-feed-dialog.service';
 import { UI_ICONS } from '../icons';
 

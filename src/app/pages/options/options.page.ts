@@ -3,21 +3,21 @@ import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { MessageKey } from '../../i18n/messages';
 import { TranslatePipe } from '../../i18n/translate.pipe';
 import { UI_ICONS } from '../../ui/icons';
-import { FeedsTabComponent } from '../options/feeds-tab/feeds-tab.component';
-import { ReadingTabComponent } from '../options/reading-tab/reading-tab.component';
-import { SyncTabComponent } from '../options/sync-tab/sync-tab.component';
-import { SystemTabComponent } from '../options/system-tab/system-tab.component';
+import { FeedsTabComponent } from './feeds-tab/feeds-tab.component';
+import { ReadingTabComponent } from './reading-tab/reading-tab.component';
+import { SyncTabComponent } from './sync-tab/sync-tab.component';
+import { SystemTabComponent } from './system-tab/system-tab.component';
 import { AboutPage } from '../about/about.page';
 
 /** Options page: one component per tab, plus the bottom tab bar. */
 @Component({
-  selector: 'rss-feeds',
+  selector: 'rss-options',
   host: { class: 'block' },
   imports: [FeedsTabComponent, ReadingTabComponent, SyncTabComponent, SystemTabComponent, AboutPage, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './feeds.page.html',
+  templateUrl: './options.page.html',
 })
-export class FeedsPage {
+export class OptionsPage {
   protected readonly tabs = [
     { id: 'feeds', label: 'tabs.feeds', icon: UI_ICONS.all },
     { id: 'reading', label: 'tabs.reading', icon: UI_ICONS.reader },

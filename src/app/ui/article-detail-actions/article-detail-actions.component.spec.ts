@@ -4,8 +4,8 @@ import { provideRouter } from '@angular/router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Article } from '../../rss/models';
-import { ArticlesStore } from '../../rss/articles.store';
-import { SnackbarService } from '../services/snackbar.service';
+import { ArticlesStore } from '../../rss/stores/articles.store';
+import { SnackbarService } from '../snackbar/snackbar.service';
 import { ArticleDetailActionsComponent } from './article-detail-actions.component';
 
 const base: Article = { id: 'a1', feedId: 'f', title: 'Title', link: 'https://a.com/1', summary: 'sum', content: '<p>body</p>', published: 1, read: false, favorite: false };

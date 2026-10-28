@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { SyncService } from '../../../pwa/services/sync.service';
-import { FeedsStore } from '../../../rss/feeds.store';
+import { FeedsStore } from '../../../rss/stores/feeds.store';
 import { LibraryService } from '../../../rss/services/library.service';
 import { SyncTabComponent } from './sync-tab.component';
 

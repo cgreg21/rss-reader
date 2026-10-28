@@ -9,11 +9,11 @@ import { TranslatePipe } from '../../../i18n/translate.pipe';
 import { FeedHit, FetchService } from '../../../rss/services/fetch.service';
 import { LibraryService } from '../../../rss/services/library.service';
 import { Feed } from '../../../rss/models';
-import { ArticlesStore } from '../../../rss/articles.store';
-import { FeedsStore } from '../../../rss/feeds.store';
-import { DialogService } from '../../../ui/services/dialog.service';
+import { ArticlesStore } from '../../../rss/stores/articles.store';
+import { FeedsStore } from '../../../rss/stores/feeds.store';
+import { DialogService } from '../../../ui/dialog/dialog.service';
 import { UI_ICONS } from '../../../ui/icons';
-import { download, pickedText } from '../download';
+import { download, pickedText } from '../../../ui/utils/files';
 
 /** Options tab: subscribe, search, categories and followed feeds (with OPML import / export). */
 @Component({

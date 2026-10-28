@@ -1,5 +1,5 @@
-import { MessageError } from '../i18n/message-error';
-import { FeedFormat, Media, ParsedFeed } from './models';
+import { MessageError } from '../../i18n/message-error';
+import { FeedFormat, Media, ParsedFeed } from '../models';
 
 const BLOCKED = 'script,iframe,object,embed,style,link,form,meta';
 

@@ -3,9 +3,9 @@ import { ChangeDetectionStrategy, Component, computed, inject, input } from '@an
 import { MessageKey } from '../../i18n/messages';
 import { I18nService } from '../../i18n/services/i18n.service';
 import { TranslatePipe } from '../../i18n/translate.pipe';
-import { ViewStore } from '../../rss/view.store';
-import { ArticleLayout, SettingsStore } from '../../rss/settings.store';
-import { DialogService } from '../services/dialog.service';
+import { ViewStore } from '../../rss/stores/view.store';
+import { ArticleLayout, SettingsStore } from '../../rss/stores/settings.store';
+import { DialogService } from '../dialog/dialog.service';
 import { UI_ICONS } from '../icons';
 import { RadialItem, RadialMenuComponent } from '../radial-menu/radial-menu.component';
 

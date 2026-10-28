@@ -2,11 +2,11 @@ import 'fake-indexeddb/auto';
 import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ArticlesStore } from '../articles.store';
-import { db } from '../db';
-import { FeedsStore } from '../feeds.store';
+import { ArticlesStore } from '../stores/articles.store';
+import { db } from '../storage/db';
+import { FeedsStore } from '../stores/feeds.store';
 import { Article } from '../models';
-import { SettingsStore } from '../settings.store';
+import { SettingsStore } from '../stores/settings.store';
 import { FetchService } from './fetch.service';
 import { LibraryService, SyncDoc } from './library.service';
 import { RefreshService } from './refresh.service';

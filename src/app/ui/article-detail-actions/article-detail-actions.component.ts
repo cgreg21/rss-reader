@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, computed, inject, input, signal } from '@angular/core';
 
-import { ArticlesStore } from '../../rss/articles.store';
+import { ArticlesStore } from '../../rss/stores/articles.store';
 import { I18nService } from '../../i18n/services/i18n.service';
 import { TranslatePipe } from '../../i18n/translate.pipe';
 import { UI_ICONS } from '../icons';
 import { RadialItem, RadialMenuComponent } from '../radial-menu/radial-menu.component';
-import { SnackbarService } from '../services/snackbar.service';
+import { SnackbarService } from '../snackbar/snackbar.service';
 
 /** Favorite, read later, read/unread, full text, read aloud and open-original buttons for one article. */
 @Component({

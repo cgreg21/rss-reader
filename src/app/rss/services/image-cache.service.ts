@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 
 import { FetchService } from './fetch.service';
-import { SettingsStore } from '../settings.store';
+import { SettingsStore } from '../stores/settings.store';
 
 const CACHE_NAME = 'rss-images';
 const MAX_CACHED_IMAGES = 300;

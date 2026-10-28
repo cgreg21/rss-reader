@@ -3,11 +3,11 @@ import { Injectable, effect, inject, signal } from '@angular/core';
 import { I18nService } from '../../i18n/services/i18n.service';
 import { MessageError } from '../../i18n/message-error';
 import { LibraryService, SyncDoc } from '../../rss/services/library.service';
-import { ArticlesStore } from '../../rss/articles.store';
-import { FeedsStore } from '../../rss/feeds.store';
+import { ArticlesStore } from '../../rss/stores/articles.store';
+import { FeedsStore } from '../../rss/stores/feeds.store';
 import { RefreshService } from '../../rss/services/refresh.service';
-import { SettingsStore, proxyOrigin } from '../../rss/settings.store';
-import { SnackbarService } from '../../ui/services/snackbar.service';
+import { SettingsStore, proxyOrigin } from '../../rss/stores/settings.store';
+import { SnackbarService } from '../../ui/snackbar/snackbar.service';
 import { LiveChannel } from '../live-channel';
 
 const CODE_KEY = 'rssreader:sync-code';

@@ -1,7 +1,7 @@
 import { Injectable, computed, effect } from '@angular/core';
 
-import { LANG_SETTINGS, LangSetting } from '../i18n/languages';
-import { flag, json, num, oneOf, persisted, text } from './persisted';
+import { LANG_SETTINGS, LangSetting } from '../../i18n/languages';
+import { flag, json, num, oneOf, persisted, text } from '../storage/persisted';
 
 export type Theme = 'dark' | 'light';
 export type ArticleLayout = 'list' | 'detail' | 'card';

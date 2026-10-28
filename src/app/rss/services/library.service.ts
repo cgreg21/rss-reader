@@ -2,10 +2,10 @@ import { Injectable, inject } from '@angular/core';
 
 import { MessageError } from '../../i18n/message-error';
 import { Category, Feed } from '../models';
-import { buildOpml, parseOpml } from '../opml';
-import { ArticlesStore, encodeState, flagsOf, stateKey } from '../articles.store';
-import { FeedsStore } from '../feeds.store';
-import { newId } from '../ids';
+import { buildOpml, parseOpml } from '../parsing/opml';
+import { ArticlesStore, encodeState, flagsOf, stateKey } from '../stores/articles.store';
+import { FeedsStore } from '../stores/feeds.store';
+import { newId } from '../storage/ids';
 import { RefreshService } from './refresh.service';
 
 /** Cross-device synchronised library: article states are keyed by `stateKey`. */

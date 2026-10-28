@@ -3,7 +3,7 @@ import { SwPush } from '@angular/service-worker';
 
 import { I18nService } from '../../i18n/services/i18n.service';
 import { MessageError } from '../../i18n/message-error';
-import { FeedsStore } from '../../rss/feeds.store';
+import { FeedsStore } from '../../rss/stores/feeds.store';
 
 const URL_KEY = 'rssreader:push-url';
 

@@ -2,9 +2,9 @@
 import { provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { SettingsStore } from '../../rss/settings.store';
-import { ViewStore } from '../../rss/view.store';
-import { DialogService } from '../services/dialog.service';
+import { SettingsStore } from '../../rss/stores/settings.store';
+import { ViewStore } from '../../rss/stores/view.store';
+import { DialogService } from '../dialog/dialog.service';
 import { ArticleActionsComponent } from './article-actions.component';
 
 describe('ArticleActionsComponent', () => {

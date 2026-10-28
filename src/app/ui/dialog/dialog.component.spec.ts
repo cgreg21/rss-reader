@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { describe, expect, it } from 'vitest';
 
-import { DialogService } from '../services/dialog.service';
+import { DialogService } from './dialog.service';
 import { DialogComponent } from './dialog.component';
 
 describe('DialogComponent', () => {

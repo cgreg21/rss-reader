@@ -3,9 +3,9 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ArticlesStore } from '../../rss/articles.store';
-import { ViewStore } from '../../rss/view.store';
-import { DrawerService } from '../services/drawer.service';
+import { ArticlesStore } from '../../rss/stores/articles.store';
+import { ViewStore } from '../../rss/stores/view.store';
+import { DrawerService } from '../drawer-content/drawer.service';
 import { TopBarComponent } from './top-bar.component';
 
 describe('TopBarComponent', () => {

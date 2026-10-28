@@ -3,10 +3,10 @@ import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ArticlesStore } from './articles.store';
-import { db } from './db';
+import { db } from '../storage/db';
 import { FeedsStore } from './feeds.store';
-import { Article, Feed } from './models';
-import { FetchService } from './services/fetch.service';
+import { Article, Feed } from '../models';
+import { FetchService } from '../services/fetch.service';
 
 const rss = (items: string) => `<?xml version="1.0"?><rss version="2.0"><channel><title>Blog</title><link>https://s.com</link>${items}</channel></rss>`;
 const item = (n: number) =>

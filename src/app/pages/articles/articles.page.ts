@@ -4,11 +4,11 @@ import { RouterLink } from '@angular/router';
 
 import { LocalDatePipe } from '../../i18n/local-date.pipe';
 import { TranslatePipe } from '../../i18n/translate.pipe';
-import { ArticlesStore } from '../../rss/articles.store';
-import { FeedsStore } from '../../rss/feeds.store';
-import { SettingsStore } from '../../rss/settings.store';
-import { ViewStore } from '../../rss/view.store';
-import { CardListComponent } from '../card-list/card-list.component';
+import { ArticlesStore } from '../../rss/stores/articles.store';
+import { FeedsStore } from '../../rss/stores/feeds.store';
+import { SettingsStore } from '../../rss/stores/settings.store';
+import { ViewStore } from '../../rss/stores/view.store';
+import { CardListComponent } from './card-list/card-list.component';
 import { RevealDirective } from '../../ui/directives/reveal.directive';
 import { ProxyImgDirective } from '../../ui/directives/proxy-img.directive';
 import { LongPressDirective } from '../../ui/directives/long-press.directive';

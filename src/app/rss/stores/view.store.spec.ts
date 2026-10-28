@@ -3,9 +3,9 @@ import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { ArticlesStore } from './articles.store';
-import { db } from './db';
+import { db } from '../storage/db';
 import { FeedsStore } from './feeds.store';
-import { Article, Feed } from './models';
+import { Article, Feed } from '../models';
 import { SettingsStore } from './settings.store';
 import { ViewStore } from './view.store';
 

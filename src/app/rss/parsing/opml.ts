@@ -1,5 +1,5 @@
-import { MessageError } from '../i18n/message-error';
-import { Category, Feed } from './models';
+import { MessageError } from '../../i18n/message-error';
+import { Category, Feed } from '../models';
 
 export interface OpmlEntry {
   url: string;

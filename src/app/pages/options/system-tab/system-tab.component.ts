@@ -4,9 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { I18nService } from '../../../i18n/services/i18n.service';
 import { TranslatePipe } from '../../../i18n/translate.pipe';
 import { ImageCache } from '../../../rss/services/image-cache.service';
-import { SettingsStore } from '../../../rss/settings.store';
+import { SettingsStore } from '../../../rss/stores/settings.store';
 import { PushService } from '../../../pwa/services/push.service';
-import { DialogService } from '../../../ui/services/dialog.service';
+import { DialogService } from '../../../ui/dialog/dialog.service';
 
 /** Options tab: auto refresh, push notifications, CORS proxy and image cache. */
 @Component({

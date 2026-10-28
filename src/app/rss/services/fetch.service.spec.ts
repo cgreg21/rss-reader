@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { SettingsStore } from '../settings.store';
+import { SettingsStore } from '../stores/settings.store';
 import { FetchService } from './fetch.service';
 
 describe('FetchService', () => {

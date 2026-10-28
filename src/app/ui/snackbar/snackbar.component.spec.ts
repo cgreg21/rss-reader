@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { describe, expect, it, vi } from 'vitest';
 
 import { ImageCache } from '../../rss/services/image-cache.service';
-import { SnackbarService } from '../services/snackbar.service';
+import { SnackbarService } from './snackbar.service';
 import { SnackbarComponent } from './snackbar.component';
 
 describe('SnackbarComponent', () => {

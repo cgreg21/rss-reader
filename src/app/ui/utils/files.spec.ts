@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { download, pickedText } from './download';
+import { download, pickedText } from './files';
 
 describe('download helpers', () => {
   afterEach(() => vi.restoreAllMocks());

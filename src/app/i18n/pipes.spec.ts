@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { SettingsStore } from '../rss/settings.store';
+import { SettingsStore } from '../rss/stores/settings.store';
 import { LocalDatePipe } from './local-date.pipe';
 import { TranslatePipe } from './translate.pipe';
 

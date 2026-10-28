@@ -1,11 +1,11 @@
 import { Injectable, effect, inject, signal } from '@angular/core';
 
 import { I18nService } from '../../i18n/services/i18n.service';
-import { ArticlesStore } from '../articles.store';
-import { FeedsStore } from '../feeds.store';
-import { parseFeed } from '../feed-parser';
+import { ArticlesStore } from '../stores/articles.store';
+import { FeedsStore } from '../stores/feeds.store';
+import { parseFeed } from '../parsing/feed-parser';
 import { Feed } from '../models';
-import { SettingsStore } from '../settings.store';
+import { SettingsStore } from '../stores/settings.store';
 import { FetchService } from './fetch.service';
 
 /** Loads the library and refreshes it from the network, on demand, when back online and periodically. */
