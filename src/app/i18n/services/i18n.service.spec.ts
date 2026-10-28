@@ -47,8 +47,8 @@ describe('I18nService', () => {
     const { i18n, settings } = setup();
     settings.language.set('en');
     expect(i18n.t('common.cancel')).toBe('Cancel');
-    expect(i18n.t('topbar.unread', { n: 4 })).toContain('4');
-    expect(i18n.t('topbar.unread', { x: 1 })).toContain('{n}');
+    expect(i18n.t('downloads.count', { n: 4 })).toContain('4');
+    expect(i18n.t('downloads.count', { x: 1 })).toContain('{n}');
     expect(i18n.t('nope.key' as never)).toBe('nope.key');
   });
 
