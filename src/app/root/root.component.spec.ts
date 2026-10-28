@@ -132,6 +132,24 @@ describe('RootComponent', () => {
     expect(root.querySelector('rss-article-actions')).not.toBeNull();
   });
 
+  it('opens external links in a new tab, leaving in-app ones alone', () => {
+    const { shell } = setup();
+    const external = document.createElement('a');
+    external.href = 'https://elsewhere.com/x';
+    const child = document.createElement('span');
+    external.appendChild(child);
+    const internal = document.createElement('a');
+    internal.href = '/article/a';
+    const mail = document.createElement('a');
+    mail.href = 'mailto:a@b.c';
+    shell.append(external, internal, mail);
+    for (const el of [child, internal, mail]) el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    expect(external.target).toBe('_blank');
+    expect(external.rel).toBe('noopener noreferrer');
+    expect(internal.target).toBe('');
+    expect(mail.target).toBe('');
+  });
+
   it('adds a tooltip from the aria-label of icon buttons', () => {
     const { shell } = setup();
     const icon = document.createElement('button');

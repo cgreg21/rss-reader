@@ -38,6 +38,18 @@
 </section>
 
 <section class="panel">
+  <div class="flex items-center justify-between gap-3">
+    <h2 class="text-base font-bold">{{ 'reading.fullText' | translate }}</h2>
+    <button type="button" role="switch" [attr.aria-label]="'reading.fullText' | translate" [attr.aria-checked]="settings.fullTextViaReader()"
+      class="relative h-6 w-11 shrink-0 rounded-full transition-colors" [class]="settings.fullTextViaReader() ? 'bg-accent' : 'bg-line'"
+      (click)="settings.fullTextViaReader.set(!settings.fullTextViaReader())">
+      <span class="absolute start-0.5 top-0.5 size-5 rounded-full bg-white transition-transform" [class]="settings.fullTextViaReader() ? 'translate-x-5 rtl:-translate-x-5' : ''"></span>
+    </button>
+  </div>
+  <p class="mt-2 text-[13px] text-muted">{{ 'reading.fullTextHelp' | translate }}</p>
+</section>
+
+<section class="panel">
   <h2 class="mb-2.5 text-base font-bold">{{ 'reading.video' | translate }}</h2>
   <p class="mb-2 text-[13px] text-muted">{{ 'reading.videoHelp' | translate }}</p>
   <input class="field w-full" name="videoFrontend" type="url" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="https://yewtu.be" [attr.aria-label]="'reading.video' | translate" [ngModel]="settings.videoFrontend()" (ngModelChange)="settings.setVideoFrontend($event)">

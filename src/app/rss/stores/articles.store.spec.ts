@@ -2,7 +2,7 @@ import 'fake-indexeddb/auto';
 import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ArticlesStore, flagsOf, stateKey } from './articles.store';
+import { ArticlesStore, READER_PROXY, flagsOf, stateKey } from './articles.store';
 import { db } from '../storage/db';
 import { parseFeed } from '../parsing/feed-parser';
 import { Article } from '../models';
@@ -108,15 +108,29 @@ describe('ArticlesStore', () => {
     expect(store.articles().find((a) => a.feedId === 'f9')).toMatchObject({ favorite: true, later: true, read: false });
   });
 
-  it('fetches full text', async () => {
+  it('fetches full text through the reader proxy, then the page itself', async () => {
     store.articles.set([art('f1:a'), art('f1:nolink', { link: '' })]);
     await expect(store.fetchFullText('missing')).rejects.toThrow();
     await expect(store.fetchFullText('f1:nolink')).rejects.toThrow();
-    download.mockResolvedValueOnce('<html><body><article><p>short</p></article></body></html>');
+    const short = '<html><body><article><p>short</p></article></body></html>';
+    const long = `<html><body><article><p>${'word '.repeat(80)}</p></article></body></html>`;
+    download.mockResolvedValueOnce(short).mockResolvedValueOnce(short);
     await expect(store.fetchFullText('f1:a')).rejects.toThrow('err.noFullText');
-    download.mockResolvedValueOnce(`<html><body><article><p>${'word '.repeat(80)}</p></article></body></html>`);
+    expect(download.mock.calls.slice(-2).map((c) => c[0])).toEqual([READER_PROXY + 'https://s.com/f1:a', 'https://s.com/f1:a']);
+    download.mockRejectedValueOnce(new Error('down')).mockResolvedValueOnce(long);
     await store.fetchFullText('f1:a');
     expect(store.article('f1:a')?.fullText).toBe(true);
+    download.mockRejectedValueOnce(new Error('down')).mockResolvedValueOnce(short);
+    await expect(store.fetchFullText('f1:a')).rejects.toThrow('down');
+  });
+
+  it('skips the reader proxy when disabled', async () => {
+    settings.fullTextViaReader.set(false);
+    store.articles.set([art('f1:a')]);
+    download.mockResolvedValueOnce(`<html><body><article><p>${'word '.repeat(80)}</p></article></body></html>`);
+    await store.fetchFullText('f1:a');
+    expect(download).toHaveBeenCalledTimes(1);
+    expect(download).toHaveBeenLastCalledWith('https://s.com/f1:a');
   });
 
   it('caps merged articles per feed but keeps favourites', async () => {

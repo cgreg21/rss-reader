@@ -14,6 +14,9 @@ import { SettingsStore } from './settings.store';
 export type ArticleFlag = 'read' | 'favorite' | 'later';
 
 const MAX_ARTICLES_PER_FEED = 100;
+const MIN_FULL_TEXT = 200;
+/** Serves the full page of an article (paywalls included) when prefixed to its URL. */
+export const READER_PROXY = 'https://wallhop.io/';
 
 const MESSAGES: Record<ArticleFlag, { on: MessageKey; off: MessageKey }> = {
   read: { on: 'flag.readOn', off: 'flag.readOff' },
@@ -155,9 +158,25 @@ export class ArticlesStore {
   async fetchFullText(id: string): Promise<void> {
     const article = this.article(id);
     if (!article?.link) throw new MessageError('err.noOrigin');
-    const content = extractReadable(await this.net.download(article.link), article.link);
-    if (toPlainLength(content) < 200) throw new MessageError('err.noFullText');
+    const content = await this.readableFrom(article.link);
+    if (!content) throw new MessageError('err.noFullText');
     await this.save({ ...article, content, fullText: true });
+  }
+
+  /** Extracted text of the first source giving enough of it: the reader proxy (when enabled) then the page itself. */
+  private async readableFrom(link: string): Promise<string | null> {
+    const sources = this.settings.fullTextViaReader() ? [READER_PROXY + link, link] : [link];
+    let failure: unknown = null;
+    for (const url of sources) {
+      try {
+        const content = extractReadable(await this.net.download(url), link);
+        if (toPlainLength(content) >= MIN_FULL_TEXT) return content;
+      } catch (e) {
+        failure = e;
+      }
+    }
+    if (failure) throw failure;
+    return null;
   }
 
   /** Adds the articles not already known and keeps the latest ones of the feed (plus its favorites). */

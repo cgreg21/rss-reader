@@ -144,6 +144,8 @@
   "reading.fontSize": "Textgröße",
   "reading.muted": "Ausgeblendete Wörter",
   "reading.mutedHelp": "Ein Wort oder eine Wendung pro Zeile: Artikel, deren Titel oder Zusammenfassung sie enthalten, werden ausgeblendet (außer Favoriten und „Später lesen“).",
+  "reading.fullText": "Volltext über wallhop.io",
+  "reading.fullTextHelp": "„Volltext laden“ geht zuerst über wallhop.io (umgeht die meisten Bezahlschranken), dann bei Bedarf über die Originalseite.",
   "reading.video": "YouTube-Videos ohne Werbung",
   "reading.videoHelp": "Adresse einer Invidious- oder Piped-Instanz (z. B. https://yewtu.be), um YouTube-Videos ohne Werbung und Tracking abzuspielen. Diese öffentlichen Instanzen sind manchmal nicht erreichbar; leer läuft die Wiedergabe über YouTube.",
   "reading.purge": "Automatische Bereinigung",

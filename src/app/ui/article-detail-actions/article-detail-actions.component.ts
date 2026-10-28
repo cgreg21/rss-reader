@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, computed, inject, input, signal } from '@angular/core';
 
-import { ArticlesStore } from '../../rss/stores/articles.store';
+import { ArticlesStore, READER_PROXY } from '../../rss/stores/articles.store';
 import { I18nService } from '../../i18n/services/i18n.service';
 import { TranslatePipe } from '../../i18n/translate.pipe';
 import { UI_ICONS } from '../icons';
@@ -24,6 +24,7 @@ export class ArticleDetailActionsComponent implements OnDestroy {
   private readonly snackbar = inject(SnackbarService);
   protected readonly i18n = inject(I18nService);
   protected readonly ui = UI_ICONS;
+  protected readonly readerProxy = READER_PROXY;
   protected readonly article = computed(() => this.store.article(this.id()));
   protected readonly loading = signal(false);
   protected readonly speaking = signal(false);
@@ -49,8 +50,8 @@ export class ArticleDetailActionsComponent implements OnDestroy {
     const items: RadialItem[] = [];
     const t = this.i18n.t.bind(this.i18n);
     if (!a) return items;
-    if (a.link && !a.fullText) {
-      items.push({ label: t('detail.fullText'), icon: this.ui.fullText, pulse: this.loading(), disabled: this.loading(), run: () => void this.fullText(a.id) });
+    if (a.link) {
+      items.push({ label: t('detail.fullText'), icon: this.ui.fullText, activeClass: a.fullText ? '!text-accent' : undefined, pulse: this.loading(), disabled: this.loading(), run: () => void this.fullText(a.id) });
     }
     if (this.speechSupported) {
       items.push({ label: t(this.speaking() ? 'detail.stopSpeech' : 'detail.speak'), icon: this.speaking() ? this.ui.stop : this.ui.speak,
@@ -58,7 +59,7 @@ export class ArticleDetailActionsComponent implements OnDestroy {
     }
     if (a.link) {
       items.push(
-        { label: t('detail.wallhop'), icon: this.ui.reader, href: 'https://wallhop.io/' + a.link },
+        { label: t('detail.wallhop'), icon: this.ui.reader, href: READER_PROXY + a.link },
         { label: t('detail.openOriginal'), icon: this.ui.external, href: a.link },
       );
     }

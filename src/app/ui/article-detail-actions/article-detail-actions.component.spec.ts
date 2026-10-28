@@ -71,7 +71,7 @@ describe('ArticleDetailActionsComponent', () => {
     const { btn, root } = setup();
     btn('Retirer des favoris').click();
     expect(store.toggle).toHaveBeenCalledWith(expect.objectContaining({ favorite: true }), 'favorite');
-    expect(root.querySelector('[aria-label="Charger le texte complet"]')).toBeNull();
+    expect(root.querySelector('[aria-label="Charger le texte complet"]')!.classList.contains('!text-accent')).toBe(true);
   });
 
   it('renders nothing for an unknown article', () => {

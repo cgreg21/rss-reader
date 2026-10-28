@@ -26,15 +26,15 @@
     [class.!text-accent]="a.later" (click)="store.toggle(a, 'later')">@if (a.later) { <span animate.enter="pop">{{ ui.laterOn }}</span> } @else { <span>{{ ui.later }}</span> }</button>
   <button class="icon-btn" type="button" [attr.aria-label]="'detail.toggleRead' | translate"
     [class.!text-green-400]="!a.read" (click)="store.toggle(a, 'read')">@if (a.read) { <span animate.enter="pop">{{ ui.read }}</span> } @else { <span animate.enter="pop">{{ ui.unread }}</span> }</button>
-  @if (a.link && !a.fullText) {
-    <button class="icon-btn" type="button" [attr.aria-label]="'detail.fullText' | translate" [class.animate-pulse]="loading()" [disabled]="loading()" (click)="fullText(a.id)">{{ ui.fullText }}</button>
+  @if (a.link) {
+    <button class="icon-btn" type="button" [attr.aria-label]="'detail.fullText' | translate" [class.!text-accent]="a.fullText" [class.animate-pulse]="loading()" [disabled]="loading()" (click)="fullText(a.id)">{{ ui.fullText }}</button>
   }
   @if (speechSupported) {
     <button class="icon-btn" type="button" [attr.aria-label]="(speaking() ? 'detail.stopSpeech' : 'detail.speak') | translate" [class.!text-accent]="speaking()"
       (click)="toggleSpeech(a.title, a.content || a.summary)">{{ speaking() ? ui.stop : ui.speak }}</button>
   }
   @if (a.link) {
-    <a class="icon-btn" [href]="'https://wallhop.io/' + a.link" target="_blank" rel="noopener noreferrer" [attr.aria-label]="'detail.wallhop' | translate">{{ ui.reader }}</a>
+    <a class="icon-btn" [href]="readerProxy + a.link" target="_blank" rel="noopener noreferrer" [attr.aria-label]="'detail.wallhop' | translate">{{ ui.reader }}</a>
     <a class="icon-btn" [href]="a.link" target="_blank" rel="noopener noreferrer" [attr.aria-label]="'detail.openOriginal' | translate">{{ ui.external }}</a>
     @if (canShare) { <button class="icon-btn" type="button" [attr.aria-label]="'detail.share' | translate" (click)="share(a.title, a.link)">{{ ui.share }}</button> }
     <button class="icon-btn" type="button" [attr.aria-label]="'detail.copyLink' | translate" (click)="copyLink(a.link)">{{ ui.copyLink }}</button>

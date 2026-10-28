@@ -144,6 +144,8 @@
   "reading.fontSize": "Tamaño del texto",
   "reading.muted": "Palabras ocultas",
   "reading.mutedHelp": "Una palabra o expresión por línea: se ocultan los artículos cuyo título o resumen la contengan (salvo favoritos y «Leer más tarde»).",
+  "reading.fullText": "Texto completo vía wallhop.io",
+  "reading.fullTextHelp": "«Cargar el texto completo» pasa primero por wallhop.io (que evita la mayoría de los muros de pago) y luego por la página original si hace falta.",
   "reading.video": "Vídeos de YouTube sin publicidad",
   "reading.videoHelp": "Dirección de una instancia Invidious o Piped (p. ej. https://yewtu.be) para reproducir vídeos de YouTube sin publicidad ni rastreo. Estas instancias públicas a veces no están disponibles; vacío, la reproducción pasa por YouTube.",
   "reading.purge": "Purga automática",

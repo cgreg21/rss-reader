@@ -94,5 +94,12 @@ export class RootComponent {
         if (!(document.activeElement instanceof HTMLInputElement || document.activeElement instanceof HTMLTextAreaElement)) window.scrollTo(0, 0);
       }, 100);
     });
+    // Every link leaving the app opens in a new tab, wherever it comes from (remote article HTML included).
+    document.addEventListener('click', (event) => {
+      const link = (event.target as Element).closest?.('a[href]');
+      if (!(link instanceof HTMLAnchorElement) || link.origin === location.origin || !/^https?:$/.test(link.protocol)) return;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+    }, { capture: true });
   }
 }

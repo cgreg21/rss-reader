@@ -40,6 +40,8 @@ export class SettingsStore {
   /** Saves new podcast episodes on the device in the background. */
   readonly autoDownloadPodcasts = persisted('rssreader:auto-download-podcasts', flag(false));
   readonly fontSize = persisted('rssreader:font-size', num(17));
+  /** Loads the full text through the reader proxy (wallhop.io) before trying the page itself. */
+  readonly fullTextViaReader = persisted('rssreader:full-text-via-reader', flag(true));
   /** Origin of an Invidious or Piped instance used to embed YouTube videos; '' plays through YouTube itself. */
   readonly videoFrontend = persisted('rssreader:video-frontend', text());
   readonly activeVideoFrontend = computed(() => proxyOrigin(this.videoFrontend()));
