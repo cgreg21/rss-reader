@@ -10,7 +10,11 @@ import { RefreshService } from './refresh.service';
 
 /** Cross-device synchronised library: article states are keyed by `stateKey`. */
 export interface SyncDoc {
-  feeds: { url: string; title: string; category: string | null }[];
+  feeds: { url: string; title: string; category: string | null; stamp?: number }[];
+  /** Category names, so that empty categories are synchronised too. */
+  categories?: string[];
+  /** Lower-cased names of deleted categories. */
+  removedCategories?: string[];
   removed: string[];
   /** Bit flags per article: 1 read, 2 favorite, 4 later. */
   states: Record<string, number>;
@@ -81,7 +85,9 @@ export class LibraryService {
     const states: Record<string, number> = {};
     for (const a of this.articlesStore.articles()) if (flagsOf(a) || a.stamp) states[stateKey(a.id)] = encodeState(a);
     return {
-      feeds: this.feedsStore.feeds().map((f) => ({ url: f.url, title: f.title, category: f.categoryId ? categories.get(f.categoryId) ?? null : null })),
+      feeds: this.feedsStore.feeds().map((f) => ({ url: f.url, title: f.title, category: f.categoryId ? categories.get(f.categoryId) ?? null : null, stamp: f.categoryStamp })),
+      categories: [...categories.values()],
+      removedCategories: this.feedsStore.removedCategories(),
       removed: this.feedsStore.removedFeeds(),
       states,
     };
@@ -92,9 +98,20 @@ export class LibraryService {
     const removed = new Set([...this.feedsStore.removedFeeds(), ...(doc.removed ?? []).filter((u) => !this.feedsStore.wasReadded(u))]);
     for (const f of this.feedsStore.feeds().filter((x) => removed.has(x.url))) await this.feedsStore.dropFeed(f.id);
     this.feedsStore.removedFeeds.set([...removed]);
+    const removedCats = new Set([...this.feedsStore.removedCategories(), ...(doc.removedCategories ?? []).filter((n) => !this.feedsStore.wasCategoryReadded(n))]);
+    for (const c of this.feedsStore.categories().filter((x) => removedCats.has(x.name.toLowerCase()))) await this.feedsStore.dropCategory(c.id);
+    this.feedsStore.removedCategories.set([...removedCats]);
+    const categoryFor = (name: string | null | undefined) => (name && !removedCats.has(name.toLowerCase()) ? this.feedsStore.categoryIdFor(name) : Promise.resolve(null));
+    for (const name of doc.categories ?? []) await categoryFor(name);
     for (const remote of doc.feeds ?? []) {
-      if (removed.has(remote.url) || this.feedsStore.feeds().some((f) => f.url === remote.url)) continue;
-      await this.feedsStore.putFeed({ id: newId('f'), url: remote.url, title: remote.title, categoryId: await this.feedsStore.categoryIdFor(remote.category) });
+      if (removed.has(remote.url)) continue;
+      const local = this.feedsStore.feeds().find((f) => f.url === remote.url);
+      const categoryId = await categoryFor(remote.category);
+      if (!local) {
+        await this.feedsStore.putFeed({ id: newId('f'), url: remote.url, title: remote.title, categoryId, categoryStamp: remote.stamp });
+      } else if ((remote.stamp ?? 0) > (local.categoryStamp ?? 0) && local.categoryId !== categoryId) {
+        await this.feedsStore.putFeed({ ...local, categoryId, categoryStamp: remote.stamp });
+      }
     }
     await this.articlesStore.applyFlags(doc.states ?? {});
   }

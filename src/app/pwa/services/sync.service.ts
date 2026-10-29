@@ -56,6 +56,7 @@ export class SyncService {
     });
     effect(() => {
       this.feedsStore.feeds();
+      this.feedsStore.categories();
       this.articlesStore.articles();
       this.feedsStore.removedFeeds();
       if (!this.enabled()) return;

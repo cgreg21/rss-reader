@@ -20,6 +20,8 @@ export interface Feed {
   image?: string;
   format?: FeedFormat;
   categoryId: string | null;
+  /** When the category was last changed by the user; the most recent change wins during synchronisation. */
+  categoryStamp?: number;
   lastFetched?: number;
   error?: string;
   /** Consecutive failed refreshes. */

@@ -25,10 +25,13 @@ export class FeedsStore {
   readonly categories = signal<Category[]>([]);
   /** Urls of feeds unfollowed on some device, kept so synchronisation can propagate the removal. */
   readonly removedFeeds = persisted('rssreader:removed-feeds', json<string[]>([]));
+  /** Lower-cased names of categories deleted on some device, kept so synchronisation can propagate the removal. */
+  readonly removedCategories = persisted('rssreader:removed-categories', json<string[]>([]));
   readonly deadFeeds = computed(() => this.feeds().filter((f) => (f.failures ?? 0) >= DEAD_FEED_FAILURES));
 
   /** Feeds re-followed here since the last sync, which must not be removed again by an older remote tombstone. */
   private readonly readded = new Set<string>();
+  private readonly readdedCategories = new Set<string>();
   private readonly removalListeners: ((removal: FeedRemoval) => void)[] = [];
 
   async load(): Promise<void> {
@@ -98,11 +101,12 @@ export class FeedsStore {
 
   markSynced(): void {
     this.readded.clear();
+    this.readdedCategories.clear();
   }
 
   async setFeedCategory(feedId: string, categoryId: string | null): Promise<void> {
     const feed = this.feeds().find((f) => f.id === feedId);
-    if (feed) await this.putFeed({ ...feed, categoryId });
+    if (feed) await this.putFeed({ ...feed, categoryId, categoryStamp: Date.now() });
   }
 
   async addCategory(name: string): Promise<void> {
@@ -116,6 +120,11 @@ export class FeedsStore {
     const existing = this.categories().find((c) => c.name.toLowerCase() === trimmed.toLowerCase());
     if (existing) return existing.id;
     const category = { id: newId('c'), name: trimmed };
+    const key = trimmed.toLowerCase();
+    if (this.removedCategories().includes(key)) {
+      this.readdedCategories.add(key);
+      this.removedCategories.set(this.removedCategories().filter((n) => n !== key));
+    }
     await this.putCategory(category);
     return category.id;
   }
@@ -127,10 +136,21 @@ export class FeedsStore {
   }
 
   async removeCategory(id: string): Promise<void> {
+    const name = this.categories().find((c) => c.id === id)?.name;
+    if (name) this.removedCategories.set([...new Set([...this.removedCategories(), name.toLowerCase()])]);
+    await this.dropCategory(id);
+  }
+
+  /** Removes a category, leaving its feeds uncategorised, without recording a tombstone. */
+  async dropCategory(id: string): Promise<void> {
     await db.remove('categories', id);
     this.categories.update((l) => l.filter((c) => c.id !== id));
-    for (const f of this.feeds().filter((x) => x.categoryId === id)) await this.setFeedCategory(f.id, null);
+    for (const f of this.feeds().filter((x) => x.categoryId === id)) await this.putFeed({ ...f, categoryId: null });
     this.notifyRemoved({ kind: 'category', id });
+  }
+
+  wasCategoryReadded(name: string): boolean {
+    return this.readdedCategories.has(name.toLowerCase());
   }
 
   private notifyRemoved(removal: FeedRemoval): void {

@@ -26,6 +26,7 @@ describe('SyncService', () => {
   const proxy = signal('https://srv.com');
   const store = {
     feeds: signal<unknown[]>([]),
+    categories: signal<unknown[]>([]),
     articles: signal<unknown[]>([]),
     removedFeeds: signal<string[]>([]),
     load: vi.fn(),

@@ -82,6 +82,8 @@ describe('LibraryService', () => {
     feeds.removedFeeds.set(['https://gone.com']);
     expect(lib.buildSyncDoc()).toEqual({
       feeds: [{ url: 'https://a.com/rss', title: 'A', category: 'C' }, { url: 'https://b.com/rss', title: 'B', category: null }],
+      categories: ['C'],
+      removedCategories: [],
       removed: ['https://gone.com'],
       states: { '1': 1 },
     });
@@ -103,5 +105,29 @@ describe('LibraryService', () => {
     expect(feeds.removedFeeds()).toContain('https://x.com/rss');
     expect(articles.article('a:1')?.favorite).toBe(true);
     await lib.applySyncDoc({} as SyncDoc);
+  });
+
+  it('applies remote category changes and empty categories, latest change wins', async () => {
+    await feeds.putFeed({ id: 'a', url: 'https://a.com/rss', title: 'A', categoryId: null, categoryStamp: 10 });
+    await feeds.putFeed({ id: 'b', url: 'https://b.com/rss', title: 'B', categoryId: null, categoryStamp: 50 });
+    await lib.applySyncDoc({
+      feeds: [{ url: 'https://a.com/rss', title: 'A', category: 'News', stamp: 20 }, { url: 'https://b.com/rss', title: 'B', category: 'News', stamp: 40 }],
+      categories: ['News', 'Empty'],
+      removed: [],
+      states: {},
+    });
+    const name = (url: string) => feeds.categories().find((c) => c.id === feeds.feeds().find((f) => f.url === url)?.categoryId)?.name;
+    expect(name('https://a.com/rss')).toBe('News');
+    expect(name('https://b.com/rss')).toBeUndefined();
+    expect(feeds.categories().map((c) => c.name).sort()).toEqual(['Empty', 'News']);
+  });
+
+  it('propagates category removals', async () => {
+    await feeds.putCategory({ id: 'c9', name: 'Old' });
+    await feeds.putFeed({ id: 'a', url: 'https://a.com/rss', title: 'A', categoryId: 'c9' });
+    await lib.applySyncDoc({ feeds: [{ url: 'https://a.com/rss', title: 'A', category: 'Old' }], categories: ['Old'], removedCategories: ['old'], removed: [], states: {} });
+    expect(feeds.categories().some((c) => c.name === 'Old')).toBe(false);
+    expect(feeds.feeds()[0].categoryId).toBeNull();
+    expect(feeds.removedCategories()).toContain('old');
   });
 });
